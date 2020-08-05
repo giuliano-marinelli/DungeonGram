@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/gameserver",
+    "baseUrl": "",
+    "module": "commonjs",
+    // "lib": [
+    //   "es6"
+    // ],
+    // "target": "es2016",
+    // "declaration": true,
+    // "noImplicitAny": false,
+    // "experimentalDecorators": true,
+    // "sourceMap": false,
+    "esModuleInterop": true
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

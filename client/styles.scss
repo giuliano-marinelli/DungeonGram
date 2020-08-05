@@ -1,0 +1,37 @@
+// You can add global styles to this file, and also import other style files
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+@font-face {
+  font-family: "MetalMania";
+  src: url(assets/fonts/MetalMania-Regular.ttf) format("opentype");
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 1px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #212121;
+}
+
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';

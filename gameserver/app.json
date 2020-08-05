@@ -1,0 +1,11 @@
+{
+  "name": "DungeonGram",
+  "description": "Agnostic Role Playing Platform",
+  "keywords": ["node", "multiplayer", "dungeongram"],
+  "env": {
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Leave as 'false' to install required devDependencies.",
+      "value": "false"
+    }
+  }
+}

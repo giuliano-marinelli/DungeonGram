@@ -1,0 +1,59 @@
+<app-toast [message]="toast.message"></app-toast>
+
+<div class="modal-content">
+  <form [formGroup]="registerForm" (ngSubmit)="register()">
+    <div class="modal-header">
+      <h5 class="modal-title">Sign Up</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group" [ngClass]="setClassUsername()">
+        <div class="input-group-prepend">
+          <span class="input-group-text">
+            <i class="fa fa-user"></i>
+          </span>
+        </div>
+        <input class="form-control" type="text" name="username" formControlName="username" placeholder="Username"
+          autofocus>
+      </div>
+      <div class="input-group" [ngClass]="setClassEmail()">
+        <div class="input-group-prepend">
+          <span class="input-group-text">
+            <i class="fa fa-envelope"></i>
+          </span>
+        </div>
+        <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email">
+      </div>
+      <div class="input-group" [ngClass]="setClassPassword()">
+        <div class="input-group-prepend">
+          <span class="input-group-text">
+            <i class="fa fa-key"></i>
+          </span>
+        </div>
+        <input class="form-control" type="password" name="password" formControlName="password" placeholder="Password">
+      </div>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">
+            <i class="fa fa-black-tie"></i>
+          </span>
+        </div>
+        <select class="custom-select" name="role" formControlName="role">
+          <option value="" selected disabled>Role</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" ngbAutofocus class="btn btn-light" data-dismiss="modal"
+        (click)="activeModal.dismiss('Close click')">Close</button>
+      <button type="button" class="btn btn-primary" type="submit" [disabled]="!registerForm.valid">
+        <i class="fa fa-user-plus"></i> Sign Up
+      </button>
+    </div>
+  </form>
+</div>
