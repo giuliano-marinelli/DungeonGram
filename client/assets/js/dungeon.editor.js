@@ -26,8 +26,8 @@ DungeonEditor.prototype.init = function () {
     room.onMessage("messages", function (message) {
       var p = document.createElement("p");
       p.innerText = message;
-      document.querySelector("#messages").appendChild(p);
-      document.querySelector("#messages").scrollTop = document.querySelector("#messages").scrollHeight;
+      document.querySelector("#chat-messages").appendChild(p);
+      document.querySelector("#chat-messages").scrollTop = document.querySelector("#chat-messages").scrollHeight;
     });
 
     // send message to room on submit
