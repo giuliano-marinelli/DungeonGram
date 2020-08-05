@@ -1,4 +1,10 @@
 <div id="editor">
+  <div id="map" class="card pull-left">
+    <h4 class="card-header">Map</h4>
+    <div class="card-body">
+      <canvas id="renderCanvas" touch-action="none"></canvas>
+    </div>
+  </div>
   <div id="chat" class="card pull-right">
     <h4 class="card-header">Chat</h4>
     <div id="chat-body" class="card-body">
@@ -8,14 +14,13 @@
       </div>
       <div id="chat-messages"></div>
       <div id="chat-send">
-        <form id="form">
-          <div class="input-group">
-            <input class="form-control" type="text" id="input" value="" autofocus autocomplete="off" />
-            <div class="input-group-append">
-              <input class="btn btn-dark" type="submit" value="Send" />
-            </div>
+        <div class="input-group">
+          <input class="form-control" type="text" id="input" value="" [(ngModel)]="message" autofocus autocomplete="off"
+            (keydown.enter)='sendMessage()' />
+          <div class="input-group-append">
+            <input class="btn btn-dark" type="button" value="Send" (click)='sendMessage()' />
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>

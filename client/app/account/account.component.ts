@@ -8,7 +8,6 @@ import { User } from '../shared/models/user.model';
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss']
-
 })
 export class AccountComponent implements OnInit {
 

@@ -10,6 +10,17 @@ body {
   margin-bottom: 15px;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px black inset !important;
+}
+
+input:-webkit-autofill {
+  -webkit-text-fill-color: white !important;
+}
+
 @font-face {
   font-family: "MetalMania";
   src: url(assets/fonts/MetalMania-Regular.ttf) format("opentype");
@@ -22,16 +33,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #212529;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #424242;
+  background: #1b1b1b;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #212121;
+  background: #181818;
 }
 
 /* Importing Bootstrap SCSS file. */
-@import '~bootstrap/scss/bootstrap';
+@import "~bootstrap/scss/bootstrap";

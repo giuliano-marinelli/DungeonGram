@@ -13,7 +13,7 @@
       <div class="input-group" [ngClass]="setClassEmail()">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-envelope"></i>
+            <i class="fa fa-fw fa-envelope"></i>
           </span>
         </div>
         <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email" autofocus>
@@ -21,16 +21,16 @@
       <div class="input-group" [ngClass]="setClassPassword()">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-key"></i>
+            <i class="fa fa-fw fa-key"></i>
           </span>
         </div>
         <input class="form-control" type="password" name="password" formControlName="password" placeholder="Password">
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" ngbAutofocus class="btn btn-light" data-dismiss="modal"
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
         (click)="activeModal.dismiss('Close click')">Close</button>
-      <button type="button" class="btn btn-primary" type="submit" [disabled]="!loginForm.valid">
+      <button type="button" class="btn btn-dark" type="submit" [disabled]="!loginForm.valid">
         <i class="fa fa-sign-in"></i> Log In
       </button>
     </div>

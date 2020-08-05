@@ -13,7 +13,7 @@
       <div class="input-group" [ngClass]="setClassUsername()">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-user"></i>
+            <i class="fa fa-fw fa-user"></i>
           </span>
         </div>
         <input class="form-control" type="text" name="username" formControlName="username" placeholder="Username"
@@ -22,7 +22,7 @@
       <div class="input-group" [ngClass]="setClassEmail()">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-envelope"></i>
+            <i class="fa fa-fw fa-envelope"></i>
           </span>
         </div>
         <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email">
@@ -30,7 +30,7 @@
       <div class="input-group" [ngClass]="setClassPassword()">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-key"></i>
+            <i class="fa fa-fw fa-key"></i>
           </span>
         </div>
         <input class="form-control" type="password" name="password" formControlName="password" placeholder="Password">
@@ -38,7 +38,7 @@
       <div class="input-group">
         <div class="input-group-prepend">
           <span class="input-group-text">
-            <i class="fa fa-black-tie"></i>
+            <i class="fa fa-fw fa-black-tie"></i>
           </span>
         </div>
         <select class="custom-select" name="role" formControlName="role">
@@ -49,9 +49,9 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" ngbAutofocus class="btn btn-light" data-dismiss="modal"
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
         (click)="activeModal.dismiss('Close click')">Close</button>
-      <button type="button" class="btn btn-primary" type="submit" [disabled]="!registerForm.valid">
+      <button type="button" class="btn btn-dark" type="submit" [disabled]="!registerForm.valid">
         <i class="fa fa-user-plus"></i> Sign Up
       </button>
     </div>
