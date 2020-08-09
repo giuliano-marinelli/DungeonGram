@@ -16,7 +16,7 @@ import { CustomLobbyRoom } from './rooms/07-custom-lobby-room';
 const port = Number(process.env.PORT || 3001) + Number(process.env.NODE_APP_INSTANCE || 0);
 const app = express();
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 // Attach WebSocket Server on HTTP Server.

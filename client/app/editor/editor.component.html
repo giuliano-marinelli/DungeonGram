@@ -1,8 +1,19 @@
 <div id="editor">
   <div id="map" class="card pull-left">
     <h4 class="card-header">Map</h4>
-    <div class="card-body">
-      <canvas id="renderCanvas" touch-action="none"></canvas>
+    <div id="map-body" class="card-body">
+      <canvas id="renderCanvas" touch-action="none" width="100%" height="100%"></canvas>
+    </div>
+  </div>
+  <div id="assets" class="card pull-right">
+    <h4 class="card-header">Assets</h4>
+    <div id="assets-body" class="card-body">
+      <app-loading [condition]="isLoading"></app-loading>
+      <div *ngIf="!isLoading">
+        <div *ngFor="let asset of assets">
+          <div class="asset-item"><img src='{{asset}}' /></div>
+        </div>
+      </div>
     </div>
   </div>
   <div id="chat" class="card pull-right">

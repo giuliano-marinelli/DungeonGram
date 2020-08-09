@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
+import {
+  GridMaterial
+} from '@babylonjs/materials';
+import { AssetService } from '../services/asset.service';
 
 @Component({
   selector: 'app-editor',
@@ -9,17 +13,33 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 })
 export class EditorComponent implements OnInit {
 
-  message: string;
-  roomChat: any;
-  roomMap: any;
-  players: Object;
-  engine: any;
-  scene: any;
+  isLoading = true;
 
-  constructor() { }
+  //chat
+  roomChat: any;
+  message: string;
+
+  //babylon
+  engine: any;
+  canvas: HTMLCanvasElement;
+
+  //map
+  roomMap: any;
+  scene: any;
+  mainCamera: any;
+  shadowGenerator: any;
+  players: Object;
+
+  //assets
+  assets: [];
+
+  constructor(private assetService: AssetService) { }
 
   ngOnInit(): void {
     var self = this;
+
+    this.getAssets();
+
     var host = window.document.location.host.replace(/:.*/, '');
 
     var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
@@ -28,12 +48,15 @@ export class EditorComponent implements OnInit {
       this.joinedRoomChat();
     });
 
-    const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+    this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-    this.engine = new BABYLON.Engine(canvas, true);
+    this.engine = new BABYLON.Engine(this.canvas, true);
     this.scene = this.createScene(); //call the createScene function
 
-    console.log(this.scene);
+    //resize canvas on resize window
+    window.onresize = () => {
+      this.engine.resize();
+    };
 
     //register a render loop to repeatedly render the scene
     this.engine.runRenderLoop(() => {
@@ -44,12 +67,22 @@ export class EditorComponent implements OnInit {
       this.roomMap = room;
       this.joinedRoomMap();
     });
-
   }
 
   ngOnDestroy(): void {
     this.roomChat.leave();
     this.roomMap.leave();
+  }
+
+  getAssets() {
+    this.assetService.getAssets().subscribe(
+      data => {
+        this.assets = data;
+        console.log(this.assets);
+      },
+      error => console.log(error),
+      () => this.isLoading = false
+    );
   }
 
   joinedRoomChat() {
@@ -72,6 +105,16 @@ export class EditorComponent implements OnInit {
     });
   }
 
+  sendMessage() {
+    console.log("input:", this.message);
+
+    // send data to room
+    this.roomChat.send("message", this.message);
+
+    // clear input
+    this.message = "";
+  }
+
   joinedRoomMap() {
     var self = this;
 
@@ -88,11 +131,14 @@ export class EditorComponent implements OnInit {
       for (let playerid in state.players) {
         if (self.players[playerid] == null) {
           self.players[playerid] = BABYLON.Mesh.CreateSphere(playerid, 16, 1, self.scene);
-        } else {
-          self.players[playerid].position.y = 1;
-          self.players[playerid].position.x = state.players[playerid].x * 0.1;
-          self.players[playerid].position.z = state.players[playerid].y * 0.1;
+          self.shadowGenerator.addShadowCaster(self.players[playerid]);
+          // if (playerid == self.roomMap.sessionId) {
+          //   self.mainCamera.lockedTarget = self.players[playerid];
+          // }
         }
+        self.players[playerid].position.y = 0.5;
+        self.players[playerid].position.x = state.players[playerid].x * 0.1;
+        self.players[playerid].position.z = state.players[playerid].y * 0.1;
       }
       for (let playerid in self.players) {
         if (!state.players[playerid]) {
@@ -102,22 +148,28 @@ export class EditorComponent implements OnInit {
     });
   }
 
-  sendMessage() {
-    console.log("input:", this.message);
-
-    // send data to room
-    this.roomChat.send("message", this.message);
-
-    // clear input
-    this.message = "";
-  }
-
   createScene(): any {
     //setup the scene
     var scene = new BABYLON.Scene(this.engine);
-    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 25, 0), scene);
-    camera.setTarget(BABYLON.Vector3.Zero());
-    var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+
+    this.mainCamera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(0, 30, 0), scene);
+    this.mainCamera.setTarget(BABYLON.Vector3.Zero());
+    // this.mainCamera.attachControl(this.canvas, true);
+
+    var light = new BABYLON.DirectionalLight("mainLight", new BABYLON.Vector3(-1, -2, 1), scene);
+    light.intensity = 0.5;
+
+    this.shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+    this.shadowGenerator.useExponentialShadowMap = true;
+
+    var gridMaterial = new GridMaterial("gridMaterial", scene);
+    gridMaterial.mainColor = new BABYLON.Color3(1, 1, 1);
+    gridMaterial.lineColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    gridMaterial.gridRatio = 1;
+
+    var ground = BABYLON.Mesh.CreateGround("ground", 100, 100, 2, scene);
+    ground.material = gridMaterial;
+    ground.receiveShadows = true;
 
     //keyboard events
     var inputMap = {};
