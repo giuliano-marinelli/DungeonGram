@@ -1,0 +1,19 @@
+#chat {
+  display: flex;
+  flex-flow: column;
+  padding-bottom: 0px;
+}
+
+#chat-header {
+  flex: 0 0 auto;
+}
+
+#chat-messages {
+  flex: 1 1 auto;
+  overflow-y: scroll;
+}
+
+#chat-send {
+  margin-top: 20px;
+  flex: 0 0 auto;
+}

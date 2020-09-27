@@ -2,8 +2,8 @@
 
 <app-toast [message]="toast.message"></app-toast>
 
-<div class="jumbotron text-center">
-  <div class="card" *ngIf="!isLoading">
+<div class="jumbotron text-center" *ngIf="!isLoading">
+  <div class="card">
     <h4 class="card-header">Account settings</h4>
     <div class="card-body">
       <form #accountForm="ngForm" (ngSubmit)="save(user)">

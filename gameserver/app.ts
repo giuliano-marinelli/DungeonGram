@@ -12,6 +12,7 @@ import { StateHandlerRoom } from "./rooms/02-state-handler";
 import { AuthRoom } from "./rooms/03-auth";
 import { ReconnectionRoom } from './rooms/04-reconnection';
 import { CustomLobbyRoom } from './rooms/07-custom-lobby-room';
+import { GameRoom } from "./rooms/game";
 
 const port = Number(process.env.PORT || 3001) + Number(process.env.NODE_APP_INSTANCE || 0);
 const app = express();
@@ -25,6 +26,8 @@ const gameServer = new Server({
   express: app,
   pingInterval: 0,
 });
+
+gameServer.define("game", GameRoom);
 
 // Define "lobby" room
 gameServer.define("lobby", LobbyRoom);
@@ -65,7 +68,7 @@ app.use('/', express.static(path.join(__dirname, "static")));
 app.use('/colyseus', monitor());
 
 gameServer.onShutdown(function () {
-  console.log(`game server is going down.`);
+  console.log(`DungeonGram gameserver is going down.`);
 });
 
 gameServer.listen(port);

@@ -8,7 +8,7 @@
   "scripts": {
     "start": "npm run prod",
     "predev": "concurrently -n \"server(build),gameserver(build)\" -c \"yellow,magenta\" \"tsc -p server\" \"tsc -p gameserver\"",
-    "dev": "concurrently -n \"mongodb,client,server,gameserver,server,gameserver\" -c \"green,blue,yellow,magenta,yellow,magenta\" \"mongod\" \"ng serve --proxy-config proxy.conf.json --open\" \"tsc -w -p server\" \"tsc -w -p gameserver\" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\"",
+    "dev": "concurrently -n \"mongodb,client,server,gameserver,server,gameserver\" -c \"green,blue,yellow,magenta,yellow,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p server\" \"tsc -w -p gameserver\" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\"",
     "preprod": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build --aot --prod\" \"tsc -p server\" \"tsc -p gameserver\"",
     "prod": "concurrently -n \"mongodb,server,gameserver\" -c \"green,yellow,magenta\" \"mongod\" \"node dist/server/app.js\" \"node dist/gameserver/app.js\""
   },
@@ -75,6 +75,7 @@
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "^2.0.8",
     "@types/node": "^12.12.53",
+    "babylonjs-loaders": "^4.1.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "codelyzer": "^5.2.2",

@@ -21,6 +21,8 @@ import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { GameComponent } from './game/game.component';
+import { ChatComponent } from './chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     AccountComponent,
     AdminComponent,
     NotFoundComponent,
-    EditorComponent
+    EditorComponent,
+    GameComponent,
+    ChatComponent
   ],
   imports: [
     AppRoutingModule,

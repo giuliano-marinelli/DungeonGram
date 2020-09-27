@@ -1,0 +1,16 @@
+<div id="chat">
+  <div id="chat-header">
+    <p>This room doesn't use the room's state. It just broadcast messages through "broadcast" method.</p>
+    <strong>Messages</strong><br>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-send">
+    <div class="input-group">
+      <input class="form-control" type="text" id="input" value="" [(ngModel)]="message" autofocus autocomplete="off"
+        (keydown.enter)='sendMessage()' />
+      <div class="input-group-append">
+        <input class="btn btn-dark" type="button" value="Send" (click)='sendMessage()' />
+      </div>
+    </div>
+  </div>
+</div>
