@@ -1,8 +1,9 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Path } from './path';
 import { Point } from './point';
+import { Schema } from './schema';
 
-export class Player {
+export class Player extends Schema {
   //schema
   id?: string;
   x?: number;
@@ -15,53 +16,54 @@ export class Player {
   skeleton?: any;
   animations?: any = {};
 
-  constructor(schema, scene, room, parameters?) {
-    this.id = parameters?.id;
-    if (schema?.direction) this.direction = new Point(schema.direction);
-    if (schema?.movementPath) this.movementPath = new Path(schema.movementPath, scene, room);
+  constructor(schema, parameters) {
+    super();
 
-    schema.onChange = (changes) => {
-      changes.forEach((change) => {
-        switch (change.field) {
-          case 'x': case 'y': case 'movementCooldown':
-            this[change.field] = change.value;
-            break;
-        }
-        switch (change.field) {
-          case 'direction':
-            if (!this[change.field] && change.value != null) this[change.field] = new Point(change.value);
-            else if (change.value == null) delete this[change.field];
-            break;
-        }
-        switch (change.field) {
-          case 'x':
-            // this.mesh.position.x = change.value;
-            // this.mesh?.translate(BABYLON.Axis.X, change.value - this.mesh.position.x, BABYLON.Space.WORLD);
-            this.transition('x', change.previousValue, change.value);
-            break;
-          case 'y':
-            // this.mesh.position.z = change.value;
-            // this.mesh?.translate(BABYLON.Axis.Z, change.value - this.mesh.position.z, BABYLON.Space.WORLD);
-            this.transition('z', change.previousValue, change.value);
-            break;
-          case 'direction':
-            if (this.mesh?.rotation) this.mesh.rotation.y = 6.27 / 8 * this.directionToRotate(change.value);
-            break;
-          case 'movementPath':
-            if (change.value.points.length) {
-              if (this.animations.run && this.animations.actual != 'run') this.animations.run();
-            } else {
-              setTimeout(() => {
-                if (this.animations.idle && this.animations.actual != 'idle') this.animations.idle();
-              }, this.movementCooldown);
-            }
-            break;
-        }
-      });
-    }
-    schema.triggerAll();
+    this.id = parameters.id;
 
-    this.doMesh(schema, scene, room);
+    this.synchronizeSchema(schema,
+      {
+        direction: { type: Point, datatype: Object },
+        movementPath: { type: Path, datatype: Object }
+      },
+      { scene: parameters.scene, room: parameters.room }
+    );
+
+    this.doMesh(schema, parameters.scene, parameters.room);
+  }
+
+  update(changes, parameters?) {
+    changes.forEach((change) => {
+      switch (change.field) {
+        case 'x':
+          // this.mesh.position.x = change.value;
+          // this.mesh?.translate(BABYLON.Axis.X, change.value - this.mesh.position.x, BABYLON.Space.WORLD);
+          this.transition('x', change.previousValue, change.value);
+          break;
+        case 'y':
+          // this.mesh.position.z = change.value;
+          // this.mesh?.translate(BABYLON.Axis.Z, change.value - this.mesh.position.z, BABYLON.Space.WORLD);
+          this.transition('z', change.previousValue, change.value);
+          break;
+        case 'direction':
+          if (this.mesh?.rotation) this.mesh.rotation.y = 6.27 / 8 * this.directionToRotate(change.value);
+          break;
+        case 'movementPath':
+          if (change.value.points.length) {
+            if (this.animations.run && this.animations.actual != 'run') this.animations.run();
+          } else {
+            setTimeout(() => {
+              if (this.animations.idle && this.animations.actual != 'idle') this.animations.idle();
+            }, this.movementCooldown);
+          }
+          break;
+      }
+    });
+  }
+
+  remove(parameters?) {
+    super.remove(parameters);
+    this.mesh.dispose();
   }
 
   doMesh(schema, scene, room) {
@@ -75,7 +77,7 @@ export class Player {
       // this.mesh.material = material;
 
       BABYLON.SceneLoader.ImportMesh('', "assets/meshes/", "dummy.babylon", scene, (meshes, particleSystems, skeletons) => {
-        console.log(meshes, particleSystems, skeletons);
+        // console.log(meshes, particleSystems, skeletons);
         this.mesh = meshes[0];
         this.skeleton = skeletons[0];
 
@@ -113,11 +115,6 @@ export class Player {
         this.mesh.position.z = schema.y;
       });
     }
-  }
-
-  remove(schema, scene, room) {
-    this.mesh.dispose();
-    this.movementPath.remove(schema, scene, room);
   }
 
   directionToRotate(direction) {
@@ -161,8 +158,8 @@ export class Player {
       var distance = newPosition - previousPosition;
       var foot = distance / (this.movementCooldown / 50);
       var i = 0;
-      console.log('distance', distance);
-      console.log('foot', foot);
+      // console.log('distance', distance);
+      // console.log('foot', foot);
       var transition = setInterval(() => {
         this.mesh.position[axis] += foot;
         i += 50;

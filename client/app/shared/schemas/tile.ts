@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
+import { Schema } from './schema';
 
-export class Tile {
+export class Tile extends Schema {
   //schema
   id?: string;
   x?: number;
@@ -8,21 +9,14 @@ export class Tile {
   //game objects
   mesh?: any;
 
-  constructor(schema, scene, room, parameters?) {
-    this.id = parameters?.id;
+  constructor(schema, parameters) {
+    super();
 
-    schema.onChange = (changes) => {
-      changes.forEach((change) => {
-        switch (change.field) {
-          case 'x': case 'y':
-            this[change.field] = change.value;
-            break;
-        }
-      });
-    }
-    schema.triggerAll();
+    this.id = parameters.id;
 
-    this.doMesh(schema, scene, room, parameters.baseTileMesh);
+    this.synchronizeSchema(schema);
+
+    this.doMesh(schema, parameters.scene, parameters.room, parameters.baseTileMesh);
   }
 
   doMesh(schema, scene, room, baseTileMesh) {
@@ -41,5 +35,10 @@ export class Tile {
       console.log('Tile : (', this.x, ',', this.y, ')', schema);
       room?.send('move', { x: this.x, y: this.y });
     }));
+  }
+
+  remove(parameters?) {
+    super.remove(parameters);
+    this.mesh.dispose();
   }
 }

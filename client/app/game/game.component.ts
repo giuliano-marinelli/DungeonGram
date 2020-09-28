@@ -120,7 +120,7 @@ export class GameComponent implements OnInit {
   initGame() {
     console.log("Joined Game");
     this.gameRoom.onStateChange.once(() => {
-      this.world = new World(this.gameRoom.state.world, this.scene, this.gameRoom, this.canvas);
+      this.world = new World(this.gameRoom.state.world, { scene: this.scene, room: this.gameRoom, canvas: this.canvas });
       // this.schemas = new Object();
       // this.schemas.tilemap = new TileMap(this.gameRoom.state.tilemap, this.scene, this.gameRoom);
       // this.schemas.players = {};

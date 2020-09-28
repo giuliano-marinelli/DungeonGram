@@ -1,6 +1,7 @@
 import { Schema, type, MapSchema } from '@colyseus/schema';
 import { Player } from '../schemas/player';
 import { TileMap } from '../schemas/tilemap';
+import { Point } from './point';
 
 export class World extends Schema {
   @type({ map: Player })

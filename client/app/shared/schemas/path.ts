@@ -1,53 +1,52 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
+import { Schema } from './schema';
 import { Point } from './point';
 
-export class Path {
+export class Path extends Schema {
   //schema
   from?: Point;
   to?: Point;
-  points?: Point[] = [];
+  points?: Point[];
   //game objects
   meshTo?: any;
   meshPoints?: any[] = [];
 
-  constructor(schema, scene, room) {
-    if (schema?.from) this.from = new Point(schema.from);
-    if (schema?.to) this.to = new Point(schema.to);
+  constructor(schema, parameters) {
+    super();
 
-    if (schema?.points) {
-      schema.points.onAdd = (point, id) => {
-        this.points[id] = new Point(point);
-      }
-      schema.points.onRemove = (point, id) => {
-        delete this.points[id];
-        this.points.length = this.points.length - 1;
-      }
-      schema.points.triggerAll();
-    }
+    this.synchronizeSchema(schema,
+      {
+        from: { type: Point, datatype: Object },
+        to: { type: Point, datatype: Object },
+        points: { type: Point, datatype: Array }
+      },
+      { scene: parameters.scene, room: parameters.room }
+    );
+  }
 
-    schema.onChange = (changes) => {
-      changes.forEach((change) => {
-        switch (change.field) {
-          case 'from': case 'to':
-            if (!this[change.field] && change.value != null) this[change.field] = new Point(change.value);
-            else if (change.value == null) delete this[change.field];
-            break;
-        }
-        switch (change.field) {
-          case 'to':
-            if (change.value) this.doMeshTo(change.value, scene, room);
-            else {
-              this.meshTo?.dispose();
-              delete this.meshTo;
-            }
-            break;
-          case 'points':
-            this.doMeshPoints(change.value, scene, room);
-            break;
-        }
-      });
-    }
-    schema.triggerAll();
+  update(changes, parameters?) {
+    changes.forEach((change) => {
+      switch (change.field) {
+        case 'to':
+          if (change.value) this.doMeshTo(change.value, parameters.scene, parameters.room);
+          else {
+            this.meshTo?.dispose();
+            delete this.meshTo;
+          }
+          break;
+        case 'points':
+          this.doMeshPoints(change.value, parameters.scene, parameters.room);
+          break;
+      }
+    });
+  }
+
+  remove(parameters?) {
+    super.remove(parameters);
+    this.meshTo.dispose();
+    this.meshPoints.forEach(meshPoint => {
+      meshPoint.dispose();
+    });
   }
 
   doMeshTo(schema, scene, room) {
@@ -90,13 +89,6 @@ export class Path {
       this.meshPoints[this.meshPoints.length - 1].position.y = 0;
       this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
       this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
-    });
-  }
-
-  remove(schema, scene, room) {
-    this.meshTo.dispose();
-    this.meshPoints.forEach(meshPoint => {
-      meshPoint.dispose();
     });
   }
 }

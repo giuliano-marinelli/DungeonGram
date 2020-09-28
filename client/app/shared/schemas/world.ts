@@ -1,32 +1,31 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
+import { Schema } from './schema';
 import { Player } from './player';
 import { TileMap } from './tilemap';
+import { Point } from './point';
 
-export class World {
+export class World extends Schema {
   //schema
-  players?: Player[] = [];
+  players?: Player[];
   tilemap?: TileMap;
   //game objects
   camera?: any;
   light?: any;
 
-  constructor(schema, scene, room, canvas) {
-    if (schema?.tilemap) this.tilemap = new TileMap(schema.tilemap, scene, room);
+  constructor(schema, parameters) {
+    super();
 
-    if (schema?.players) {
-      schema.players.onAdd = (player, id) => {
-        this.players[id] = new Player(player, scene, room, { id: id });
-      }
-      schema.players.onRemove = (player, id) => {
-        this.players[id].remove(player, scene, room);
-        delete this.players[id];
-      }
-      schema.players.triggerAll();
-    }
+    this.synchronizeSchema(schema,
+      {
+        players: { type: Player, datatype: Array, parameters: (key) => { return { id: key } } },
+        tilemap: { type: TileMap, datatype: Object }
+      },
+      { scene: parameters.scene, room: parameters.room }
+    );
 
-    this.initCamera(scene, canvas);
+    this.initCamera(parameters.scene, parameters.canvas);
 
-    this.initGlobalLights(scene);
+    this.initGlobalLights(parameters.scene);
   }
 
   initCamera(scene, canvas) {
