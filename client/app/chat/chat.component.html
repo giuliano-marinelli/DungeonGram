@@ -4,12 +4,21 @@
     <strong>Messages</strong><br>
   </div>
   <div id="chat-messages"></div>
+  <div id="chat-buttons">
+    <input class="dice-btn" type="image" src="assets/images/chat/d4.png" (click)='sendMessage("/roll 1d4")' />
+    <input class="dice-btn" type="image" src="assets/images/chat/d6.png" (click)='sendMessage("/roll 1d6")' />
+    <input class="dice-btn" type="image" src="assets/images/chat/d8.png" (click)='sendMessage("/roll 1d8")' />
+    <input class="dice-btn" type="image" src="assets/images/chat/d10.png" (click)='sendMessage("/roll 1d10")' />
+    <input class="dice-btn" type="image" src="assets/images/chat/d12.png" (click)='sendMessage("/roll 1d12")' />
+    <input class="dice-btn" type="image" src="assets/images/chat/d20.png" (click)='sendMessage("/roll 1d20")' />
+  </div>
+  <div id="chat-send">
   <div id="chat-send">
     <div class="input-group">
       <input class="form-control" type="text" id="input" value="" [(ngModel)]="message" autofocus autocomplete="off"
-        (keydown.enter)='sendMessage()' />
+        (keydown.enter)='sendMessage()' placeholder="Enter text or /roll command" />
       <div class="input-group-append">
-        <input class="btn btn-dark" type="button" value="Send" (click)='sendMessage()' />
+        <button class="btn btn-dark" type="button"  (click)='sendMessage()'><i class="fa fa-paper-plane"></i></button>
       </div>
     </div>
   </div>

@@ -41,8 +41,7 @@
               "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
               "client/assets/js/utils.js",
-              "client/assets/js/dungeon.editor.js",
-              "client/assets/libs/colyseus.js"
+              "client/assets/js/dungeon.editor.js"
             ]
           },
           "configurations": {

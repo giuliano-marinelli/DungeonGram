@@ -1,0 +1,39 @@
+<div id="tools">
+
+  <div class="tool-btn-container" *ngFor="let tool of tools | keyvalue" id="tool-btn-container-{{tool.value.name}}">
+
+    <div class="{{tool.value.dropdown ? 'dropright' : ''}}">
+
+      <button
+        class="btn btn-dark tool-btn {{tool.value.active ? 'active' : ''}} {{tool.value.dropdown ? 'dropdown-toggle' : ''}}"
+        (click)="callTool(tool.key)" attr.data-toggle="{{tool.value.dropdown ? 'dropdown' : ''}}"
+        data-toggle-tooltip="tooltip" title="{{tool.value.label}}" data-placement="right">
+        <img src="{{tool.value.image}}">
+      </button>
+
+      <div *ngIf="tool.value.dropdown" class="dropdown-menu">
+        <div [ngSwitch]="tool.value.name">
+          <div *ngSwitchCase="'grid'">
+            <div class="form-group">
+              <label>Width</label>
+              <label style="float: right">{{grid_width.value}}</label>
+              <input type="range" class="form-control-range" #grid_width
+                (change)="gridSize({ width: grid_width.value, height: grid_height.value })" min="10" max="1000" step="2"
+                value="50" />
+            </div>
+            <div class="form-group">
+              <label>Height</label>
+              <label style="float: right">{{grid_height.value}}</label>
+              <input type="range" class="form-control-range" #grid_height
+                (change)="gridSize({ width: grid_width.value, height: grid_height.value })" min="10" max="1000" step="2"
+                value="50" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

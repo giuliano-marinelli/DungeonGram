@@ -1,6 +1,7 @@
 import { Room, Client } from 'colyseus';
 import { Schema, type, MapSchema } from '@colyseus/schema';
 import { World } from '../schemas/world';
+import { Point } from '../schemas/point';
 
 export class State extends Schema {
   @type(World)
@@ -14,14 +15,32 @@ export class GameRoom extends Room<State> {
     this.setState(new State());
 
     this.onMessage("move", (client, data) => {
-      console.log("GameRoom: received message from", client.sessionId, ":", data);
+      console.log("GameRoom: received 'move' action from", client.sessionId, ":", data);
       this.state.world?.movePlayer(client.sessionId, data);
+    });
+
+    this.onMessage("dragPlayer", (client, data) => {
+      console.log("GameRoom: received 'dragPlayer' action from", client.sessionId, ":", data);
+      this.state.world?.dragPlayer(client.sessionId, data);
+    });
+
+    this.onMessage("tilemap", (client, data) => {
+      console.log("GameRoom: received 'tilemap' action from", client.sessionId, ":", data);
+      this.state.world?.tilemap?.changeSize(data.width, data.height);
+    });
+
+    this.onMessage("wall", (client, data) => {
+      console.log("GameRoom: received 'wall' action from", client.sessionId, ":", data);
+      if (data.action == 'start')
+        this.state.world.wallFirstPoint = new Point(data.x, data.y);
+      else if (data.action == 'end')
+        this.state.world.createWall(new Point(data.x, data.y));
     });
 
     this.setSimulationInterval((deltaTime) => this.state.world.update(deltaTime));
   }
 
-  onAuth(client, options, req) {
+  onAuth(client: Client, options, req) {
     // console.log(req.headers.cookie);
     return true;
   }
@@ -30,11 +49,20 @@ export class GameRoom extends Room<State> {
     this.state.world?.createPlayer(client.sessionId);
   }
 
-  onLeave(client) {
+  onLeave(client: Client) {
     this.state.world?.removePlayer(client.sessionId);
   }
 
   onDispose() {
     console.log("GameRoom: Disposed");
+  }
+}
+
+export class Utils {
+  static uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }

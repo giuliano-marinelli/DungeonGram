@@ -1,6 +1,5 @@
 import { Schema, type } from "@colyseus/schema";
 
-
 export class Tile extends Schema {
   @type("number")
   x: number;

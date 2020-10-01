@@ -10,35 +10,35 @@ export class Tile extends Schema {
   mesh?: any;
 
   constructor(schema, parameters) {
-    super();
+    super(parameters);
 
     this.id = parameters.id;
 
     this.synchronizeSchema(schema);
 
-    this.doMesh(schema, parameters.scene, parameters.room, parameters.baseTileMesh);
+    this.doMesh();
   }
 
-  doMesh(schema, scene, room, baseTileMesh) {
-    this.mesh = baseTileMesh.createInstance(this.id);
+  doMesh() {
+    this.mesh = this.parameters.baseTileMesh.createInstance(this.id);
 
     //positioning mesh
     this.mesh.position.y = 0;
-    this.mesh.position.x = schema.x;
-    this.mesh.position.z = schema.y;
+    this.mesh.position.x = this.x;
+    this.mesh.position.z = this.y;
 
     //set action on mouse in/out
-    this.mesh.actionManager = new BABYLON.ActionManager(scene);
+    this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, this.mesh.material, "emissiveColor", this.mesh.material.emissiveColor));
     // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
-      console.log('Tile : (', this.x, ',', this.y, ')', schema);
-      room?.send('move', { x: this.x, y: this.y });
+      console.log('Tile : (', this.x, ',', this.y, ')', this._schema);
+      this.parameters.room.send('move', { x: this.x, y: this.y });
     }));
   }
 
-  remove(parameters?) {
-    super.remove(parameters);
+  remove() {
+    super.remove();
     this.mesh.dispose();
   }
 }

@@ -4,6 +4,7 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import {
   GridMaterial
 } from '@babylonjs/materials';
+import { Controller } from '../shared/controller/controller';
 
 //game main schema
 import { World } from '../shared/schemas/world';
@@ -15,17 +16,15 @@ import { World } from '../shared/schemas/world';
 })
 export class GameComponent implements OnInit {
   //babylon
-  engine: any;
   canvas: HTMLCanvasElement;
+  engine: any;
+  scene: any;
 
   //game
   gameRoom: any;
-  scene: any;
-  mainCamera: any;
-  shadowGenerator: any;
+  controller: any;
 
   //game schemas
-  schemas: any;
   world: any;
 
   constructor() { }
@@ -34,12 +33,16 @@ export class GameComponent implements OnInit {
     this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
     this.engine = new BABYLON.Engine(this.canvas, true);
-    this.scene = this.createScene(); //call the createScene function
+    this.scene = new BABYLON.Scene(this.engine);
+    this.scene.actionManager = new BABYLON.ActionManager(this.scene);
+
+    this.controller = new Controller();
 
     var host = window.document.location.host.replace(/:.*/, '');
     var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
     client.joinOrCreate("game").then((room: any) => {
       this.gameRoom = room;
+      this.controller.rooms.game = this.gameRoom;
       this.initGame();
     });
 
@@ -49,9 +52,23 @@ export class GameComponent implements OnInit {
     };
   }
 
+  initGame() {
+    console.log("Joined Game");
+    this.gameRoom.onStateChange.once(() => {
+      //create the root schema object
+      this.world = new World(this.gameRoom.state.world, { scene: this.scene, room: this.gameRoom, canvas: this.canvas, controller: this.controller });
+
+      //register a render loop to repeatedly render the scene
+      this.engine.runRenderLoop(() => {
+        this.scene.render();
+      });
+    });
+  }
+
+  //DESUSED
   createScene(): any {
     //setup the scene
-    var scene = new BABYLON.Scene(this.engine);
+    // var scene = new BABYLON.Scene(this.engine);
 
     // this.mainCamera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(0, 30, 0), scene);
     // this.mainCamera.setTarget(BABYLON.Vector3.Zero());
@@ -114,26 +131,7 @@ export class GameComponent implements OnInit {
     //     //sphere.position.x -= 0.1
     //   }
     // })
-    return scene;
+    // return scene;
   };
-
-  initGame() {
-    console.log("Joined Game");
-    this.gameRoom.onStateChange.once(() => {
-      this.world = new World(this.gameRoom.state.world, { scene: this.scene, room: this.gameRoom, canvas: this.canvas });
-      // this.schemas = new Object();
-      // this.schemas.tilemap = new TileMap(this.gameRoom.state.tilemap, this.scene, this.gameRoom);
-      // this.schemas.players = {};
-      // this.gameRoom.state.players.onAdd = (player, id) => {
-      //   this.schemas.players[id] = new Player(player, id, this.scene);
-      // }
-      // this.gameRoom.state.players.triggerAll();
-
-      //register a render loop to repeatedly render the scene
-      this.engine.runRenderLoop(() => {
-        this.scene.render();
-      });
-    });
-  }
 
 }

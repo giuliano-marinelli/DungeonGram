@@ -3,30 +3,38 @@ import { Path } from '../schemas/path';
 import { Point } from '../schemas/point';
 
 export class Player extends Schema {
+  // @type("string")
+  // id;
   @type("number")
   x = 0;
   @type("number")
   y = 0;
   @type(Point)
-  direction: any = new Point(1, 0);
+  direction: Point = new Point(1, 0);
   @type(Path)
-  movementPath = new Path();
-  //internal attributes
-  movementAcum = 0;
+  movementPath: Path = new Path();
   @type("number")
   movementCooldown = 500;
+  @type("boolean")
+  beignDragged = false;
+  //internal attributes
+  movementAcum = 0;
 
   move(movement: any) {
-    this.movementPath = new Path(new Point(this.x, this.y), new Point(movement.x, movement.y));
+    if (movement.x != this.x || movement.y != this.y) {
+      this.movementPath.set(new Point(this.x, this.y), new Point(movement.x, movement.y));
+    }
     // console.log(JSON.stringify(this.movementPath.from), JSON.stringify(this.movementPath.to));
     // console.table(this.movementPath.points);
-    // this.x = movement.x != null ? movement.x : 0;
-    // this.y = movement.y != null ? movement.y : 0;
+    // this.movementPath.points.forEach((point) => {
+    //   console.log(JSON.stringify(point));
+    // });
   }
 
   update(deltaTime: number) {
     if (this.movementPath.points.length) {
       if (this.movementAcum == 0) {
+        var nextIndex = this.movementPath.points.length - 1;
         this.direction.x = this.movementPath.points[0].x - this.x;
         this.direction.y = this.movementPath.points[0].y - this.y;
         this.x = this.movementPath.points[0].x;
@@ -42,5 +50,20 @@ export class Player extends Schema {
         this.movementAcum = (this.movementAcum - deltaTime <= 0) ? 0 : this.movementAcum - deltaTime;
       }
     }
+  }
+
+  drag(position?) {
+    this.beignDragged = true;
+    this.movementPath.unset();
+    if (position) {
+      this.x = position.x;
+      this.y = position.y;
+    }
+  }
+
+  drop() {
+    this.beignDragged = false;
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
   }
 }

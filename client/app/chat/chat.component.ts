@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
+import { Controller } from '../shared/controller/controller';
 
 @Component({
   selector: 'app-chat',
@@ -7,7 +8,9 @@ import * as Colyseus from "colyseus.js";
   styleUrls: ['./chat.component.scss']
 })
 export class ChatComponent implements OnInit {
-  roomChat: any;
+  @Input() controller: Controller;
+
+  chatRoom: any;
   message: string;
 
   constructor() { }
@@ -16,43 +19,44 @@ export class ChatComponent implements OnInit {
     var host = window.document.location.host.replace(/:.*/, '');
     var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
     client.joinOrCreate("chat").then((room: any) => {
-      this.roomChat = room;
-      this.joinedRoomChat();
+      this.chatRoom = room;
+      this.controller.rooms.chat = this.chatRoom;
+      this.initChat();
     });
   }
 
   ngOnDestroy(): void {
-    this.roomChat.leave();
+    this.chatRoom.leave();
   }
 
-  joinedRoomChat() {
-    console.log("joined chat");
-    this.roomChat.onStateChange.once(function (state) {
-      console.log("initial chat state:", state);
+  initChat() {
+    console.log("Joined Chat");
+    this.chatRoom.onStateChange.once(function (state) {
+      console.log("ChatRoom: Initial State", state);
     });
 
     // new room state
-    this.roomChat.onStateChange(function (state) {
+    this.chatRoom.onStateChange(function (state) {
       // this signal is triggered on each patch
     });
 
     // listen to patches coming from the server
-    this.roomChat.onMessage("messages", function (message) {
+    this.chatRoom.onMessage("messages", function (message) {
       var p = document.createElement("p");
-      p.innerText = message;
+      p.innerHTML = message;
       document.querySelector("#chat-messages").appendChild(p);
       document.querySelector("#chat-messages").scrollTop = document.querySelector("#chat-messages").scrollHeight;
     });
   }
 
-  sendMessage() {
-    console.log("input:", this.message);
-
-    // send data to room
-    this.roomChat.send("message", this.message);
-
-    // clear input
-    this.message = "";
+  sendMessage(message?) {
+    if (message)
+      this.chatRoom.send("message", message);
+    else {
+      this.chatRoom.send("message", this.message);
+      // clear input
+      this.message = "";
+    }
   }
 
 }

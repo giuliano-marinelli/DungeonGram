@@ -2,18 +2,36 @@
   display: flex;
   flex-flow: column;
   padding-bottom: 0px;
+  max-height: 300px;
 }
 
 #chat-header {
   flex: 0 0 auto;
+  display: none;
 }
 
 #chat-messages {
   flex: 1 1 auto;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+#chat-buttons {
+  flex: 0 0 auto;
 }
 
 #chat-send {
-  margin-top: 20px;
   flex: 0 0 auto;
+}
+
+.dice-btn {
+  width: 60px;
+  height: 60px;
+}
+
+.dice-btn:focus {
+  color: #ced4da;
+  background-color: rgba(0,0,0,0);
+  border-color: rgba(0,0,0,0);
+  box-shadow: none;
+  outline: none;
 }
