@@ -17,17 +17,39 @@ export class ToolsComponent implements OnInit {
 
   ngOnInit(): void {
     this.tools = {
-      walls: { name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: false },
-      rule: { name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png', dropdown: false },
-      grid: { name: 'grid', label: 'Grid', image: 'assets/images/tools/grid.png', dropdown: true }
+      walls: {
+        name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: true,
+        options: {
+          remove: false,
+          adjustToGrid: true
+        },
+        actions: {
+          toggle: () => { this.toggleActiveTool(this.tools.walls, !this.tools.walls.active) },
+          remove: (value) => { this.tools.walls.options.remove = value },
+          adjustToGrid: (value) => { this.tools.walls.options.adjustToGrid = value }
+        }
+      },
+      rule: {
+        name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png',
+        actions: {
+          toggle: () => { this.toggleActiveTool(this.tools.rule, !this.tools.rule.active) }
+        }
+      },
+      grid: {
+        name: 'grid', label: 'Grid', image: 'assets/images/tools/grid.png', dropdown: true,
+        actions: {
+          gridSize: (size) => { this.controller.send('game', 'tilemap', { width: parseInt(size.width), height: parseInt(size.height) }) }
+        }
+      }
     };
 
     setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
   }
 
-  callTool(tool) {
-    this[tool]();
+  callTool(event, tool) {
+    if (this.tools[tool]?.actions?.toggle) this.tools[tool].actions.toggle();
     $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+    event.stopPropagation(); //to stop dropdown work on click (only on hover)
   }
 
   toggleActiveTool(tool, toggle) {
@@ -37,19 +59,4 @@ export class ToolsComponent implements OnInit {
     tool.active = toggle;
     this.controller.toggleTool(tool, toggle);
   }
-
-  walls() {
-    this.toggleActiveTool(this.tools.walls, !this.tools.walls.active);
-  }
-
-  rule() {
-    this.toggleActiveTool(this.tools.rule, !this.tools.rule.active);
-  }
-
-  grid() { }
-
-  gridSize(size) {
-    this.controller.send('game', 'tilemap', { width: parseInt(size.width), height: parseInt(size.height) });
-  }
-
 }

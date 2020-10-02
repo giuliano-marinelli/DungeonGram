@@ -35,6 +35,8 @@ export class GameRoom extends Room<State> {
         this.state.world.wallFirstPoint = new Point(data.x, data.y);
       else if (data.action == 'end')
         this.state.world.createWall(new Point(data.x, data.y));
+      else if (data.action == 'remove')
+        this.state.world.removeWall(data.id);
     });
 
     this.setSimulationInterval((deltaTime) => this.state.world.update(deltaTime));

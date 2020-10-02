@@ -22,7 +22,7 @@
   box-shadow: none;
 }
 
-.tool-btn> img {
+.tool-btn > img {
   width: 40px;
   height: 40px;
 }
@@ -34,6 +34,17 @@
 
 .tool-btn-container .dropdown-menu {
   // top: 40px !important;
-  left: 8px !important;
+  left: 55px !important;
   padding: 5px 10px;
+  width: 200px;
+}
+
+//to make dropdown work on hover
+.tool-btn-container .dropright:hover > .dropdown-menu {
+  display: block;
+}
+
+//adjust the container width for preserve menu on hover
+.tool-btn-container .dropright:hover {
+  width: 100px;
 }

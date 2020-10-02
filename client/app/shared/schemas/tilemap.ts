@@ -78,10 +78,14 @@ export class TileMap extends Schema {
         if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction)
           this.parameters.controller.send('game', 'move', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z) });
         else if (this.parameters.controller.activeTool?.name == 'walls') {
-          var x = Math.round(pick.pickedPoint.x * 2) / 2;
-          x = x % 1 == 0 ? x + 0.5 : x;
-          var z = Math.round(pick.pickedPoint.z * 2) / 2;
-          z = z % 1 == 0 ? z + 0.5 : z;
+          var x = pick.pickedPoint.x;
+          var z = pick.pickedPoint.z;
+          if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
+            x = Math.round(pick.pickedPoint.x * 2) / 2;
+            x = x % 1 == 0 ? x + 0.5 : x;
+            z = Math.round(pick.pickedPoint.z * 2) / 2;
+            z = z % 1 == 0 ? z + 0.5 : z;
+          }
           this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'end' });
         }
       }
@@ -91,10 +95,14 @@ export class TileMap extends Schema {
       if (e.sourceEvent.button == 0) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY);
         if (this.parameters.controller.activeTool?.name == 'walls') {
-          var x = Math.round(pick.pickedPoint.x * 2) / 2;
-          x = x % 1 == 0 ? x + 0.5 : x;
-          var z = Math.round(pick.pickedPoint.z * 2) / 2;
-          z = z % 1 == 0 ? z + 0.5 : z;
+          var x = pick.pickedPoint.x;
+          var z = pick.pickedPoint.z;
+          if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
+            x = Math.round(pick.pickedPoint.x * 2) / 2;
+            x = x % 1 == 0 ? x + 0.5 : x;
+            z = Math.round(pick.pickedPoint.z * 2) / 2;
+            z = z % 1 == 0 ? z + 0.5 : z;
+          }
           this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'start' });
         }
       }

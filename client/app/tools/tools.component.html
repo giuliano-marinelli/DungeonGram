@@ -6,27 +6,42 @@
 
       <button
         class="btn btn-dark tool-btn {{tool.value.active ? 'active' : ''}} {{tool.value.dropdown ? 'dropdown-toggle' : ''}}"
-        (click)="callTool(tool.key)" attr.data-toggle="{{tool.value.dropdown ? 'dropdown' : ''}}"
-        data-toggle-tooltip="tooltip" title="{{tool.value.label}}" data-placement="right">
+        (click)="callTool($event, tool.key)" attr.data-toggle="{{tool.value.dropdown ? 'dropdown' : ''}}"
+        attr.data-toggle-tooltip="{{tool.value.dropdown ? '' : 'tooltip'}}"
+        title="{{tool.value.dropdown ? '' : tool.value.label}}" data-placement="right">
         <img src="{{tool.value.image}}">
       </button>
 
       <div *ngIf="tool.value.dropdown" class="dropdown-menu">
         <div [ngSwitch]="tool.value.name">
           <div *ngSwitchCase="'grid'">
+            <h5>Grid</h5>
             <div class="form-group">
               <label>Width</label>
               <label style="float: right">{{grid_width.value}}</label>
               <input type="range" class="form-control-range" #grid_width
-                (change)="gridSize({ width: grid_width.value, height: grid_height.value })" min="10" max="1000" step="2"
-                value="50" />
+                (change)="tool.value.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
+                max="1000" step="2" value="50" />
             </div>
             <div class="form-group">
               <label>Height</label>
               <label style="float: right">{{grid_height.value}}</label>
               <input type="range" class="form-control-range" #grid_height
-                (change)="gridSize({ width: grid_width.value, height: grid_height.value })" min="10" max="1000" step="2"
-                value="50" />
+                (change)="tool.value.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
+                max="1000" step="2" value="50" />
+            </div>
+          </div>
+          <div *ngSwitchCase="'walls'">
+            <h5>Walls</h5>
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="tool-walls-remove" #walls_remove
+                (change)="tool.value.actions.remove(walls_remove.checked)">
+              <label class="custom-control-label" for="tool-walls-remove">Remove on click</label>
+            </div>
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="tool-walls-adjust-to-grid" #walls_adjust_to_grid
+                (change)="tool.value.actions.adjustToGrid(walls_adjust_to_grid.checked)" checked="true">
+              <label class="custom-control-label" for="tool-walls-adjust-to-grid">Adjust to grid</label>
             </div>
           </div>
         </div>

@@ -59,4 +59,8 @@ export class World extends Schema {
     }
     this.wallFirstPoint = null;
   }
+
+  removeWall(id: string) {
+    delete this.walls[id];
+  }
 }

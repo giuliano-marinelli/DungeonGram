@@ -18,8 +18,8 @@ export class Wall extends Schema {
 
     this.synchronizeSchema(schema,
       {
-        from: { type: Point, datatype: Object, parameters: () => { return { parent: this } } },
-        to: { type: Point, datatype: Object, parameters: () => { return { parent: this } } }
+        from: { type: Point, datatype: Object },
+        to: { type: Point, datatype: Object }
       }
     );
 
@@ -27,7 +27,7 @@ export class Wall extends Schema {
   }
 
   doMesh() {
-    this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 1, depth: 0.2 }, this.parameters.scene);
+    this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 0.4, width: 1, depth: 0.2 }, this.parameters.scene);
     this.mesh.scaling.x = Vectors.distance(this.from, this.to);
     //set material of base tile mesh
     var material = new BABYLON.StandardMaterial("wall", this.parameters.scene);
@@ -36,7 +36,7 @@ export class Wall extends Schema {
 
     //positioning mesh
     var middlePoint = Vectors.middlePoint(this.from, this.to);
-    this.mesh.position.y = 1;
+    this.mesh.position.y = 0.2;
     this.mesh.position.x = middlePoint.x;
     this.mesh.position.z = middlePoint.y;
 
@@ -45,11 +45,18 @@ export class Wall extends Schema {
     this.mesh.rotate(BABYLON.Axis.Y, Vectors.angle(this.from, this.to), BABYLON.Space.WORLD);
 
     //set action on mouse in/out
-    // this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-    // this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
-    //   console.log('Tile : (', this.x, ',', this.y, ')', this._schema);
-    //   this.parameters.room.send('move', { x: this.x, y: this.y });
-    // }));
+    this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+      this.mesh.material.emissiveColor = BABYLON.Color3.Black();
+    }));
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+      if (this.parameters.controller.activeTool?.name == 'walls')
+        this.mesh.material.emissiveColor = BABYLON.Color3.White();
+    }));
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, () => {
+      if (this.parameters.controller.activeTool?.name == 'walls' && this.parameters.controller.activeTool?.options?.remove)
+        this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
+    }));
   }
 
   remove() {
