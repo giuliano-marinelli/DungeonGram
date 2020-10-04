@@ -90,33 +90,23 @@ export class TileMap extends Schema {
       if (e.sourceEvent.button == 0) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (this.parameters.controller.activeTool?.name == 'walls') {
-          var x = pick.pickedPoint.x;
-          var z = pick.pickedPoint.z;
-          if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
-            x = Math.round(pick.pickedPoint.x * 2) / 2;
-            x = x % 1 == 0 ? x + 0.5 : x;
-            z = Math.round(pick.pickedPoint.z * 2) / 2;
-            z = z % 1 == 0 ? z + 0.5 : z;
-          }
+          var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
+          if (this.parameters.controller.activeTool?.options?.adjustToGrid)
+            adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
           if (!temporalWallStartPoint && !temporalWallEndPoint) {
             temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
-            temporalWallStartPoint.position = new BABYLON.Vector3(x, 1.25, z);
+            temporalWallStartPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
             temporalWallStartPoint.isPickable = false;
             temporalWallEndPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
-            temporalWallEndPoint.position = new BABYLON.Vector3(x, 1.25, z);
+            temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
             temporalWallEndPoint.isPickable = false;
             dragWall = () => {
               temporalWallRay?.dispose();
               var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
               if (pick.pickedPoint) {
-                var x = pick.pickedPoint?.x;
-                var z = pick.pickedPoint?.z;
-                if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
-                  x = Math.round(pick.pickedPoint.x * 2) / 2;
-                  x = x % 1 == 0 ? x + 0.5 : x;
-                  z = Math.round(pick.pickedPoint.z * 2) / 2;
-                  z = z % 1 == 0 ? z + 0.5 : z;
-                }
+                var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
+                if (this.parameters.controller.activeTool?.options?.adjustToGrid)
+                  adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
                 var origin = new BABYLON.Vector3(temporalWallStartPoint.position.x, 0, temporalWallStartPoint.position.z);
                 var target = new BABYLON.Vector3(temporalWallEndPoint.position.x, 0, temporalWallEndPoint.position.z);
                 var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
@@ -126,12 +116,12 @@ export class TileMap extends Schema {
                   BABYLON.Vector3.Distance(origin, target)
                 );
                 temporalWallRay = BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
-                temporalWallEndPoint.position = new BABYLON.Vector3(x, 1.25, z);
+                temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
               }
             }
             this.parameters.canvas.addEventListener("pointermove", dragWall, false);
           }
-          this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'start' });
+          this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
         }
       }
     }));
@@ -144,14 +134,9 @@ export class TileMap extends Schema {
           if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction)
             this.parameters.controller.send('game', 'move', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z) });
           else if (this.parameters.controller.activeTool?.name == 'walls') {
-            var x = pick.pickedPoint?.x;
-            var z = pick.pickedPoint?.z;
-            if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
-              x = Math.round(pick.pickedPoint.x * 2) / 2;
-              x = x % 1 == 0 ? x + 0.5 : x;
-              z = Math.round(pick.pickedPoint.z * 2) / 2;
-              z = z % 1 == 0 ? z + 0.5 : z;
-            }
+            var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
+            if (this.parameters.controller.activeTool?.options?.adjustToGrid)
+              adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
             this.parameters.canvas.removeEventListener("pointermove", dragWall, false);
             temporalWallStartPoint?.dispose();
             temporalWallEndPoint?.dispose();
@@ -159,7 +144,7 @@ export class TileMap extends Schema {
             temporalWallStartPoint = null;
             temporalWallEndPoint = null;
             temporalWallRay = null;
-            this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'end' });
+            this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'end' });
           }
         }
       }

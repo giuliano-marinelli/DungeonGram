@@ -15,6 +15,7 @@
       <div *ngIf="tool.dropdown" class="dropdown-menu">
         <div [ngSwitch]="tool.name">
           <h5>{{tool.label}}</h5>
+
           <div *ngSwitchCase="'grid'">
             <div class="form-group">
               <label>Width</label>
@@ -36,6 +37,7 @@
               <label class="custom-control-label" for="tool-grid-show">Show</label>
             </div>
           </div>
+
           <div *ngSwitchCase="'walls'">
             <div class="form-group">
               <label>Visibility</label>
@@ -47,14 +49,15 @@
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-remove" #walls_remove
                 (change)="tool.actions.remove(walls_remove.checked)" checked="true">
-              <label class="custom-control-label" for="tool-walls-remove">Remove on click</label>
+              <label class="custom-control-label" for="tool-walls-remove">Remove on Click</label>
             </div>
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-adjust-to-grid" #walls_adjust_to_grid
                 (change)="tool.actions.adjustToGrid(walls_adjust_to_grid.checked)" checked="true">
-              <label class="custom-control-label" for="tool-walls-adjust-to-grid">Adjust to grid</label>
+              <label class="custom-control-label" for="tool-walls-adjust-to-grid">Adjust to Grid</label>
             </div>
           </div>
+
           <div *ngSwitchCase="'fogOfWar'">
             <div class="form-group">
               <label>Visibility</label>
@@ -64,6 +67,15 @@
                 max="1" step="0.1" value="0" />
             </div>
           </div>
+
+          <div *ngSwitchCase="'rule'">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="tool-rule-adjust-to-corner" #rule_adjust_to_corner
+                (change)="tool.actions.adjustToCorner(rule_adjust_to_corner.checked)" checked="true">
+              <label class="custom-control-label" for="tool-rule-adjust-to-corner">Adjust to Corner</label>
+            </div>
+          </div>
+
         </div>
       </div>
 

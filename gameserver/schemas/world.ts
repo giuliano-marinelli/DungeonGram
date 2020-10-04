@@ -84,4 +84,20 @@ export class World extends Schema {
   setTilemapShowGrid(id: string, value: number) {
     this.users[id].tilemapShowGrid = value;
   }
+
+  startRule(id: string, point: Point) {
+    this.users[id].rule.start(point);
+  }
+
+  moveRule(id: string, point: Point) {
+    this.users[id].rule.move(point);
+  }
+
+  addRule(id: string, point: Point) {
+    this.users[id].rule.add(point);
+  }
+
+  endRule(id: string) {
+    this.users[id].rule.end();
+  }
 }

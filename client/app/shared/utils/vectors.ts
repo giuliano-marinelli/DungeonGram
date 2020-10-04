@@ -104,4 +104,12 @@ export class Vectors {
     return points;
   }
 
+  static getCornerGridPoint(point) {
+    var x = Math.round(point.x * 2) / 2;
+    x = x % 1 == 0 ? x + 0.5 : x;
+    var z = Math.round(point.z * 2) / 2;
+    z = z % 1 == 0 ? z + 0.5 : z;
+
+    return new BABYLON.Vector3(x, 0, z);
+  }
 }

@@ -1,4 +1,5 @@
 import { Schema } from './schema';
+import { Rule } from './rule';
 
 export class User extends Schema {
   //schema
@@ -7,13 +8,26 @@ export class User extends Schema {
   wallsPickable?: boolean;
   fogOfWarVisibility?: number;
   tilemapShowGrid?: number;
+  rule?: Rule;
 
   constructor(schema, parameters) {
     super(parameters);
 
     this.id = parameters.id;
 
-    this.synchronizeSchema(schema);
+    this.synchronizeSchema(schema,{
+        rule: {
+          type: Rule, datatype: Object, parameters: () => {
+            return {
+              userId: this.id,
+              canvas: parameters.canvas,
+              scene: parameters.scene,
+              room: parameters.room,
+              controller: parameters.controller
+            }
+          }
+        }
+    });
   }
 
   update(changes?) {

@@ -32,7 +32,10 @@ export class World extends Schema {
           type: User, datatype: Array, parameters: (key) => {
             return {
               world: this,
+              canvas: parameters.canvas,
+              scene: parameters.scene,
               room: parameters.room,
+              controller: parameters.controller,
               id: key
             }
           }

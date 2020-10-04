@@ -29,7 +29,7 @@ export class GameRoom extends Room<State> {
       if (data.action == 'resize')
         this.state.world?.tilemap?.changeSize(data.width, data.height);
       else if (data.action == 'show')
-      this.state.world.setTilemapShowGrid(client.sessionId, data.value);
+        this.state.world.setTilemapShowGrid(client.sessionId, data.value);
     });
 
     this.onMessage("wall", (client, data) => {
@@ -50,6 +50,18 @@ export class GameRoom extends Room<State> {
       console.log("GameRoom: received 'fogOfWar' action from", client.sessionId, ":", data);
       if (data.action == 'visibility')
         this.state.world.setFogOfWarVisibility(client.sessionId, data.value);
+    });
+
+    this.onMessage("rule", (client, data) => {
+      console.log("GameRoom: received 'rule' action from", client.sessionId, ":", data);
+      if (data.action == 'start')
+        this.state.world.startRule(client.sessionId, new Point(data.x, data.y));
+      else if (data.action == 'move')
+        this.state.world.moveRule(client.sessionId, new Point(data.x, data.y));
+      else if (data.action == 'add')
+        this.state.world.addRule(client.sessionId, new Point(data.x, data.y));
+      else if (data.action == 'end')
+        this.state.world.endRule(client.sessionId);
     });
 
     this.setSimulationInterval((deltaTime) => this.state.world.update(deltaTime));

@@ -136,7 +136,7 @@ export class Player extends Schema {
           console.log('Player', this.id, ': (', this.x, ',', this.y, ')', this._schema);
         }));
         this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-          if (e.sourceEvent.button == 0) {
+          if (e.sourceEvent.button == 0 && this.parameters.controller.activeTool?.name != 'rule') {
             this.parameters.controller.toggleAction('dragPlayer', true);
             this.parameters.controller.send('game', 'dragPlayer', { id: this.id, action: 'drag' });
             var drag = () => {

@@ -35,9 +35,13 @@ export class ToolsComponent implements OnInit {
         }
       },
       rule: {
-        name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png',
+        name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png', dropdown: true,
+        options: {
+          adjustToCorner: true
+        },
         actions: {
-          toggle: () => { this.toggleActiveTool(this.tools.rule, !this.tools.rule.active) }
+          toggle: () => { this.toggleActiveTool(this.tools.rule, !this.tools.rule.active) },
+          adjustToCorner: (value) => { this.tools.rule.options.adjustToCorner = value },
         }
       },
       grid: {
