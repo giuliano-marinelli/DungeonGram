@@ -79,7 +79,7 @@ export class Player extends Schema {
       }
     });
 
-    this.parameters.world.updatePlayersVisibility();
+    this.parameters.world.updatePlayersVisibility(this.id);
     this.animator?.rotate(Vectors.directionToRotate(this.direction));
   }
 

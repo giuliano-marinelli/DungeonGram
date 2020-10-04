@@ -168,40 +168,48 @@ export class World extends Schema {
     });
   }
 
-  updatePlayersVisibility() {
+  updatePlayersVisibility(player?) {
     if (this.players[this.parameters.room.sessionId]?.mesh) {
       setTimeout(() => {
         this.players[this.parameters.room.sessionId]?.visionRays.forEach(visionRay => {
           visionRay?.dispose();
         });
         this.players[this.parameters.room.sessionId].collider.isCollible = false;
-        for (let player in this.players) {
-          if (this.players[player].mesh && player != this.parameters.room.sessionId) {
-            this.players[player].collider.isPickable = true;
-            var origin = new BABYLON.Vector3(this.players[this.parameters.room.sessionId].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[this.parameters.room.sessionId].mesh.position.z);
-            var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[player].mesh.position.z).subtract(origin));
-            var ray = new BABYLON.Ray(
-              origin,
-              target,
-              this.players[this.parameters.room.sessionId].visionRange - 1
-            );
-            // this.players[this.parameters.room.sessionId].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
-            var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
-              return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
-            })?.pickedMesh;
-            if (pickedMesh && this.players[player].id == pickedMesh.name)
-              this.players[player].mesh.visibility = 1;
-            else {
-              this.players[player].mesh.visibility = 0;
-              this.players[player].collider.isPickable = false;
-            }
+        if (!player || player == this.parameters.room.sessionId) {
+          for (let player in this.players) {
+            this._updatePlayerVisibility(player)
           }
+        } else {
+          this._updatePlayerVisibility(player)
         }
         this.players[this.parameters.room.sessionId].collider.isCollible = true;
         // this.players[this.parameters.room.sessionId]?.visiblePlayers?.forEach(playerMesh => {
         //   if (playerMesh) playerMesh.visibility = 1;
         // });
       }, this.players[this.parameters.room.sessionId].movementCooldown);
+    }
+  }
+
+  _updatePlayerVisibility(player) {
+    if (this.players[player].mesh && player != this.parameters.room.sessionId) {
+      this.players[player].collider.isPickable = true;
+      var origin = new BABYLON.Vector3(this.players[this.parameters.room.sessionId].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[this.parameters.room.sessionId].mesh.position.z);
+      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[player].mesh.position.z).subtract(origin));
+      var ray = new BABYLON.Ray(
+        origin,
+        target,
+        this.players[this.parameters.room.sessionId].visionRange - 1
+      );
+      // this.players[this.parameters.room.sessionId].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+      var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
+        return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
+      })?.pickedMesh;
+      if (pickedMesh && this.players[player].id == pickedMesh.name)
+        this.players[player].mesh.visibility = 1;
+      else {
+        this.players[player].mesh.visibility = 0;
+        this.players[player].collider.isPickable = false;
+      }
     }
   }
 }
