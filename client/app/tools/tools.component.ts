@@ -12,6 +12,7 @@ export class ToolsComponent implements OnInit {
   @Input() controller: Controller;
 
   tools: any;
+  orderedTools: any[];
 
   constructor() { }
 
@@ -20,13 +21,17 @@ export class ToolsComponent implements OnInit {
       walls: {
         name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: true,
         options: {
-          remove: false,
+          remove: true,
           adjustToGrid: true
         },
         actions: {
-          toggle: () => { this.toggleActiveTool(this.tools.walls, !this.tools.walls.active) },
+          toggle: () => {
+            this.toggleActiveTool(this.tools.walls, !this.tools.walls.active);
+            this.controller.send('game', 'wall', { value: this.tools.walls.active, action: 'pickable' });
+          },
           remove: (value) => { this.tools.walls.options.remove = value },
-          adjustToGrid: (value) => { this.tools.walls.options.adjustToGrid = value }
+          adjustToGrid: (value) => { this.tools.walls.options.adjustToGrid = value },
+          visibility: (visibility) => { this.controller.send('game', 'wall', { value: parseFloat(visibility.value), action: 'visibility' }) },
         }
       },
       rule: {
@@ -38,10 +43,19 @@ export class ToolsComponent implements OnInit {
       grid: {
         name: 'grid', label: 'Grid', image: 'assets/images/tools/grid.png', dropdown: true,
         actions: {
-          gridSize: (size) => { this.controller.send('game', 'tilemap', { width: parseInt(size.width), height: parseInt(size.height) }) }
+          gridSize: (size) => { this.controller.send('game', 'tilemap', { width: parseInt(size.width), height: parseInt(size.height), action: 'resize' }) },
+          show: (show) => { this.controller.send('game', 'tilemap', { value: show, action: 'show' }) }
+        }
+      },
+      fogOfWar: {
+        name: 'fogOfWar', label: 'Fog of War', image: 'assets/images/tools/fogOfWar.png', dropdown: true,
+        actions: {
+          visibility: (visibility) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibility.value), action: 'visibility' }) },
         }
       }
     };
+
+    this.orderedTools = [this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule]
 
     setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
   }

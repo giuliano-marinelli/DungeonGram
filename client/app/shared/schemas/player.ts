@@ -13,11 +13,16 @@ export class Player extends Schema {
   direction?: Point;
   movementPath?: Path;
   movementCooldown?: number;
-  beignDragged: boolean;
+  beignDragged?: boolean;
+  visionRange?: number;
   //game objects
   mesh?: any;
+  collider?: any;
   skeleton?: any;
   animator?: any;
+  visionLight?: any;
+  visionRays?: any = [];
+  visiblePlayers?: any = [];
 
   constructor(schema, parameters) {
     super(parameters);
@@ -59,15 +64,22 @@ export class Player extends Schema {
           break;
         case 'beignDragged':
           if (this.beignDragged) {
+            if (this.collider) this.collider.isDragged = true;
             BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
               10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-          } else
+          } else {
+            if (this.collider) this.collider.isDragged = false;
             BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
               10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+          }
+          break;
+        case 'visionRange':
+          if (this.visionLight) this.visionLight.range = this.visionRange;
           break;
       }
     });
 
+    this.parameters.world.updatePlayersVisibility();
     this.animator?.rotate(Vectors.directionToRotate(this.direction));
   }
 
@@ -80,6 +92,23 @@ export class Player extends Schema {
     if (!this.mesh) {
       BABYLON.SceneLoader.ImportMesh('', "assets/meshes/", "dummy.babylon", this.parameters.scene, (meshes, particleSystems, skeletons) => {
         this.mesh = meshes[0];
+        this.mesh.name = this.id;
+
+        //positioning mesh
+        this.mesh.position.y = -0.05;
+        this.mesh.position.x = this.x;
+        this.mesh.position.z = this.y;
+        this.mesh.isPickable = false;
+
+        //set collider mesh
+        this.collider = BABYLON.MeshBuilder.CreateCylinder('', { height: 1.5, diameter: 0.5 }, this.parameters.scene);
+        this.collider.parent = this.mesh;
+        this.collider.name = this.id;
+        this.collider.position.y = 1;
+        this.collider.visibility = 0;
+        this.collider.isCollible = true;
+        this.collider.isPlayer = true;
+
         this.skeleton = skeletons[0];
 
         var idleRange = this.skeleton.getAnimationRange("YBot_Idle");
@@ -100,18 +129,18 @@ export class Player extends Schema {
         );
 
         //set action on mouse in/out/click
-        this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
+        this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, this.mesh.material, "emissiveColor", this.mesh.material.emissiveColor));
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
-        this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
+        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
           console.log('Player', this.id, ': (', this.x, ',', this.y, ')', this._schema);
         }));
-        this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
           if (e.sourceEvent.button == 0) {
             this.parameters.controller.toggleAction('dragPlayer', true);
             this.parameters.controller.send('game', 'dragPlayer', { id: this.id, action: 'drag' });
             var drag = () => {
-              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY);
+              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
               if (pick?.pickedPoint) {
                 this.parameters.controller.send('game', 'dragPlayer', { id: this.id, position: { x: pick.pickedPoint.x, y: pick.pickedPoint.z }, action: 'drag' });
               }
@@ -129,16 +158,49 @@ export class Player extends Schema {
           }
         }));
 
-        //positioning mesh
-        this.mesh.position.y = -0.05;
-        this.mesh.position.x = this.x;
-        this.mesh.position.z = this.y;
-
         //cast shadows
-        this.parameters.shadowGenerator.addShadowCaster(this.mesh);
+        // this.parameters.shadowGenerators.baseLight.addShadowCaster(this.mesh);
+
+        //add vision light
+        if (this.id == this.parameters.room.sessionId) {
+          this.visionLight = new BABYLON.PointLight("playerLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
+          this.visionLight.range = this.visionRange;
+          this.visionLight.parent = this.mesh;
+          this.visionLight.specular = new BABYLON.Color3(0, 0, 0);
+          this.visionLight.shadowMinZ = 0.1;
+          this.visionLight.intensity = 100;
+          this.parameters.lights.playerLight = this.visionLight;
+
+          //add shadow generator for the vision light
+          new BABYLON.ShadowGenerator(1024, this.visionLight);
+          this.visionLight._shadowGenerator.useBlurExponentialShadowMap = true;
+          this.visionLight._shadowGenerator.transparencyShadow = true;
+        }
+
+        this.parameters.world.updateLights();
+        this.parameters.world.updateShadows();
 
         this.update();
       });
     }
+  }
+
+  doVisionRays() {
+    if (this.id == this.parameters.room.sessionId) {
+      this.visionRays.forEach(visionRay => {
+        visionRay.dispose();
+      });
+      this.visiblePlayers = [];
+      var raysPoints = Vectors.getRadiusPoints({ x: 0, y: 0 }, 64);
+      raysPoints.forEach(rayPoint => {
+        var ray = new BABYLON.Ray(new BABYLON.Vector3(this.x, 1, this.y), new BABYLON.Vector3(rayPoint.x, 0, rayPoint.y), this.visionRange);
+        // this.visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+        var pickedMesh = this.parameters.scene.pickWithRay(ray)?.pickedMesh;
+        if (pickedMesh?.name.indexOf('player') != -1)
+          this.visiblePlayers.push(pickedMesh);
+      });
+    }
+
+    this.parameters.world.updatePlayersVisibility();
   }
 }

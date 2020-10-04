@@ -1,3 +1,4 @@
+import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 export class Vectors {
   static distance(pointA, pointB) {
     var a = pointA.x - pointB.x;
@@ -67,4 +68,40 @@ export class Vectors {
       }
     }
   }
+
+  static rotateByArc(Center, A, arc) {
+    //calculate radius
+    var radius = BABYLON.Vector2.Distance(Center, A);
+
+    //calculate angle from arc
+    var angle = arc / radius;
+
+    var B = this.rotateByRadians(Center, A, angle);
+
+    return B;
+  }
+
+  static rotateByRadians(Center, A, angle) {
+    //Move calculation to 0,0
+    var v = A.add(Center.negate());
+
+    //rotate x and y
+    var x = v.x * Math.cos(angle) + v.y * Math.sin(angle);
+    var y = v.y * Math.cos(angle) - v.x * Math.sin(angle);
+
+    //move back to center
+    var B = new BABYLON.Vector2(x, y).add(Center);
+
+    return B;
+  }
+
+  static getRadiusPoints(centerPoint, subdivisions) {
+    var points = [];
+    for (var i = 0; i <= Math.PI * 2; i += Math.PI / subdivisions) {
+      var point = this.rotateByArc(new BABYLON.Vector2(centerPoint.x, centerPoint.y), new BABYLON.Vector2(1, 0), i)
+      points.push(point);
+    }
+    return points;
+  }
+
 }

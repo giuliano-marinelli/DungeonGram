@@ -1,19 +1,23 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
+import { User } from './user';
 import { Player } from './player';
 import { Wall } from './wall';
 import { TileMap } from './tilemap';
-import { Point } from './point';
+import {
+  GridMaterial,
+  ShadowOnlyMaterial
+} from '@babylonjs/materials';
 
 export class World extends Schema {
   //schema
+  users?: User[];
   players?: Player[];
   walls?: Wall[];
   tilemap?: TileMap;
   //game objects
   camera?: any;
-  lights?: any[] = [];
-  shadowGenerator: any;
+  lights?: any = {};
 
   constructor(schema, parameters) {
     super(parameters);
@@ -24,13 +28,23 @@ export class World extends Schema {
 
     this.synchronizeSchema(schema,
       {
+        users: {
+          type: User, datatype: Array, parameters: (key) => {
+            return {
+              world: this,
+              room: parameters.room,
+              id: key
+            }
+          }
+        },
         players: {
           type: Player, datatype: Array, parameters: (key) => {
             return {
+              world: this,
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
-              shadowGenerator: this.shadowGenerator,
+              lights: this.lights,
               controller: parameters.controller,
               id: key
             }
@@ -39,16 +53,27 @@ export class World extends Schema {
         walls: {
           type: Wall, datatype: Array, parameters: (key) => {
             return {
+              world: this,
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
-              shadowGenerator: this.shadowGenerator,
+              lights: this.lights,
               controller: parameters.controller,
               id: key
             }
           }
         },
-        tilemap: { type: TileMap, datatype: Object, parameters: () => { return { scene: parameters.scene, room: parameters.room, controller: parameters.controller } } }
+        tilemap: {
+          type: TileMap, datatype: Object, parameters: () => {
+            return {
+              world: this,
+              canvas: parameters.canvas,
+              scene: parameters.scene,
+              room: parameters.room,
+              controller: parameters.controller
+            }
+          }
+        }
       }
     );
   }
@@ -66,21 +91,113 @@ export class World extends Schema {
 
   initGlobalLights() {
     //init lights
-    // this.light = new BABYLON.PointLight("mainLight", new BABYLON.Vector3(0, 1, 0), scene);
-    this.lights.push(new BABYLON.DirectionalLight("baseLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene));
-    this.lights[0].position = new BABYLON.Vector3(50, 100, 50);
-    this.lights[0].intensity = 1;
-    // this.lights.push(new BABYLON.HemisphericLight("ambientLight", new BABYLON.Vector3(0, 1, 0), this.parameters.scene));
+    this.lights.baseLight = new BABYLON.DirectionalLight("baseLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
+    this.lights.baseLight.position = new BABYLON.Vector3(50, 100, 50);
+    this.lights.baseLight.intensity = 1;
 
-    //init shadow generator for that lights
-    this.shadowGenerator = new BABYLON.ShadowGenerator(4096, this.lights[0]);
-    this.shadowGenerator.useExponentialShadowMap = true;
-    // this.shadowGenerator.usePoissonSampling = true;
+    this.lights.fogLight = new BABYLON.DirectionalLight("fogLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
+    this.lights.fogLight.position = new BABYLON.Vector3(50, 100, 50);
+    this.lights.fogLight.intensity = 0;
+
+    //init shadow generator for base light
+    new BABYLON.ShadowGenerator(4096, this.lights.baseLight);
+    this.lights.baseLight._shadowGenerator.useBlurExponentialShadowMap = true;
 
     //init skybox
     // var box = BABYLON.Mesh.CreateBox('SkyBox', 1000, this.parameters.scene, false, BABYLON.Mesh.BACKSIDE);
     // box.material = new BABYLON.SkyMaterial('sky', this.parameters.scene);
     // box.material.inclination = -0.35;
     this.parameters.scene.clearColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+  }
+
+  updateLights() {
+    setTimeout(() => {
+      if (this.lights.playerLight && this.tilemap?.terrain && !this.lights.playerLight.setted) {
+        this.lights.playerLight.includedOnlyMeshes.push(this.tilemap.terrain);
+        this.lights.playerLight.setted = true;
+      }
+
+      if (this.lights.baseLight && this.tilemap?.terrain && !this.lights.baseLight.setted) {
+        this.lights.baseLight.excludedMeshes.push(this.tilemap.terrain);
+        this.lights.baseLight.setted = true;
+
+        this.lights.fogLight.includedOnlyMeshes.push(this.tilemap.terrain);
+      }
+    });
+  }
+
+  updateShadows() {
+    setTimeout(() => {
+      for (let wall in this.walls) {
+        this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
+      }
+      for (let player in this.players) {
+        this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
+      }
+    });
+  }
+
+  updateWalls() {
+    setTimeout(() => {
+      var user = this.users[this.parameters.room.sessionId];
+      for (let wall in this.walls) {
+        this.walls[wall].mesh.isPickable = user.wallsPickable;
+        this.walls[wall].mesh.visibility = user.wallsVisibility;
+      }
+    });
+  }
+
+  updateFogOfWar() {
+    setTimeout(() => {
+      var user = this.users[this.parameters.room.sessionId];
+      this.lights.fogLight.intensity = user.fogOfWarVisibility;
+    });
+  }
+
+  updateTilemap() {
+    setTimeout(() => {
+      var user = this.users[this.parameters.room.sessionId];
+      if (user.tilemapShowGrid)
+        this.tilemap.ground.material = this.tilemap.gridMaterial;
+      else
+        this.tilemap.ground.material = new ShadowOnlyMaterial('shadowOnly', this.parameters.scene);
+    });
+  }
+
+  updatePlayersVisibility() {
+    if (this.players[this.parameters.room.sessionId]?.mesh) {
+      setTimeout(() => {
+        this.players[this.parameters.room.sessionId]?.visionRays.forEach(visionRay => {
+          visionRay?.dispose();
+        });
+        this.players[this.parameters.room.sessionId].collider.isCollible = false;
+        for (let player in this.players) {
+          if (this.players[player].mesh && player != this.parameters.room.sessionId) {
+            this.players[player].collider.isPickable = true;
+            var origin = new BABYLON.Vector3(this.players[this.parameters.room.sessionId].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[this.parameters.room.sessionId].mesh.position.z);
+            var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[player].mesh.position.z).subtract(origin));
+            var ray = new BABYLON.Ray(
+              origin,
+              target,
+              this.players[this.parameters.room.sessionId].visionRange - 1
+            );
+            // this.players[this.parameters.room.sessionId].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+            var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
+              return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
+            })?.pickedMesh;
+            if (pickedMesh && this.players[player].id == pickedMesh.name)
+              this.players[player].mesh.visibility = 1;
+            else {
+              this.players[player].mesh.visibility = 0;
+              this.players[player].collider.isPickable = false;
+            }
+          }
+        }
+        this.players[this.parameters.room.sessionId].collider.isCollible = true;
+        // this.players[this.parameters.room.sessionId]?.visiblePlayers?.forEach(playerMesh => {
+        //   if (playerMesh) playerMesh.visibility = 1;
+        // });
+      }, this.players[this.parameters.room.sessionId].movementCooldown);
+    }
   }
 }

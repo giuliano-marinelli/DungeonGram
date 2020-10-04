@@ -17,19 +17,10 @@ export class Player extends Schema {
   movementCooldown = 500;
   @type("boolean")
   beignDragged = false;
+  @type("number")
+  visionRange = 12;
   //internal attributes
   movementAcum = 0;
-
-  move(movement: any) {
-    if (movement.x != this.x || movement.y != this.y) {
-      this.movementPath.set(new Point(this.x, this.y), new Point(movement.x, movement.y));
-    }
-    // console.log(JSON.stringify(this.movementPath.from), JSON.stringify(this.movementPath.to));
-    // console.table(this.movementPath.points);
-    // this.movementPath.points.forEach((point) => {
-    //   console.log(JSON.stringify(point));
-    // });
-  }
 
   update(deltaTime: number) {
     if (this.movementPath.points.length) {
@@ -50,6 +41,17 @@ export class Player extends Schema {
         this.movementAcum = (this.movementAcum - deltaTime <= 0) ? 0 : this.movementAcum - deltaTime;
       }
     }
+  }
+
+  move(movement: any) {
+    if (movement.x != this.x || movement.y != this.y) {
+      this.movementPath.set(new Point(this.x, this.y), new Point(movement.x, movement.y));
+    }
+    // console.log(JSON.stringify(this.movementPath.from), JSON.stringify(this.movementPath.to));
+    // console.table(this.movementPath.points);
+    // this.movementPath.points.forEach((point) => {
+    //   console.log(JSON.stringify(point));
+    // });
   }
 
   drag(position?) {

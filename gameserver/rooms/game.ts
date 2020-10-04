@@ -26,7 +26,10 @@ export class GameRoom extends Room<State> {
 
     this.onMessage("tilemap", (client, data) => {
       console.log("GameRoom: received 'tilemap' action from", client.sessionId, ":", data);
-      this.state.world?.tilemap?.changeSize(data.width, data.height);
+      if (data.action == 'resize')
+        this.state.world?.tilemap?.changeSize(data.width, data.height);
+      else if (data.action == 'show')
+      this.state.world.setTilemapShowGrid(client.sessionId, data.value);
     });
 
     this.onMessage("wall", (client, data) => {
@@ -37,6 +40,16 @@ export class GameRoom extends Room<State> {
         this.state.world.createWall(new Point(data.x, data.y));
       else if (data.action == 'remove')
         this.state.world.removeWall(data.id);
+      else if (data.action == 'visibility')
+        this.state.world.setWallVisibility(client.sessionId, data.value);
+      else if (data.action == 'pickable')
+        this.state.world.setWallPickable(client.sessionId, data.value);
+    });
+
+    this.onMessage("fogOfWar", (client, data) => {
+      console.log("GameRoom: received 'fogOfWar' action from", client.sessionId, ":", data);
+      if (data.action == 'visibility')
+        this.state.world.setFogOfWarVisibility(client.sessionId, data.value);
     });
 
     this.setSimulationInterval((deltaTime) => this.state.world.update(deltaTime));
@@ -48,10 +61,12 @@ export class GameRoom extends Room<State> {
   }
 
   onJoin(client: Client) {
+    this.state.world?.createUser(client.sessionId);
     this.state.world?.createPlayer(client.sessionId);
   }
 
   onLeave(client: Client) {
+    this.state.world?.removeUser(client.sessionId);
     this.state.world?.removePlayer(client.sessionId);
   }
 

@@ -1,4 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
+import { User } from './user';
 import { Player } from '../schemas/player';
 import { TileMap } from '../schemas/tilemap';
 import { Point } from './point';
@@ -6,31 +7,38 @@ import { Wall } from './wall';
 import { Utils } from '../rooms/game';
 
 export class World extends Schema {
+  @type({ map: User })
+  users = new MapSchema<User>();
   @type({ map: Player })
   players = new MapSchema<Player>();
-
   @type({ map: Wall })
   walls = new MapSchema<Wall>();
-
   @type(TileMap)
   tilemap: TileMap = new TileMap(50, 50);
 
   wallFirstPoint: Point;
+  // wallVisibility: number = 0.5;
+  // wallPickable: boolean = false;
+
+  createUser(id: string) {
+    console.log("Create User", id);
+    this.users[id] = new User();
+  }
+
+  removeUser(id: string) {
+    delete this.users[id];
+  }
 
   createPlayer(id: string) {
     console.log("Create Player", id);
-    // this.players.set(id, new Player());
-    // this.players.get(id).id = id;
     this.players[id] = new Player();
   }
 
   removePlayer(id: string) {
-    // this.players.delete(id);
     delete this.players[id];
   }
 
   movePlayer(id: string, movement: any) {
-    // this.players.get(id).move(movement);
     this.players[id].move(movement);
   }
 
@@ -44,9 +52,6 @@ export class World extends Schema {
   }
 
   update(deltaTime: number) {
-    // this.players.forEach((player) => {
-    //   player.update(deltaTime);
-    // });
     for (var id in this.players) {
       this.players[id].update(deltaTime);
     }
@@ -60,7 +65,23 @@ export class World extends Schema {
     this.wallFirstPoint = null;
   }
 
-  removeWall(id: string) {
-    delete this.walls[id];
+  removeWall(wallId: string) {
+    delete this.walls[wallId];
+  }
+
+  setWallVisibility(id: string, value: number) {
+    this.users[id].wallsVisibility = value;
+  }
+
+  setWallPickable(id: string, value: boolean) {
+    this.users[id].wallsPickable = value;
+  }
+
+  setFogOfWarVisibility(id: string, value: number) {
+    this.users[id].fogOfWarVisibility = value;
+  }
+
+  setTilemapShowGrid(id: string, value: number) {
+    this.users[id].tilemapShowGrid = value;
   }
 }

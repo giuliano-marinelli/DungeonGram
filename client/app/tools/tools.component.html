@@ -1,47 +1,67 @@
 <div id="tools">
 
-  <div class="tool-btn-container" *ngFor="let tool of tools | keyvalue" id="tool-btn-container-{{tool.value.name}}">
+  <div class="tool-btn-container" *ngFor="let tool of orderedTools" id="tool-btn-container-{{tool.name}}">
 
-    <div class="{{tool.value.dropdown ? 'dropright' : ''}}">
+    <div class="{{tool.dropdown ? 'dropright' : ''}}">
 
       <button
-        class="btn btn-dark tool-btn {{tool.value.active ? 'active' : ''}} {{tool.value.dropdown ? 'dropdown-toggle' : ''}}"
-        (click)="callTool($event, tool.key)" attr.data-toggle="{{tool.value.dropdown ? 'dropdown' : ''}}"
-        attr.data-toggle-tooltip="{{tool.value.dropdown ? '' : 'tooltip'}}"
-        title="{{tool.value.dropdown ? '' : tool.value.label}}" data-placement="right">
-        <img src="{{tool.value.image}}">
+        class="btn btn-dark tool-btn {{tool.active ? 'active' : ''}} {{tool.dropdown ? 'dropdown-toggle' : ''}}"
+        (click)="callTool($event, tool.name)" attr.data-toggle="{{tool.dropdown ? 'dropdown' : ''}}"
+        attr.data-toggle-tooltip="{{tool.dropdown ? '' : 'tooltip'}}"
+        title="{{tool.dropdown ? '' : tool.label}}" data-placement="right">
+        <img src="{{tool.image}}">
       </button>
 
-      <div *ngIf="tool.value.dropdown" class="dropdown-menu">
-        <div [ngSwitch]="tool.value.name">
+      <div *ngIf="tool.dropdown" class="dropdown-menu">
+        <div [ngSwitch]="tool.name">
+          <h5>{{tool.label}}</h5>
           <div *ngSwitchCase="'grid'">
-            <h5>Grid</h5>
             <div class="form-group">
               <label>Width</label>
               <label style="float: right">{{grid_width.value}}</label>
               <input type="range" class="form-control-range" #grid_width
-                (change)="tool.value.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
+                (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
                 max="1000" step="2" value="50" />
             </div>
             <div class="form-group">
               <label>Height</label>
               <label style="float: right">{{grid_height.value}}</label>
               <input type="range" class="form-control-range" #grid_height
-                (change)="tool.value.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
+                (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
                 max="1000" step="2" value="50" />
+            </div>
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="tool-grid-show" #grid_show
+                (change)="tool.actions.show(grid_show.checked)" checked="true">
+              <label class="custom-control-label" for="tool-grid-show">Show</label>
             </div>
           </div>
           <div *ngSwitchCase="'walls'">
-            <h5>Walls</h5>
+            <div class="form-group">
+              <label>Visibility</label>
+              <label style="float: right">{{walls_visibility.value}}</label>
+              <input type="range" class="form-control-range" #walls_visibility
+                (change)="tool.actions.visibility({ value: walls_visibility.value })" min="0"
+                max="1" step="0.1" value="0.5" />
+            </div>
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-remove" #walls_remove
-                (change)="tool.value.actions.remove(walls_remove.checked)">
+                (change)="tool.actions.remove(walls_remove.checked)" checked="true">
               <label class="custom-control-label" for="tool-walls-remove">Remove on click</label>
             </div>
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-adjust-to-grid" #walls_adjust_to_grid
-                (change)="tool.value.actions.adjustToGrid(walls_adjust_to_grid.checked)" checked="true">
+                (change)="tool.actions.adjustToGrid(walls_adjust_to_grid.checked)" checked="true">
               <label class="custom-control-label" for="tool-walls-adjust-to-grid">Adjust to grid</label>
+            </div>
+          </div>
+          <div *ngSwitchCase="'fogOfWar'">
+            <div class="form-group">
+              <label>Visibility</label>
+              <label style="float: right">{{fogOfWar_visibility.value}}</label>
+              <input type="range" class="form-control-range" #fogOfWar_visibility
+                (change)="tool.actions.visibility({ value: fogOfWar_visibility.value })" min="0"
+                max="1" step="0.1" value="0" />
             </div>
           </div>
         </div>

@@ -2,7 +2,8 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
 import { Tile } from './tile';
 import {
-  GridMaterial
+  GridMaterial,
+  ShadowOnlyMaterial
 } from '@babylonjs/materials';
 
 export class TileMap extends Schema {
@@ -14,6 +15,8 @@ export class TileMap extends Schema {
   ground?: any;
   baseTileMesh?: any;
   terrain?: any;
+  terrainShadows?: any;
+  gridMaterial?: any;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -53,13 +56,13 @@ export class TileMap extends Schema {
     // this.ground.scaling.z = this.height;
 
     //grid material
-    var gridMaterial = new GridMaterial("gridMaterial", this.parameters.scene);
-    gridMaterial.mainColor = BABYLON.Color3.Black();
-    gridMaterial.lineColor = BABYLON.Color3.White();
-    gridMaterial.opacity = 0.5;
-    gridMaterial.gridRatio = 1;
-    gridMaterial.minorUnitVisibility = 1;
-    gridMaterial.majorUnitFrequency = 0;
+    this.gridMaterial = new GridMaterial("gridMaterial", this.parameters.scene);
+    this.gridMaterial.mainColor = BABYLON.Color3.Black();
+    this.gridMaterial.lineColor = BABYLON.Color3.White();
+    this.gridMaterial.opacity = 0.5;
+    this.gridMaterial.gridRatio = 1;
+    this.gridMaterial.minorUnitVisibility = 1;
+    this.gridMaterial.majorUnitFrequency = 0;
 
     //standard material
     var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
@@ -67,7 +70,7 @@ export class TileMap extends Schema {
     material.alpha = 0.5;
 
     //set material of ground
-    this.ground.material = gridMaterial;
+    this.ground.material = this.gridMaterial;
 
     //click action on ground for move player
     this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
@@ -115,12 +118,20 @@ export class TileMap extends Schema {
       this.terrain.scaling.x = this.width;
       this.terrain.scaling.z = this.height;
       this.terrain.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
-    } else {
 
+      this.terrainShadows.scaling.x = this.width;
+      this.terrainShadows.scaling.z = this.height;
+      this.terrainShadows.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.025, this.height / 2 - 0.5);
+    } else {
       this.terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 1, height: 1 }, this.parameters.scene);
       this.terrain.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
       this.terrain.scaling.x = this.width;
       this.terrain.scaling.z = this.height;
+
+      this.terrainShadows = BABYLON.MeshBuilder.CreateGround('terrainShadows', { width: 1, height: 1 }, this.parameters.scene);
+      this.terrainShadows.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.025, this.height / 2 - 0.5);
+      this.terrainShadows.scaling.x = this.width;
+      this.terrainShadows.scaling.z = this.height;
 
       //standard material
       var material = new BABYLON.StandardMaterial("terrain", this.parameters.scene);
@@ -135,8 +146,15 @@ export class TileMap extends Schema {
       //set material of ground
       this.terrain.material = material;
 
+      this.terrainShadows.material = new ShadowOnlyMaterial('shadowOnly', this.parameters.scene)
+
       //receive shadows
       this.terrain.receiveShadows = true;
+
+      this.terrainShadows.receiveShadows = true;
+
+      //update lights casted on it
+      this.parameters.world.updateLights();
     }
   }
 
