@@ -46,7 +46,7 @@ export class Player extends Schema {
           this.animator?.clear();
           if (!this.beignDragged) this.animator?.play('run');
           BABYLON.Animation.CreateAndStartAnimation("moveX", this.mesh, "position.x",
-            1000 / this.movementCooldown, 1, this.mesh?.position.x, this.x,
+            100, this.movementCooldown / 10, this.mesh?.position.x, this.x,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to)
                 this.animator?.play('idle');
@@ -56,7 +56,7 @@ export class Player extends Schema {
           this.animator?.clear();
           if (!this.beignDragged) this.animator?.play('run');
           BABYLON.Animation.CreateAndStartAnimation("moveZ", this.mesh, "position.z",
-            1000 / this.movementCooldown, 1, this.mesh?.position.z, this.y,
+            100, this.movementCooldown / 10, this.mesh?.position.z, this.y,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to)
                 this.animator?.play('idle');

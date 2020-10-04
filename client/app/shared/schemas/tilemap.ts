@@ -5,6 +5,7 @@ import {
   GridMaterial,
   ShadowOnlyMaterial
 } from '@babylonjs/materials';
+import { Vectors } from '../utils/vectors';
 
 export class TileMap extends Schema {
   //schema
@@ -31,6 +32,8 @@ export class TileMap extends Schema {
 
     this.initGround();
 
+    this.initActions();
+
     this.initTerrain();
   }
 
@@ -54,6 +57,7 @@ export class TileMap extends Schema {
     this.ground.position = new BABYLON.Vector3(this.width / 2 - 0.5, 0, this.height / 2 - 0.5);
     // this.ground.scaling.x = this.width;
     // this.ground.scaling.z = this.height;
+    this.ground.isGround = true;
 
     //grid material
     this.gridMaterial = new GridMaterial("gridMaterial", this.parameters.scene);
@@ -71,32 +75,20 @@ export class TileMap extends Schema {
 
     //set material of ground
     this.ground.material = this.gridMaterial;
+  }
+
+  initActions() {
+    var temporalWallStartPoint;
+    var temporalWallEndPoint;
+    var temporalWallRay;
+    var dragWall;
 
     //click action on ground for move player
     this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-    this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
-      //only works with left click (left: 0, middle: 1, right: 2)
-      if (e.sourceEvent.button == 0) {
-        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY);
-        if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction)
-          this.parameters.controller.send('game', 'move', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z) });
-        else if (this.parameters.controller.activeTool?.name == 'walls') {
-          var x = pick.pickedPoint.x;
-          var z = pick.pickedPoint.z;
-          if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
-            x = Math.round(pick.pickedPoint.x * 2) / 2;
-            x = x % 1 == 0 ? x + 0.5 : x;
-            z = Math.round(pick.pickedPoint.z * 2) / 2;
-            z = z % 1 == 0 ? z + 0.5 : z;
-          }
-          this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'end' });
-        }
-      }
-    }));
     this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.sourceEvent.button == 0) {
-        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY);
+        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (this.parameters.controller.activeTool?.name == 'walls') {
           var x = pick.pickedPoint.x;
           var z = pick.pickedPoint.z;
@@ -106,11 +98,72 @@ export class TileMap extends Schema {
             z = Math.round(pick.pickedPoint.z * 2) / 2;
             z = z % 1 == 0 ? z + 0.5 : z;
           }
+          if (!temporalWallStartPoint && !temporalWallEndPoint) {
+            temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
+            temporalWallStartPoint.position = new BABYLON.Vector3(x, 1.25, z);
+            temporalWallStartPoint.isPickable = false;
+            temporalWallEndPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
+            temporalWallEndPoint.position = new BABYLON.Vector3(x, 1.25, z);
+            temporalWallEndPoint.isPickable = false;
+            dragWall = () => {
+              temporalWallRay?.dispose();
+              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+              if (pick.pickedPoint) {
+                var x = pick.pickedPoint?.x;
+                var z = pick.pickedPoint?.z;
+                if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
+                  x = Math.round(pick.pickedPoint.x * 2) / 2;
+                  x = x % 1 == 0 ? x + 0.5 : x;
+                  z = Math.round(pick.pickedPoint.z * 2) / 2;
+                  z = z % 1 == 0 ? z + 0.5 : z;
+                }
+                var origin = new BABYLON.Vector3(temporalWallStartPoint.position.x, 0, temporalWallStartPoint.position.z);
+                var target = new BABYLON.Vector3(temporalWallEndPoint.position.x, 0, temporalWallEndPoint.position.z);
+                var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
+                var ray = new BABYLON.Ray(
+                  origin,
+                  targetNormalized,
+                  BABYLON.Vector3.Distance(origin, target)
+                );
+                temporalWallRay = BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
+                temporalWallEndPoint.position = new BABYLON.Vector3(x, 1.25, z);
+              }
+            }
+            this.parameters.canvas.addEventListener("pointermove", dragWall, false);
+          }
           this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'start' });
         }
       }
     }));
-
+    // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
+    this.parameters.canvas.addEventListener("pointerup", (e) => {
+      //only works with left click (left: 0, middle: 1, right: 2)
+      if (e.button == 0) {
+        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+        if (pick.pickedPoint) {
+          if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction)
+            this.parameters.controller.send('game', 'move', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z) });
+          else if (this.parameters.controller.activeTool?.name == 'walls') {
+            var x = pick.pickedPoint?.x;
+            var z = pick.pickedPoint?.z;
+            if (this.parameters.controller.activeTool?.options?.adjustToGrid) {
+              x = Math.round(pick.pickedPoint.x * 2) / 2;
+              x = x % 1 == 0 ? x + 0.5 : x;
+              z = Math.round(pick.pickedPoint.z * 2) / 2;
+              z = z % 1 == 0 ? z + 0.5 : z;
+            }
+            this.parameters.canvas.removeEventListener("pointermove", dragWall, false);
+            temporalWallStartPoint?.dispose();
+            temporalWallEndPoint?.dispose();
+            temporalWallRay?.dispose();
+            temporalWallStartPoint = null;
+            temporalWallEndPoint = null;
+            temporalWallRay = null;
+            this.parameters.controller.send('game', 'wall', { x: x, y: z, action: 'end' });
+          }
+        }
+      }
+    }, false);
   }
 
   initTerrain() {

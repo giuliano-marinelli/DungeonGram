@@ -94,10 +94,12 @@ export class World extends Schema {
     this.lights.baseLight = new BABYLON.DirectionalLight("baseLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
     this.lights.baseLight.position = new BABYLON.Vector3(50, 100, 50);
     this.lights.baseLight.intensity = 1;
+    this.lights.baseLight.specular = new BABYLON.Color3(0, 0, 0);
 
     this.lights.fogLight = new BABYLON.DirectionalLight("fogLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
     this.lights.fogLight.position = new BABYLON.Vector3(50, 100, 50);
     this.lights.fogLight.intensity = 0;
+    this.lights.fogLight.specular = new BABYLON.Color3(0, 0, 0);
 
     //init shadow generator for base light
     new BABYLON.ShadowGenerator(4096, this.lights.baseLight);
@@ -128,12 +130,14 @@ export class World extends Schema {
 
   updateShadows() {
     setTimeout(() => {
-      for (let wall in this.walls) {
-        this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
-      }
-      for (let player in this.players) {
-        this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
-      }
+      try {
+        for (let wall in this.walls) {
+          this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
+        }
+        for (let player in this.players) {
+          this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
+        }
+      } catch (err) { }
     });
   }
 

@@ -8,6 +8,7 @@ export class ChatRoom extends Room {
     this.onMessage("message", (client, message) => {
       console.log("ChatRoom: received message from", client.sessionId, ":", message);
       var roll = new Roll(message);
+      console.log(roll);
       this.broadcast("messages", '<b>' + client.sessionId + '</b> ' +
         (roll.isRoll
           ? 'rolling ' + roll.rolls.join(' + ') + '<br>' + (roll.getSum() + ' = ' + roll.getValue())

@@ -4,11 +4,13 @@
   padding: 0px;
   height: 50px;
   margin-top: -8px;
-  color: #aa0000 !important;
+  // color: #aa0000 !important;
+  color: #1a1717 !important;
 }
 
 .dungeon-title:hover {
-  color: #880000 !important;
+  // color: #880000 !important;
+  color: #0e0c0c !important;
 }
 
 .dungeon-container {
@@ -18,5 +20,15 @@
 }
 
 .dungeon-navbar {
-  background-color: #ff0000 !important;
+  // background-color: #ff0000 !important;
+  background-color: #3f3d3d !important;
+}
+
+.dungeon-navbar #navbar-supported-content a {
+  color: #1a1717 !important;
+  font-weight: 700;
+}
+
+.dungeon-navbar #navbar-supported-content a:hover {
+  color: #0e0c0c !important;
 }

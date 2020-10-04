@@ -18,7 +18,7 @@ export class Roll extends Schema {
         this.rolls = rollString.split('+');
         this.rolls.forEach((roll) => {
           if (roll.indexOf('d') > -1) {
-            var amount = parseInt(roll.split('d')[0]);
+            var amount = roll.split('d')[0] != '' ? parseInt(roll.split('d')[0]) : 1;
             var dice = new Dice(parseInt(roll.split('d')[1]));
 
             this.results.push(dice.roll(amount));
@@ -29,7 +29,9 @@ export class Roll extends Schema {
         if (this.rolls.length && this._validateRoll())
           this.isRoll = true;
       }
-    } catch (err) { }
+    } catch (err) {
+      console.log('Bad rolling ', err);
+    }
   }
 
   _validateRoll() {
@@ -37,7 +39,7 @@ export class Roll extends Schema {
     this.rolls.forEach(roll => {
       if (valid) {
         if (roll.indexOf('d') > -1) {
-          valid = !isNaN(parseInt(roll.split('d')[0])) && !isNaN(parseInt(roll.split('d')[1]));
+          valid = (roll.split('d')[0] == '' || !isNaN(parseInt(roll.split('d')[0]))) && !isNaN(parseInt(roll.split('d')[1]));
         } else {
           valid = !isNaN(parseInt(roll));
         }

@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import { Controller } from '../shared/controller/controller';
 
+declare var $;
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -57,6 +58,22 @@ export class ChatComponent implements OnInit {
       // clear input
       this.message = "";
     }
+  }
+
+  toggleChat() {
+    $('#chat-messages').toggle();
+    $('#chat-buttons').toggle();
+    $('#chat-send').toggle();
+    if ($("#chat-header .btn").attr('data-original-title') == 'Maximize Chat') {
+      $("#chat-header .btn").attr('data-original-title', 'Minimize Chat');
+      $("#chat-header .btn .material-icons").html('keyboard_arrow_down');
+    } else {
+      $("#chat-header .btn").attr('data-original-title', 'Maximize Chat');
+      $("#chat-header .btn .material-icons").html('keyboard_arrow_up');
+    }
+
+    $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+    $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
   }
 
 }

@@ -12,7 +12,7 @@ export class Dice extends Schema {
   roll(times: number = 1) {
     var result = [];
     for (let i = 0; i < times; i++) {
-      result.push(this._random(1, this.faces));
+      result.push(this._random(1, this.faces + 1));
     }
     return result;
   }
