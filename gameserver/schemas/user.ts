@@ -1,5 +1,6 @@
 import { Schema, type } from '@colyseus/schema';
 import { Rule } from '../schemas/rule';
+import { Figure } from '../schemas/figure';
 
 export class User extends Schema {
   @type("number")
@@ -12,13 +13,21 @@ export class User extends Schema {
   tilemapShowGrid: boolean;
   @type(Rule)
   rule: Rule;
+  @type(Figure)
+  figureDrawer: Figure;
+  @type("string")
+  selectedPlayer: string;
 
-  constructor(wallsVisibility: number = 0.5, wallsPickable: boolean = false, fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true, rule: Rule = new Rule()) {
+  constructor(wallsVisibility: number = 0.5, wallsPickable: boolean = false,
+    fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,
+    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedPlayer?: string) {
     super();
     this.wallsVisibility = wallsVisibility;
     this.wallsPickable = wallsPickable;
     this.fogOfWarVisibility = fogOfWarVisibility;
     this.tilemapShowGrid = tilemapShowGrid;
     this.rule = rule;
+    this.figureDrawer = figureDrawer;
+    this.selectedPlayer = selectedPlayer;
   }
 }

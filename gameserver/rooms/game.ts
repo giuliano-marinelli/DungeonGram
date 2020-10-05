@@ -14,14 +14,17 @@ export class GameRoom extends Room<State> {
 
     this.setState(new State());
 
-    this.onMessage("move", (client, data) => {
-      console.log("GameRoom: received 'move' action from", client.sessionId, ":", data);
-      this.state.world?.movePlayer(client.sessionId, data);
-    });
-
-    this.onMessage("dragPlayer", (client, data) => {
-      console.log("GameRoom: received 'dragPlayer' action from", client.sessionId, ":", data);
-      this.state.world?.dragPlayer(client.sessionId, data);
+    this.onMessage("player", (client, data) => {
+      console.log("GameRoom: received 'player' action from", client.sessionId, ":", data);
+      if (data.action == 'move') {
+        this.state.world?.movePlayer(client.sessionId, new Point(data.x, data.y));
+      } else if (data.action == 'drag') {
+        this.state.world?.dragPlayer(data.id, data.x || data.y ? new Point(data.x, data.y) : null);
+      } else if (data.action == 'drop') {
+        this.state.world?.dropPlayer(data.id);
+      } else if (data.action == 'select') {
+        this.state.world.selectPlayer(client.sessionId, data.id);
+      }
     });
 
     this.onMessage("tilemap", (client, data) => {
@@ -62,6 +65,24 @@ export class GameRoom extends Room<State> {
         this.state.world.addRule(client.sessionId, new Point(data.x, data.y));
       else if (data.action == 'end')
         this.state.world.endRule(client.sessionId);
+      else if (data.action == 'share')
+        this.state.world.shareRule(client.sessionId, data.value);
+      else if (data.action == 'normalizeUnit')
+        this.state.world.normalizeUnitRule(client.sessionId, data.value);
+    });
+
+    this.onMessage("figure", (client, data) => {
+      console.log("GameRoom: received 'figure' action from", client.sessionId, ":", data);
+      if (data.action == 'start')
+        this.state.world.startFigure(client.sessionId, new Point(data.x, data.y));
+      else if (data.action == 'move')
+        this.state.world.moveFigure(client.sessionId, new Point(data.x, data.y));
+      else if (data.action == 'share')
+        this.state.world.shareFigure(client.sessionId, data.value);
+        else if (data.action == 'end')
+        this.state.world.endFigure(client.sessionId);
+      else if (data.action == 'normalizeUnit')
+        this.state.world.normalizeUnitFigure(client.sessionId, data.value);
     });
 
     this.setSimulationInterval((deltaTime) => this.state.world.update(deltaTime));

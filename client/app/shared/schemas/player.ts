@@ -34,7 +34,16 @@ export class Player extends Schema {
     this.synchronizeSchema(schema,
       {
         direction: { type: Point, datatype: Object },
-        movementPath: { type: Path, datatype: Object, parameters: () => { return { scene: parameters.scene, room: parameters.room, playerId: this.id } } }
+        movementPath: {
+          type: Path, datatype: Object, parameters: () => {
+            return {
+              world: parameters.world,
+              scene: parameters.scene,
+              room: parameters.room,
+              playerId: this.id
+            }
+          }
+        }
       }
     );
   }
@@ -79,7 +88,10 @@ export class Player extends Schema {
       }
     });
 
-    this.parameters.world.updatePlayersVisibility(this.id);
+    if (this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer != null) {
+      this.parameters.world.updatePlayersVisibility(this.id);
+      this.initVisionLight();
+    }
     this.animator?.rotate(Vectors.directionToRotate(this.direction));
   }
 
@@ -132,21 +144,24 @@ export class Player extends Schema {
         this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, this.mesh.material, "emissiveColor", this.mesh.material.emissiveColor));
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
-        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
+        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
           console.log('Player', this.id, ': (', this.x, ',', this.y, ')', this._schema);
+          if (e.sourceEvent.button == 2) {
+            this.parameters.controller.send('game', 'player', { id: this.id, action: 'select' });
+          }
         }));
         this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-          if (e.sourceEvent.button == 0 && this.parameters.controller.activeTool?.name != 'rule') {
+          if (e.sourceEvent.button == 0 && !this.parameters.controller.activeTool) {
             this.parameters.controller.toggleAction('dragPlayer', true);
-            this.parameters.controller.send('game', 'dragPlayer', { id: this.id, action: 'drag' });
+            this.parameters.controller.send('game', 'player', { id: this.id, action: 'drag' });
             var drag = () => {
               var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
               if (pick?.pickedPoint) {
-                this.parameters.controller.send('game', 'dragPlayer', { id: this.id, position: { x: pick.pickedPoint.x, y: pick.pickedPoint.z }, action: 'drag' });
+                this.parameters.controller.send('game', 'player', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
               }
             }
             var drop = () => {
-              this.parameters.controller.send('game', 'dragPlayer', { id: this.id, action: 'drop' });
+              this.parameters.controller.send('game', 'player', { id: this.id, action: 'drop' });
               this.parameters.canvas.removeEventListener("pointerup", drop, false);
               this.parameters.canvas.removeEventListener("pointermove", drag, false);
               setTimeout(() => {
@@ -161,27 +176,37 @@ export class Player extends Schema {
         //cast shadows
         // this.parameters.shadowGenerators.baseLight.addShadowCaster(this.mesh);
 
-        //add vision light
-        if (this.id == this.parameters.room.sessionId) {
-          this.visionLight = new BABYLON.PointLight("playerLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
-          this.visionLight.range = this.visionRange;
-          this.visionLight.parent = this.mesh;
-          this.visionLight.specular = new BABYLON.Color3(0, 0, 0);
-          this.visionLight.shadowMinZ = 0.1;
-          this.visionLight.intensity = 100;
-          this.parameters.lights.playerLight = this.visionLight;
-
-          //add shadow generator for the vision light
-          new BABYLON.ShadowGenerator(1024, this.visionLight);
-          this.visionLight._shadowGenerator.useBlurExponentialShadowMap = true;
-          this.visionLight._shadowGenerator.transparencyShadow = true;
-        }
-
         this.parameters.world.updateLights();
         this.parameters.world.updateShadows();
 
+        this.initVisionLight();
+
         this.update();
       });
+    }
+  }
+
+  initVisionLight() {
+    //add vision light
+    if (this.id == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer) {
+      if (!this.visionLight && this.mesh) {
+        this.visionLight = new BABYLON.PointLight("playerLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
+        this.visionLight.range = this.visionRange;
+        this.visionLight.parent = this.mesh;
+        this.visionLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+        this.visionLight.specular = new BABYLON.Color3(0, 0, 0);
+        this.visionLight.shadowMinZ = 0.1;
+        this.visionLight.intensity = 100;
+        this.parameters.lights.playerLight = this.visionLight;
+
+        //add shadow generator for the vision light
+        new BABYLON.ShadowGenerator(1024, this.visionLight);
+        this.visionLight._shadowGenerator.useBlurExponentialShadowMap = true;
+        this.visionLight._shadowGenerator.transparencyShadow = true;
+      }
+    } else if (this.visionLight) {
+      this.visionLight.dispose();
+      this.visionLight = null;
     }
   }
 

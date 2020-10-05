@@ -18,6 +18,11 @@ export class TileMap extends Schema {
   terrain?: any;
   terrainShadows?: any;
   gridMaterial?: any;
+  //aux
+  temporalWallStartPoint?: any;
+  temporalWallEndPoint?: any;
+  temporalWallRay?: any;
+  dragWall?: any;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -31,10 +36,8 @@ export class TileMap extends Schema {
     );
 
     this.initGround();
-
-    this.initActions();
-
     this.initTerrain();
+    this.initActions();
   }
 
   remove() {
@@ -78,72 +81,68 @@ export class TileMap extends Schema {
   }
 
   initActions() {
-    var temporalWallStartPoint;
-    var temporalWallEndPoint;
-    var temporalWallRay;
-    var dragWall;
-
     //click action on ground for move player
-    this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-    this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+    // this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
+    // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+    this.parameters.canvas.addEventListener("pointerdown", (e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
-      if (e.sourceEvent.button == 0) {
-        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-        if (this.parameters.controller.activeTool?.name == 'walls') {
-          var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-          if (this.parameters.controller.activeTool?.options?.adjustToGrid)
-            adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-          if (!temporalWallStartPoint && !temporalWallEndPoint) {
-            temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
-            temporalWallStartPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
-            temporalWallStartPoint.isPickable = false;
-            temporalWallEndPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
-            temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
-            temporalWallEndPoint.isPickable = false;
-            dragWall = () => {
-              temporalWallRay?.dispose();
-              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-              if (pick.pickedPoint) {
-                var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-                if (this.parameters.controller.activeTool?.options?.adjustToGrid)
-                  adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-                var origin = new BABYLON.Vector3(temporalWallStartPoint.position.x, 0, temporalWallStartPoint.position.z);
-                var target = new BABYLON.Vector3(temporalWallEndPoint.position.x, 0, temporalWallEndPoint.position.z);
-                var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
-                var ray = new BABYLON.Ray(
-                  origin,
-                  targetNormalized,
-                  BABYLON.Vector3.Distance(origin, target)
-                );
-                temporalWallRay = BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
-                temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
+      if (e.button == 0) {
+        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround || mesh.isWall });
+        if (pick.pickedPoint) {
+          if (this.parameters.controller.activeTool?.name == 'walls' &&
+            (!this.parameters.controller.activeTool?.options.remove || !pick.pickedMesh.isWall)) {
+            var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
+            adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+            if (!this.temporalWallStartPoint && !this.temporalWallEndPoint) {
+              this.temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
+              this.temporalWallStartPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
+              this.temporalWallStartPoint.isPickable = false;
+              this.temporalWallEndPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
+              this.temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
+              this.temporalWallEndPoint.isPickable = false;
+              this.dragWall = () => {
+                this.temporalWallRay?.dispose();
+                var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+                if (pick.pickedPoint) {
+                  var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
+                  adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+                  var origin = new BABYLON.Vector3(this.temporalWallStartPoint.position.x, 0, this.temporalWallStartPoint.position.z);
+                  var target = new BABYLON.Vector3(this.temporalWallEndPoint.position.x, 0, this.temporalWallEndPoint.position.z);
+                  var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
+                  var ray = new BABYLON.Ray(
+                    origin,
+                    targetNormalized,
+                    BABYLON.Vector3.Distance(origin, target)
+                  );
+                  this.temporalWallRay = BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
+                  this.temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
+                }
               }
+              this.parameters.canvas.addEventListener("pointermove", this.dragWall, false);
             }
-            this.parameters.canvas.addEventListener("pointermove", dragWall, false);
+            this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
           }
-          this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
         }
       }
-    }));
+    }, false);
     // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
     this.parameters.canvas.addEventListener("pointerup", (e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.button == 0) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick.pickedPoint) {
-          if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction)
-            this.parameters.controller.send('game', 'move', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z) });
-          else if (this.parameters.controller.activeTool?.name == 'walls') {
+          if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction) {
+            this.parameters.controller.send('game', 'player', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z), action: 'move' });
+          } else if (this.parameters.controller.activeTool?.name == 'walls') {
             var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-            if (this.parameters.controller.activeTool?.options?.adjustToGrid)
-              adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-            this.parameters.canvas.removeEventListener("pointermove", dragWall, false);
-            temporalWallStartPoint?.dispose();
-            temporalWallEndPoint?.dispose();
-            temporalWallRay?.dispose();
-            temporalWallStartPoint = null;
-            temporalWallEndPoint = null;
-            temporalWallRay = null;
+            adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+            this.parameters.canvas.removeEventListener("pointermove", this.dragWall, false);
+            this.temporalWallStartPoint?.dispose();
+            this.temporalWallEndPoint?.dispose();
+            this.temporalWallRay?.dispose();
+            this.temporalWallStartPoint = null;
+            this.temporalWallEndPoint = null;
+            this.temporalWallRay = null;
             this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'end' });
           }
         }
@@ -173,7 +172,8 @@ export class TileMap extends Schema {
 
       //standard material
       var material = new BABYLON.StandardMaterial("terrain", this.parameters.scene);
-      var texture = new BABYLON.Texture('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ff727761-d6b1-4548-916b-3b9033c9149d/ddbvz3t-02a6fb39-0481-46c3-96c2-7eeea043447f.jpg/v1/fill/w_1920,h_1920,q_75,strp/empty_dungeon_map_by_zatnikotel_ddbvz3t-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD0xOTIwIiwicGF0aCI6IlwvZlwvZmY3Mjc3NjEtZDZiMS00NTQ4LTkxNmItM2I5MDMzYzkxNDlkXC9kZGJ2ejN0LTAyYTZmYjM5LTA0ODEtNDZjMy05NmMyLTdlZWVhMDQzNDQ3Zi5qcGciLCJ3aWR0aCI6Ijw9MTkyMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.cLV4Dlz3BMU8z6D7uGnV6HsL37wNFxNLYJOATxYmUDY',
+      // var texture = new BABYLON.Texture('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ff727761-d6b1-4548-916b-3b9033c9149d/ddbvz3t-02a6fb39-0481-46c3-96c2-7eeea043447f.jpg/v1/fill/w_1920,h_1920,q_75,strp/empty_dungeon_map_by_zatnikotel_ddbvz3t-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD0xOTIwIiwicGF0aCI6IlwvZlwvZmY3Mjc3NjEtZDZiMS00NTQ4LTkxNmItM2I5MDMzYzkxNDlkXC9kZGJ2ejN0LTAyYTZmYjM5LTA0ODEtNDZjMy05NmMyLTdlZWVhMDQzNDQ3Zi5qcGciLCJ3aWR0aCI6Ijw9MTkyMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.cLV4Dlz3BMU8z6D7uGnV6HsL37wNFxNLYJOATxYmUDY',
+      var texture = new BABYLON.Texture('https://i.imgur.com/bc3ECkA.jpg',
         this.parameters.scene);
       material.diffuseTexture = texture;
 

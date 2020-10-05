@@ -42,6 +42,7 @@ export class Wall extends Schema {
     this.mesh.position.x = middlePoint.x;
     this.mesh.position.z = middlePoint.y;
     this.mesh.isCollible = true;
+    this.mesh.isWall = true;
 
     //rotate relative to orientation
     // if (this.from.x == this.to.x)

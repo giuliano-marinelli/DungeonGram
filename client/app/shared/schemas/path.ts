@@ -16,30 +16,26 @@ export class Path extends Schema {
 
     this.synchronizeSchema(schema,
       {
-        from: { type: Point, datatype: Object, parameters: () => { return { parent: this } } },
-        to: { type: Point, datatype: Object, parameters: () => { return { parent: this } } },
+        from: { type: Point, datatype: Object },
+        to: { type: Point, datatype: Object },
         points: { type: Point, datatype: Array, onAdd: 'last', onRemove: 'first' }
       }
     );
   }
 
-  update(changes?) {
-    changes?.forEach((change) => {
-      if (this.parameters.playerId == this.parameters.room.sessionId) {
-        switch (change.field) {
-          case 'to':
-            if (this.to) this.doMeshTo();
-            else {
-              this.meshTo?.dispose();
-              delete this.meshTo;
-            }
-            break;
-          case 'points':
-            this.doMeshPoints();
-            break;
-        }
-      }
-    });
+  update(changes) {
+    // changes?.forEach((change) => {
+    //   switch (change.field) {
+    //     case 'to':
+    //       this.doMeshTo();
+    //       break;
+    //     case 'points':
+    //       this.doMeshPoints();
+    //       break;
+    //   }
+    // });
+    this.doMeshTo();
+    this.doMeshPoints();
   }
 
   remove() {
@@ -51,7 +47,13 @@ export class Path extends Schema {
   }
 
   doMeshTo() {
-    if (!this.meshTo) {
+    if (this.meshTo) {
+      this.meshTo.dispose();
+      delete this.meshTo;
+    }
+
+    if (this.parameters.playerId == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer &&
+      this.to) {
       //create mesh
       this.meshTo = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.4 }, this.parameters.scene);
 
@@ -60,12 +62,12 @@ export class Path extends Schema {
       material.diffuseColor = BABYLON.Color3.White();
       material.alpha = 1;
       this.meshTo.material = material;
-    }
 
-    //positioning mesh
-    this.meshTo.position.y = 0;
-    this.meshTo.position.x = this.to.x;
-    this.meshTo.position.z = this.to.y;
+      //positioning mesh
+      this.meshTo.position.y = 0;
+      this.meshTo.position.x = this.to.x;
+      this.meshTo.position.z = this.to.y;
+    }
   }
 
   doMeshPoints() {
@@ -76,20 +78,23 @@ export class Path extends Schema {
       this.meshPoints = [];
     }
 
-    this.points.forEach(point => {
-      //create mesh
-      this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
+    if (this.parameters.playerId == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer &&
+      this.points.length) {
+      this.points.forEach(point => {
+        //create mesh
+        this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
 
-      //set material
-      var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-      material.diffuseColor = BABYLON.Color3.White();
-      material.alpha = 0.8;
-      this.meshPoints[this.meshPoints.length - 1].material = material;
+        //set material
+        var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
+        material.diffuseColor = BABYLON.Color3.White();
+        material.alpha = 0.8;
+        this.meshPoints[this.meshPoints.length - 1].material = material;
 
-      //positioning mesh
-      this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-      this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-      this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
-    });
+        //positioning mesh
+        this.meshPoints[this.meshPoints.length - 1].position.y = 0;
+        this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
+        this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
+      });
+    }
   }
 }

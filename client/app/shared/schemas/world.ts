@@ -137,9 +137,9 @@ export class World extends Schema {
         for (let wall in this.walls) {
           this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
         }
-        for (let player in this.players) {
-          this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
-        }
+        // for (let player in this.players) {
+        //   this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
+        // }
       } catch (err) { }
     });
   }
@@ -172,38 +172,49 @@ export class World extends Schema {
   }
 
   updatePlayersVisibility(player?) {
-    if (this.players[this.parameters.room.sessionId]?.mesh) {
+    var selectedPlayer = this.users[this.parameters.room.sessionId]?.selectedPlayer;
+    if (selectedPlayer && this.players[selectedPlayer]?.mesh) {
       setTimeout(() => {
-        this.players[this.parameters.room.sessionId]?.visionRays.forEach(visionRay => {
-          visionRay?.dispose();
-        });
-        this.players[this.parameters.room.sessionId].collider.isCollible = false;
-        if (!player || player == this.parameters.room.sessionId) {
+        this.players[selectedPlayer].mesh.visibility = 1;
+        // this.players[selectedPlayer]?.visionRays.forEach(visionRay => {
+        //   visionRay?.dispose();
+        // });
+        this.players[selectedPlayer].collider.isCollible = false;
+        if (!player || player == selectedPlayer) {
           for (let player in this.players) {
-            this._updatePlayerVisibility(player)
+            this._updatePlayerVisibility(player, selectedPlayer)
           }
         } else {
-          this._updatePlayerVisibility(player)
+          this._updatePlayerVisibility(player, selectedPlayer)
         }
-        this.players[this.parameters.room.sessionId].collider.isCollible = true;
-        // this.players[this.parameters.room.sessionId]?.visiblePlayers?.forEach(playerMesh => {
+        this.players[selectedPlayer].collider.isCollible = true;
+        // this.players[selectedPlayer]?.visiblePlayers?.forEach(playerMesh => {
         //   if (playerMesh) playerMesh.visibility = 1;
         // });
-      }, this.players[this.parameters.room.sessionId].movementCooldown);
+      }, this.players[selectedPlayer].movementCooldown);
+    } else {
+      setTimeout(() => {
+        for (let player in this.players) {
+          if (this.players[player].mesh) {
+            this.players[player].collider.isPickable = true;
+            this.players[player].mesh.visibility = 1;
+          }
+        }
+      });
     }
   }
 
-  _updatePlayerVisibility(player) {
-    if (this.players[player].mesh && player != this.parameters.room.sessionId) {
+  _updatePlayerVisibility(player, selectedPlayer) {
+    if (this.players[player].mesh && player != selectedPlayer) {
       this.players[player].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.players[this.parameters.room.sessionId].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[this.parameters.room.sessionId].mesh.position.z);
+      var origin = new BABYLON.Vector3(this.players[selectedPlayer].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[selectedPlayer].mesh.position.z);
       var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[player].mesh.position.z).subtract(origin));
       var ray = new BABYLON.Ray(
         origin,
         target,
-        this.players[this.parameters.room.sessionId].visionRange - 1
+        this.players[selectedPlayer].visionRange - 1
       );
-      // this.players[this.parameters.room.sessionId].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+      // this.players[selectedPlayer].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
         return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
       })?.pickedMesh;

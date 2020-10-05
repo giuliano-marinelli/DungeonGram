@@ -1,5 +1,6 @@
 import { Schema } from './schema';
 import { Rule } from './rule';
+import { Figure } from './figure';
 
 export class User extends Schema {
   //schema
@@ -9,24 +10,37 @@ export class User extends Schema {
   fogOfWarVisibility?: number;
   tilemapShowGrid?: number;
   rule?: Rule;
+  figureDrawer?: Figure;
+  selectedPlayer?: string;
 
   constructor(schema, parameters) {
     super(parameters);
 
     this.id = parameters.id;
 
-    this.synchronizeSchema(schema,{
-        rule: {
-          type: Rule, datatype: Object, parameters: () => {
-            return {
-              userId: this.id,
-              canvas: parameters.canvas,
-              scene: parameters.scene,
-              room: parameters.room,
-              controller: parameters.controller
-            }
+    this.synchronizeSchema(schema, {
+      rule: {
+        type: Rule, datatype: Object, parameters: () => {
+          return {
+            userId: this.id,
+            canvas: parameters.canvas,
+            scene: parameters.scene,
+            room: parameters.room,
+            controller: parameters.controller
           }
         }
+      },
+      figureDrawer: {
+        type: Figure, datatype: Object, parameters: () => {
+          return {
+            userId: this.id,
+            canvas: parameters.canvas,
+            scene: parameters.scene,
+            room: parameters.room,
+            controller: parameters.controller
+          }
+        }
+      }
     });
   }
 
@@ -45,6 +59,14 @@ export class User extends Schema {
             break;
           case 'tilemapShowGrid':
             this.parameters.world.updateTilemap();
+            break;
+          case 'selectedPlayer':
+            this.parameters.world.updatePlayersVisibility();
+            console.log(change.previousValue, change.value);
+            if (change.previousValue && this.parameters.world.players) this.parameters.world.players[change.previousValue]?.initVisionLight();
+            if (change.value && this.parameters.world.players) this.parameters.world.players[change.value]?.initVisionLight();
+            this.parameters.world.updateLights();
+            this.parameters.world.updateShadows();
             break;
         }
       });

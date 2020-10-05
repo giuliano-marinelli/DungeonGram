@@ -18,7 +18,7 @@ export class Player extends Schema {
   @type("boolean")
   beignDragged = false;
   @type("number")
-  visionRange = 12;
+  visionRange = 10;
   //internal attributes
   movementAcum = 0;
 

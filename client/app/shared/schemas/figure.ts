@@ -8,9 +8,10 @@ import {
   TextBlock
 } from '@babylonjs/gui';
 
-export class Rule extends Schema {
+export class Figure extends Schema {
   //schema
   points?: Point[];
+  type?: string;
   shared?: boolean;
   normalizeUnit?: boolean;
   //game objects
@@ -20,6 +21,7 @@ export class Rule extends Schema {
   sumSignRectangle?: any;
   sumSignLabel?: any;
   sum?: number = 0;
+  figureMesh?: any;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -46,12 +48,10 @@ export class Rule extends Schema {
   }
 
   initActions() {
-    this.parameters.canvas.removeEventListener("pointermove", dragRule, false);
-    this.parameters.canvas.removeEventListener("contextmenu", addRule, false);
-    var dragRule;
-    var addRule;
+    this.parameters.canvas.removeEventListener("pointermove", dragFigure, false);
+    var dragFigure;
     this.parameters.canvas.addEventListener("pointerdown", (e) => {
-      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'rule') {
+      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'figure') {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick?.pickedPoint) {
           var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
@@ -61,7 +61,7 @@ export class Rule extends Schema {
             adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
 
 
-          dragRule = () => {
+          dragFigure = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
             if (pick?.pickedPoint) {
               var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
@@ -70,35 +70,20 @@ export class Rule extends Schema {
               else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
                 adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
 
-              this.parameters.controller.send('game', 'rule', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'move' });
+              this.parameters.controller.send('game', 'figure', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'move' });
             }
           }
-          addRule = (e) => {
-            if (e.button == 2) {
-              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-              if (pick?.pickedPoint) {
-                var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-                if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-                  adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-                else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-                  adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
-                this.parameters.controller.send('game', 'rule', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'add' });
-              }
-            }
-          }
-          this.parameters.canvas.addEventListener("pointermove", dragRule, false);
-          this.parameters.canvas.addEventListener("contextmenu", addRule, false);
-          this.parameters.controller.send('game', 'rule', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
+          this.parameters.canvas.addEventListener("pointermove", dragFigure, false);
+          this.parameters.controller.send('game', 'figure', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
           e.stopImmediatePropagation();
         }
       }
     }, false);
 
     this.parameters.canvas.addEventListener("pointerup", (e) => {
-      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'rule') {
-        this.parameters.canvas.removeEventListener("pointermove", dragRule, false);
-        this.parameters.canvas.removeEventListener("contextmenu", addRule, false);
-        this.parameters.controller.send('game', 'rule', { action: 'end' });
+      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'figure') {
+        this.parameters.canvas.removeEventListener("pointermove", dragFigure, false);
+        this.parameters.controller.send('game', 'figure', { action: 'end' });
       }
     }, false);
   }
@@ -114,6 +99,9 @@ export class Rule extends Schema {
         ray.dispose();
       });
       this.rays = [];
+
+      this.figureMesh?.dispose();
+      this.figureMesh = null;
 
       this.sum = 0;
     }
@@ -142,7 +130,7 @@ export class Rule extends Schema {
         var ray = new BABYLON.Ray(
           origin,
           targetNormalized,
-          BABYLON.Vector3.Distance(origin, target)
+          distance
         );
         this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Yellow()));
 
@@ -153,6 +141,16 @@ export class Rule extends Schema {
         } else {
           this.sum += distance;
         }
+
+        this.figureMesh?.dispose();
+        this.figureMesh = BABYLON.MeshBuilder.CreateDisc("disc", { radius: distance }, this.parameters.scene);
+        this.figureMesh.position = origin;
+        this.figureMesh.rotation.x = Math.PI * 2 / 4;
+
+        var material = new BABYLON.StandardMaterial("figure", this.parameters.scene);
+        material.diffuseColor = BABYLON.Color3.Red();
+        material.alpha = 0.5;
+        this.figureMesh.material = material;
       }
     }
 

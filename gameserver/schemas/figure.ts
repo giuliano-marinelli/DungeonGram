@@ -1,9 +1,11 @@
 import { Schema, type, ArraySchema } from "@colyseus/schema";
 import { Point } from '../schemas/point';
 
-export class Rule extends Schema {
+export class Figure extends Schema {
   @type([Point])
   points = new ArraySchema<Point>();
+  @type('string')
+  type = 'cone';
   @type("boolean")
   shared = false;
   @type("boolean")
@@ -27,11 +29,6 @@ export class Rule extends Schema {
       this.points[this.points.length - 1].x = point.x;
       this.points[this.points.length - 1].y = point.y;
     }
-  }
-
-  add(point: Point) {
-    this.points.push(new Point(point.x, point.y));
-    console.log(this.points);
   }
 
   end() {

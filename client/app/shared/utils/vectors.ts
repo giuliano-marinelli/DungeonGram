@@ -112,4 +112,29 @@ export class Vectors {
 
     return new BABYLON.Vector3(x, 0, z);
   }
+
+  static getCenterGridPoint(point) {
+    var x = Math.round(point.x);
+    var z = Math.round(point.z);
+
+    return new BABYLON.Vector3(x, 0, z);
+  }
+
+  static getGridPoint(point, precision) {
+    var divisor;
+    switch (precision) {
+      case 'grid': divisor = 2; break;
+      case 'half_grid': divisor = 2; break;
+      case 'quarter_grid': divisor = 4; break;
+    }
+    var x = point.x;
+    var z = point.z;
+    if (precision != 'none') {
+      x = Math.round(point.x * divisor) / divisor;
+      if (precision == 'grid') x = x % 1 == 0 ? x + 0.5 : x;
+      z = Math.round(point.z * divisor) / divisor;
+      if (precision == 'grid') z = z % 1 == 0 ? z + 0.5 : z;
+    }
+    return new BABYLON.Vector3(x, 0, z);
+  }
 }
