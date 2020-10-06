@@ -48,3 +48,23 @@
 .tool-btn-container .dropright:hover {
   width: 100px;
 }
+
+/* HIDE RADIO */
+.form-check-input.check-image[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+.form-check-input.check-image[type="radio"] + img {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+/* CHECKED STYLES */
+.form-check-input.check-image[type="radio"]:checked + img {
+  filter: drop-shadow(0px 0px 4px white);
+}

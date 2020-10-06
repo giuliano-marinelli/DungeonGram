@@ -57,8 +57,10 @@ export class Wall extends Schema {
       if (this.parameters.controller.activeTool?.name == 'walls')
         this.mesh.material.emissiveColor = BABYLON.Color3.White();
     }));
-    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, () => {
-      if (this.parameters.controller.activeTool?.name == 'walls' && this.parameters.controller.activeTool?.options?.remove)
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
+      if (this.parameters.controller.activeTool?.name == 'walls'
+        && this.parameters.controller.activeTool?.options?.remove
+        && e.sourceEvent.ctrlKey)
         this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
     }));
 

@@ -32,14 +32,14 @@ export class ToolsComponent implements OnInit {
           },
           remove: (value) => { this.tools.walls.options.remove = value },
           adjustToGrid: (value) => { this.tools.walls.options.adjustToGrid = value },
-          adjustTo: (value) => { this.tools.walls.options.adjustTo= value },
+          adjustTo: (value) => { this.tools.walls.options.adjustTo = value },
           visibility: (visibility) => { this.controller.send('game', 'wall', { value: parseFloat(visibility.value), action: 'visibility' }) },
         }
       },
       rule: {
         name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png', dropdown: true,
         options: {
-          adjustTo: 'center',
+          adjustTo: 'half_grid',
           normalizeUnit: true
         },
         actions: {
@@ -52,11 +52,12 @@ export class ToolsComponent implements OnInit {
       figure: {
         name: 'figure', label: 'Draw Figures', image: 'assets/images/tools/figure.png', dropdown: true,
         options: {
-          adjustTo: 'center',
+          adjustTo: 'half_grid',
           normalizeUnit: true
         },
         actions: {
           toggle: () => { this.toggleActiveTool(this.tools.figure, !this.tools.figure.active) },
+          type: (type) => { this.controller.send('game', 'figure', { value: type, action: 'type' }) },
           adjustTo: (value) => { this.tools.figure.options.adjustTo = value },
           share: (share) => { this.controller.send('game', 'figure', { value: share, action: 'share' }) },
           normalizeUnit: (normalizeUnit) => { this.controller.send('game', 'figure', { value: normalizeUnit, action: 'normalizeUnit' }) },

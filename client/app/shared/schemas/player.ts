@@ -144,11 +144,9 @@ export class Player extends Schema {
         this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, this.mesh.material, "emissiveColor", this.mesh.material.emissiveColor));
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
-        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
+        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, () => {
           console.log('Player', this.id, ': (', this.x, ',', this.y, ')', this._schema);
-          if (e.sourceEvent.button == 2) {
-            this.parameters.controller.send('game', 'player', { id: this.id, action: 'select' });
-          }
+          this.parameters.controller.send('game', 'player', { id: this.id, action: 'select' });
         }));
         this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
           if (e.sourceEvent.button == 0 && !this.parameters.controller.activeTool) {

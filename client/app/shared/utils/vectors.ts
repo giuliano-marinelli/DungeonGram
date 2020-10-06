@@ -1,5 +1,18 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 export class Vectors {
+  static Vector3: any = {
+    MiddlePoint: (pointA, pointB) => {
+      var x = (pointA.x + pointB.x) / 2;
+      var y = (pointA.y + pointB.y) / 2;
+      var z = (pointA.z + pointB.z) / 2;
+
+      return new BABYLON.Vector3(x, y, z);
+    },
+    Angle: (pointA, pointB) => {
+      return -Math.atan2(pointB.z - pointA.z, pointB.x - pointA.x);
+    }
+  };
+
   static distance(pointA, pointB) {
     var a = pointA.x - pointB.x;
     var b = pointA.y - pointB.y;
@@ -7,15 +20,15 @@ export class Vectors {
     return Math.sqrt(a * a + b * b);
   }
 
-  static middlePoint(poinnA, pointB) {
-    var a = (poinnA.x + pointB.x) / 2;
-    var b = (poinnA.y + pointB.y) / 2;
+  static middlePoint(pointA, pointB) {
+    var a = (pointA.x + pointB.x) / 2;
+    var b = (pointA.y + pointB.y) / 2;
 
     return { x: a, y: b };
   }
 
-  static angle(poinnA, pointB) {
-    return -Math.atan2(pointB.y - poinnA.y, pointB.x - poinnA.x);
+  static angle(pointA, pointB) {
+    return -Math.atan2(pointB.y - pointA.y, pointB.x - pointA.x);
   }
 
   static directionToRotate(direction) {
@@ -123,6 +136,8 @@ export class Vectors {
   static getGridPoint(point, precision) {
     var divisor;
     switch (precision) {
+      case 'center': divisor = 1; break;
+      case 'corner': divisor = 2; break;
       case 'grid': divisor = 2; break;
       case 'half_grid': divisor = 2; break;
       case 'quarter_grid': divisor = 4; break;
@@ -131,9 +146,9 @@ export class Vectors {
     var z = point.z;
     if (precision != 'none') {
       x = Math.round(point.x * divisor) / divisor;
-      if (precision == 'grid') x = x % 1 == 0 ? x + 0.5 : x;
+      if (precision == 'grid' || precision == 'corner') x = x % 1 == 0 ? x + 0.5 : x;
       z = Math.round(point.z * divisor) / divisor;
-      if (precision == 'grid') z = z % 1 == 0 ? z + 0.5 : z;
+      if (precision == 'grid' || precision == 'corner') z = z % 1 == 0 ? z + 0.5 : z;
     }
     return new BABYLON.Vector3(x, 0, z);
   }

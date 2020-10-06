@@ -1,5 +1,6 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Vectors } from '../utils/vectors';
+import { Shapes } from '../utils/shapes';
 import { Point } from './point';
 import { Schema } from './schema';
 import {
@@ -54,21 +55,15 @@ export class Figure extends Schema {
       if (e.button == 0 && this.parameters.controller.activeTool?.name == 'figure') {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick?.pickedPoint) {
-          var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-          if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-            adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-          else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-            adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
+          var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+            this.parameters.controller.activeTool?.options?.adjustTo);
 
 
           dragFigure = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
             if (pick?.pickedPoint) {
-              var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-              if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-                adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-              else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-                adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
+              var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+                this.parameters.controller.activeTool?.options?.adjustTo);
 
               this.parameters.controller.send('game', 'figure', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'move' });
             }
@@ -143,12 +138,31 @@ export class Figure extends Schema {
         }
 
         this.figureMesh?.dispose();
-        this.figureMesh = BABYLON.MeshBuilder.CreateDisc("disc", { radius: distance }, this.parameters.scene);
-        this.figureMesh.position = origin;
-        this.figureMesh.rotation.x = Math.PI * 2 / 4;
+
+        switch (this.type) {
+          case 'triangle':
+            this.figureMesh = Shapes.createTriangle("triangle", this.parameters.scene);
+            this.figureMesh.position = origin;
+            this.figureMesh.rotation.y = Vectors.Vector3.Angle(origin, target);
+            this.figureMesh.scaling.x = this.sum;
+            this.figureMesh.scaling.z = this.sum;
+            break;
+          case 'circle': default:
+            this.figureMesh = BABYLON.MeshBuilder.CreateDisc("circle", { radius: this.sum }, this.parameters.scene);
+            this.figureMesh.position = origin;
+            this.figureMesh.rotation.x = Math.PI * 2 / 4;
+            break;
+          case 'square':
+            this.figureMesh = BABYLON.MeshBuilder.CreatePlane("square", { size: this.sum * 2 }, this.parameters.scene);
+            this.figureMesh.position = origin;
+            this.figureMesh.rotation.x = Math.PI * 2 / 4;
+            this.sum = this.sum * 2;
+            break;
+        }
 
         var material = new BABYLON.StandardMaterial("figure", this.parameters.scene);
         material.diffuseColor = BABYLON.Color3.Red();
+        material.emissiveColor = BABYLON.Color3.Red();
         material.alpha = 0.5;
         this.figureMesh.material = material;
       }

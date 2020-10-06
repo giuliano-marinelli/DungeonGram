@@ -17,19 +17,19 @@ export class Rule extends Schema {
     this.points.splice(0, this.points.length);
   }
 
-  start(point: Point) {
+  start(point) {
     this.points.push(new Point(point.x, point.y));
     this.points.push(new Point(point.x, point.y));
   }
 
-  move(point: Point) {
+  move(point) {
     if (this.points[this.points.length - 1]) {
       this.points[this.points.length - 1].x = point.x;
       this.points[this.points.length - 1].y = point.y;
     }
   }
 
-  add(point: Point) {
+  add(point) {
     this.points.push(new Point(point.x, point.y));
     console.log(this.points);
   }

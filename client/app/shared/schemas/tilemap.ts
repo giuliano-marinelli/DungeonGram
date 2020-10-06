@@ -91,8 +91,8 @@ export class TileMap extends Schema {
         if (pick.pickedPoint) {
           if (this.parameters.controller.activeTool?.name == 'walls' &&
             (!this.parameters.controller.activeTool?.options.remove || !pick.pickedMesh.isWall)) {
-            var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-            adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+            var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+              this.parameters.controller.activeTool?.options?.adjustTo);
             if (!this.temporalWallStartPoint && !this.temporalWallEndPoint) {
               this.temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 0.1, depth: 0.1 }, this.parameters.scene);
               this.temporalWallStartPoint.position = new BABYLON.Vector3(adjustedPoint.x, 1.25, adjustedPoint.z);
@@ -104,8 +104,8 @@ export class TileMap extends Schema {
                 this.temporalWallRay?.dispose();
                 var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
                 if (pick.pickedPoint) {
-                  var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-                  adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+                  var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+                    this.parameters.controller.activeTool?.options?.adjustTo);
                   var origin = new BABYLON.Vector3(this.temporalWallStartPoint.position.x, 0, this.temporalWallStartPoint.position.z);
                   var target = new BABYLON.Vector3(this.temporalWallEndPoint.position.x, 0, this.temporalWallEndPoint.position.z);
                   var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
@@ -134,8 +134,8 @@ export class TileMap extends Schema {
           if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction) {
             this.parameters.controller.send('game', 'player', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z), action: 'move' });
           } else if (this.parameters.controller.activeTool?.name == 'walls') {
-            var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-            adjustedPoint = Vectors.getGridPoint(adjustedPoint, this.parameters.controller.activeTool?.options?.adjustTo);
+            var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+              this.parameters.controller.activeTool?.options?.adjustTo);
             this.parameters.canvas.removeEventListener("pointermove", this.dragWall, false);
             this.temporalWallStartPoint?.dispose();
             this.temporalWallEndPoint?.dispose();

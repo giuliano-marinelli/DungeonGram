@@ -48,38 +48,30 @@
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-walls-adjust-to" id="tool-walls-adjust-to-grid"
                 value="grid" #walls_adjust_to_grid (change)="tool.actions.adjustTo(walls_adjust_to_grid.value)" checked>
-              <label class="form-check-label" for="tool-walls-adjust-to-grid">
-                Adjust to Grid
-              </label>
+              <label class="form-check-label" for="tool-walls-adjust-to-grid">Adjust to Grid</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-walls-adjust-to"
                 id="tool-walls-adjust-to-half-grid" value="half_grid" #walls_adjust_to_half_grid
                 (change)="tool.actions.adjustTo(walls_adjust_to_half_grid.value)">
-              <label class="form-check-label" for="tool-walls-adjust-to-half-grid">
-                Adjust to Half Grid
-              </label>
+              <label class="form-check-label" for="tool-walls-adjust-to-half-grid">Adjust to Half Grid</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-walls-adjust-to"
                 id="tool-walls-adjust-to-quarter-grid" value="quarter_grid" #walls_adjust_to_quarter_grid
                 (change)="tool.actions.adjustTo(walls_adjust_to_quarter_grid.value)">
-              <label class="form-check-label" for="tool-walls-adjust-to-quarter-grid">
-                Adjust to Quarter Grid
-              </label>
+              <label class="form-check-label" for="tool-walls-adjust-to-quarter-grid">Adjust to Quarter Grid</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-walls-adjust-to" id="tool-walls-adjust-to-none"
                 value="none" #walls_adjust_to_none (change)="tool.actions.adjustTo(walls_adjust_to_none.value)">
-              <label class="form-check-label" for="tool-walls-adjust-to-none">
-                Not Adjust
-              </label>
+              <label class="form-check-label" for="tool-walls-adjust-to-none">Not Adjust</label>
             </div>
             <hr />
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-remove" #walls_remove
                 (change)="tool.actions.remove(walls_remove.checked)" checked>
-              <label class="custom-control-label" for="tool-walls-remove">Remove on Click</label>
+              <label class="custom-control-label" for="tool-walls-remove">Remove with Ctrl+Click</label>
             </div>
             <!-- <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-walls-adjust-to-grid" #walls_adjust_to_grid
@@ -100,26 +92,25 @@
 
           <div *ngSwitchCase="'rule'">
             <div class="form-check">
+              <input class="form-check-input" type="radio" name="tool-rule-adjust-to" id="tool-rule-adjust-to-half-grid"
+                value="half_grid" #rule_adjust_to_half_grid
+                (change)="tool.actions.adjustTo(rule_adjust_to_half_grid.value)" checked>
+              <label class="form-check-label" for="tool-rule-adjust-to-half-grid">Adjust to Half Grid</label>
+            </div>
+            <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-rule-adjust-to" id="tool-rule-adjust-to-corner"
                 value="corner" #rule_adjust_to_corner (change)="tool.actions.adjustTo(rule_adjust_to_corner.value)">
-              <label class="form-check-label" for="tool-rule-adjust-to-corner">
-                Adjust to Corner
-              </label>
+              <label class="form-check-label" for="tool-rule-adjust-to-corner">Adjust to Corner</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-rule-adjust-to" id="tool-rule-adjust-to-center"
-                value="center" #rule_adjust_to_center (change)="tool.actions.adjustTo(rule_adjust_to_center.value)"
-                checked>
-              <label class="form-check-label" for="tool-rule-adjust-to-center">
-                Adjust to Center
-              </label>
+                value="center" #rule_adjust_to_center (change)="tool.actions.adjustTo(rule_adjust_to_center.value)">
+              <label class="form-check-label" for="tool-rule-adjust-to-center">Adjust to Center</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-rule-adjust-to" id="tool-rule-adjust-to-none"
                 value="none" #rule_adjust_to_none (change)="tool.actions.adjustTo(rule_adjust_to_none.value)">
-              <label class="form-check-label" for="tool-rule-adjust-to-none">
-                Not Adjust
-              </label>
+              <label class="form-check-label" for="tool-rule-adjust-to-none">Not Adjust</label>
             </div>
             <hr />
             <div class="custom-control custom-switch">
@@ -134,40 +125,78 @@
             </div>
           </div>
 
-          <div *ngSwitchCase="'figure'">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="tool-figure-adjust-to" id="tool-figure-adjust-to-corner"
-                value="corner" #figure_adjust_to_corner (change)="tool.actions.adjustTo(figure_adjust_to_corner.value)">
-              <label class="form-check-label" for="tool-figure-adjust-to-corner">
-                Adjust to Corner
+          <div *ngSwitchCase="'figure'" id="tool-figure-container">
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-figure-type"
+                  id="tool-figure-type-triangle" #figure_type_triangle value="triangle"
+                  (change)="tool.actions.type(figure_type_triangle.value)" checked>
+                <!-- <label class="form-check-label" for="tool-figure-type-triangle">Cone</label> -->
+                <img src="assets/images/tools/figures/triangle.png" alt="Cone" data-toggle-tooltip="tooltip"
+                  title="Cone" data-placement="bottom" data-container="#tool-figure-container">
               </label>
             </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="tool-figure-adjust-to" id="tool-figure-adjust-to-center"
-                value="center" #figure_adjust_to_center (change)="tool.actions.adjustTo(figure_adjust_to_center.value)"
-                checked>
-              <label class="form-check-label" for="tool-figure-adjust-to-center">
-                Adjust to Center
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-figure-type"
+                  id="tool-figure-type-circle" #figure_type_circle value="circle"
+                  (change)="tool.actions.type(figure_type_circle.value)">
+                <!-- <label class="form-check-label" for="tool-figure-type-circle">Sphere</label> -->
+                <img src="assets/images/tools/figures/circle.png" alt='Sphere' data-toggle-tooltip="tooltip"
+                  title="Sphere" data-placement="bottom" data-container="#tool-figure-container">
               </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-figure-type"
+                  id="tool-figure-type-square" #figure_type_square value="square"
+                  (change)="tool.actions.type(figure_type_square.value)">
+                <!-- <label class="form-check-label" for="tool-figure-type-square">Cube</label> -->
+                <img src="assets/images/tools/figures/square.png" alt='Cube' data-toggle-tooltip="tooltip" title="Cube"
+                  data-placement="bottom" data-container="#tool-figure-container">
+              </label>
+            </div>
+
+            <hr />
+
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="tool-figure-adjust-to"
+                id="tool-figure-adjust-to-half-grid" value="half_grid" #figure_adjust_to_half_grid
+                (change)="tool.actions.adjustTo(figure_adjust_to_half_grid.value)" checked>
+              <label class="form-check-label" for="tool-figure-adjust-to-half-grid">Adjust to Half Grid</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="tool-figure-adjust-to"
+                id="tool-figure-adjust-to-corner" value="corner" #figure_adjust_to_corner
+                (change)="tool.actions.adjustTo(figure_adjust_to_corner.value)">
+              <label class="form-check-label" for="tool-figure-adjust-to-corner">Adjust to Corner</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="tool-figure-adjust-to"
+                id="tool-figure-adjust-to-center" value="center" #figure_adjust_to_center
+                (change)="tool.actions.adjustTo(figure_adjust_to_center.value)">
+              <label class="form-check-label" for="tool-figure-adjust-to-center">Adjust to Center</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-figure-adjust-to" id="tool-figure-adjust-to-none"
                 value="none" #figure_adjust_to_none (change)="tool.actions.adjustTo(figure_adjust_to_none.value)">
-              <label class="form-check-label" for="tool-figure-adjust-to-none">
-                Not Adjust
-              </label>
+              <label class="form-check-label" for="tool-figure-adjust-to-none">Not Adjust</label>
             </div>
+
             <hr />
+
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-figure-normalize-unit" #figure_normalize_unit
                 (change)="tool.actions.normalizeUnit(figure_normalize_unit.checked)" checked>
               <label class="custom-control-label" for="tool-figure-normalize-unit">Normalize Unit</label>
             </div>
+
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-figure-share" #figure_share
                 (change)="tool.actions.share(figure_share.checked)">
               <label class="custom-control-label" for="tool-figure-share">Share with others</label>
             </div>
+
           </div>
 
         </div>

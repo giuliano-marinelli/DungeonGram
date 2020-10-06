@@ -54,21 +54,15 @@ export class Rule extends Schema {
       if (e.button == 0 && this.parameters.controller.activeTool?.name == 'rule') {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick?.pickedPoint) {
-          var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-          if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-            adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-          else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-            adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
+          var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+            this.parameters.controller.activeTool?.options?.adjustTo);
 
 
           dragRule = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
             if (pick?.pickedPoint) {
-              var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-              if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-                adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-              else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-                adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
+              var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+                this.parameters.controller.activeTool?.options?.adjustTo);
 
               this.parameters.controller.send('game', 'rule', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'move' });
             }
@@ -77,11 +71,8 @@ export class Rule extends Schema {
             if (e.button == 2) {
               var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
               if (pick?.pickedPoint) {
-                var adjustedPoint = new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z)
-                if (this.parameters.controller.activeTool?.options?.adjustTo == 'corner')
-                  adjustedPoint = Vectors.getCornerGridPoint(adjustedPoint);
-                else if (this.parameters.controller.activeTool?.options?.adjustTo == 'center')
-                  adjustedPoint = Vectors.getCenterGridPoint(adjustedPoint);
+                var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
+                  this.parameters.controller.activeTool?.options?.adjustTo);
                 this.parameters.controller.send('game', 'rule', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'add' });
               }
             }
