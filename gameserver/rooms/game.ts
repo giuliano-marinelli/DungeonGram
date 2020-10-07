@@ -1,7 +1,6 @@
 import { Room, Client } from 'colyseus';
 import { Schema, type, MapSchema } from '@colyseus/schema';
 import { World } from '../schemas/world';
-import { Point } from '../schemas/point';
 
 export class State extends Schema {
   @type(World)

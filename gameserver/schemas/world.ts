@@ -5,7 +5,7 @@ import { TileMap } from '../schemas/tilemap';
 import { Point } from './point';
 import { Wall } from './wall';
 import { Utils } from '../rooms/game';
-
+import { WorldPhysics } from '../physics/world.physics';
 export class World extends Schema {
   @type({ map: User })
   users = new MapSchema<User>();
@@ -15,20 +15,25 @@ export class World extends Schema {
   walls = new MapSchema<Wall>();
   @type(TileMap)
   tilemap: TileMap = new TileMap(20, 20);
+  //physics
+  worldPhysics: WorldPhysics = new WorldPhysics();
 
   command = {
     user: {
       join: {
         do: (client: string, data: any) => {
-          this.players[client] = new Player();
           this.users[client] = new User();
           this.users[client].selectedPlayer = client;
+
+          this.players[client] = new Player();
+          this.players[client].playerPhysics = this.worldPhysics.addEntity(client, 'player', { x: this.players[client].x, y: this.players[client].y }) //add physics player
         }
       },
       leave: {
         do: (client: string, data: any) => {
-          delete this.players[client];
           delete this.users[client];
+          delete this.players[client];
+          this.worldPhysics.removeEntity(client, 'player'); //remove physics player
         }
       },
     },
@@ -36,7 +41,7 @@ export class World extends Schema {
       move: {
         do: (client: string, data: any) => {
           if (this.users[client].selectedPlayer &&
-            data.x > 0 && data.y > 0 &&
+            data.x >= 0 && data.y >= 0 &&
             data.x < this.tilemap.width && data.y < this.tilemap.height)
             this.players[this.users[client].selectedPlayer].move({ x: data.x, y: data.y });
         },
@@ -66,7 +71,7 @@ export class World extends Schema {
       state: { wallFirstPoint: null },
       start: {
         do: (client: string, data: any) => {
-          this.command.wall.state.wallFirstPoint = new Point(data.x, data.y);
+          this.command.wall.state.wallFirstPoint = { x: data.x, y: data.y };
         },
         validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
@@ -75,7 +80,10 @@ export class World extends Schema {
           if (this.command.wall.state.wallFirstPoint &&
             (this.command.wall.state.wallFirstPoint.x != data.x
               || this.command.wall.state.wallFirstPoint.y != data.y)) {
-            this.walls[Utils.uuidv4()] = new Wall(this.command.wall.state.wallFirstPoint, new Point(data.x, data.y));
+            var wallId = Utils.uuidv4();
+            this.walls[wallId] = new Wall(this.command.wall.state.wallFirstPoint, { x: data.x, y: data.y });
+            this.walls[wallId].wallPhysics = this.worldPhysics.addEntity(wallId, 'wall',
+              { from: this.command.wall.state.wallFirstPoint, to: { x: data.x, y: data.y } }); //add physics wall
           }
           this.command.wall.state.wallFirstPoint = null;
         },
@@ -84,6 +92,7 @@ export class World extends Schema {
       remove: {
         do: (client: string, data: any) => {
           delete this.walls[data.id];
+          this.worldPhysics.removeEntity(data.id, 'wall'); //remove physics wall
         },
         validate: (data: any) => { return data.id != null && typeof data.id === "string" }
       },
@@ -226,6 +235,10 @@ export class World extends Schema {
   }
 
   update(deltaTime: number) {
+    //udpate physics world
+    this.worldPhysics.update(deltaTime);
+
+    //update each player (their update their physics individually)
     for (var id in this.players) {
       this.players[id].update(deltaTime);
     }

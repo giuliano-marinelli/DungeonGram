@@ -23,6 +23,11 @@ export class Player extends Schema {
   visionLight?: any;
   visionRays?: any = [];
   visiblePlayers?: any = [];
+  //physics
+  xPhysics?: number;
+  yPhysics?: number;
+  isCollidingPhysics?: boolean;
+  colliderPhysics?: any;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -71,6 +76,9 @@ export class Player extends Schema {
                 this.animator?.play('idle');
             });
           break;
+        case 'direction':
+          this.animator?.rotate(Vectors.directionToRotate(this.direction));
+          break;
         case 'beignDragged':
           if (this.beignDragged) {
             if (this.collider) this.collider.isDragged = true;
@@ -85,6 +93,18 @@ export class Player extends Schema {
         case 'visionRange':
           if (this.visionLight) this.visionLight.range = this.visionRange;
           break;
+        case 'xPhysics':
+          if (this.colliderPhysics) this.colliderPhysics.position.x = this.xPhysics;
+          break;
+        case 'yPhysics':
+          if (this.colliderPhysics) this.colliderPhysics.position.z = this.yPhysics;
+          break;
+        case 'isCollidingPhysics':
+          if (this.colliderPhysics)
+            this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
+          if (this.isCollidingPhysics)
+            this.animator?.play('idle');
+          break;
       }
     });
 
@@ -92,12 +112,13 @@ export class Player extends Schema {
       this.parameters.world.updatePlayersVisibility(this.id);
       this.initVisionLight();
     }
-    this.animator?.rotate(Vectors.directionToRotate(this.direction));
   }
 
   remove() {
     super.remove();
     this.mesh.dispose();
+    this.collider.dispose();
+    this.colliderPhysics.dispose();
   }
 
   doMesh() {
@@ -121,6 +142,16 @@ export class Player extends Schema {
         this.collider.isCollible = true;
         this.collider.isPlayer = true;
 
+        //set collider phyics mesh
+        this.colliderPhysics = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 0.9, depth: 0.9 }, this.parameters.scene);
+        this.colliderPhysics.name = this.id + "physics";
+        this.colliderPhysics.position.y = 0.95;
+        this.colliderPhysics.position.x = this.xPhysics;
+        this.colliderPhysics.position.z = this.yPhysics;
+        this.colliderPhysics.visibility = 0;
+        this.colliderPhysics.isPickable = false;
+        this.colliderPhysics.material = new BABYLON.StandardMaterial("colliderPhysicsMaterial", this.parameters.scene);
+
         this.skeleton = skeletons[0];
 
         var idleRange = this.skeleton.getAnimationRange("YBot_Idle");
@@ -139,6 +170,9 @@ export class Player extends Schema {
             right: this.parameters.scene.beginWeightedAnimation(this.skeleton, rightRange.from, rightRange.to, 0.0, true)
           }, this.mesh, this.parameters.scene
         );
+
+        //adjust start direction
+        this.animator.rotate(Vectors.directionToRotate(this.direction));
 
         //set action on mouse in/out/click
         this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);

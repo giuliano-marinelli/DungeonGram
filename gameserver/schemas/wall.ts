@@ -1,15 +1,18 @@
 import { Schema, type } from "@colyseus/schema";
 import { Point } from './point';
+import { WallPhysics } from '../physics/wall.physics';
 
 export class Wall extends Schema {
   @type(Point)
   from: Point;
   @type(Point)
   to: Point;
+  //physics
+  wallPhysics: WallPhysics;
 
-  constructor(from: Point, to: Point) {
+  constructor(from: any, to: any) {
     super();
-    this.from = from;
-    this.to = to;
+    this.from = new Point(from.x, from.y);
+    this.to = new Point(to.x, to.y);
   }
 }

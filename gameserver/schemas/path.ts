@@ -26,6 +26,14 @@ export class Path extends Schema {
     }, 100);
   }
 
+  doPoint() {
+    this.points.shift();
+    if (!this.points.length) {
+      this.from = null;
+      this.to = null;
+    }
+  }
+
   unset() {
     this.from = null;
     this.to = null;

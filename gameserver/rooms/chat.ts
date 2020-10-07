@@ -3,10 +3,10 @@ import { Roll } from '../schemas/roll';
 
 export class ChatRoom extends Room {
   onCreate(options) {
-    console.log("ChatRoom: Created", options);
+    console.log("ChatRoom: created", options);
 
     this.onMessage("message", (client, message) => {
-      console.log("ChatRoom: received message from", client.sessionId, ":", message);
+      console.log('ChatRoom: client', client.sessionId, 'send message =>', message);
       var roll = new Roll(message);
       console.log(roll);
       this.broadcast("messages", '<b>' + client.sessionId + '</b> ' +
@@ -26,7 +26,7 @@ export class ChatRoom extends Room {
   }
 
   onDispose() {
-    console.log("ChatRoom: Dispose");
+    console.log("ChatRoom: dispose");
   }
 
 }

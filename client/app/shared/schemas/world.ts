@@ -107,6 +107,7 @@ export class World extends Schema {
     //init shadow generator for base light
     new BABYLON.ShadowGenerator(4096, this.lights.baseLight);
     this.lights.baseLight._shadowGenerator.useBlurExponentialShadowMap = true;
+    this.lights.baseLight._shadowGenerator.darkness = 0.5;
 
     //init skybox
     // var box = BABYLON.Mesh.CreateBox('SkyBox', 1000, this.parameters.scene, false, BABYLON.Mesh.BACKSIDE);
@@ -137,9 +138,9 @@ export class World extends Schema {
         for (let wall in this.walls) {
           this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
         }
-        // for (let player in this.players) {
-        //   this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
-        // }
+        for (let player in this.players) {
+          this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
+        }
       } catch (err) { }
     });
   }

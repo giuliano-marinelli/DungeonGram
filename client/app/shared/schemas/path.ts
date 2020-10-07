@@ -10,6 +10,7 @@ export class Path extends Schema {
   //game objects
   meshTo?: any;
   meshPoints?: any[] = [];
+  rays?: any[] = [];
 
   constructor(schema, parameters) {
     super(parameters);
@@ -59,7 +60,7 @@ export class Path extends Schema {
 
       //set material
       var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-      material.diffuseColor = BABYLON.Color3.White();
+      material.emissiveColor = BABYLON.Color3.White();
       material.alpha = 1;
       this.meshTo.material = material;
 
@@ -76,25 +77,42 @@ export class Path extends Schema {
         meshPoint.dispose();
       });
       this.meshPoints = [];
+
+      this.rays.forEach(ray => {
+        ray.dispose();
+      });
+      this.rays = [];
     }
 
     if (this.parameters.playerId == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer &&
       this.points.length) {
-      this.points.forEach(point => {
+      for (let i = 0; i < this.points.length; i++) {
+        var point = this.points[i];
         //create mesh
-        this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
+        // this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
 
-        //set material
-        var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-        material.diffuseColor = BABYLON.Color3.White();
-        material.alpha = 0.8;
-        this.meshPoints[this.meshPoints.length - 1].material = material;
+        // //set material
+        // var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
+        // material.diffuseColor = BABYLON.Color3.White();
+        // material.alpha = 0.8;
+        // this.meshPoints[this.meshPoints.length - 1].material = material;
 
-        //positioning mesh
-        this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-        this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-        this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
-      });
+        // //positioning mesh
+        // this.meshPoints[this.meshPoints.length - 1].position.y = 0;
+        // this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
+        // this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
+        if (i > 0) {
+          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
+          var target = new BABYLON.Vector3(point.x, 0, point.y);
+          var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
+          var ray = new BABYLON.Ray(
+            origin,
+            targetNormalized,
+            BABYLON.Vector3.Distance(origin, target)
+          );
+          this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.White()));
+        }
+      }
     }
   }
 }

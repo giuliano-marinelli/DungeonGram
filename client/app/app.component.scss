@@ -8,6 +8,24 @@
   color: #1a1717 !important;
 }
 
+.dungeon-title {
+  background: black;
+  width: 100px;
+  margin-left: -16px;
+  margin-bottom: -8px;
+  height: 60px;
+  padding-left: 46px;
+  border-radius: 0px 40px 40px 0px;
+}
+
+.dungeon-title img {
+  transition: all 0.2s ease-in-out;
+}
+
+.dungeon-title img:hover {
+  filter: drop-shadow(0px 0px 4px white);
+}
+
 .dungeon-title:hover {
   // color: #880000 !important;
   color: #0e0c0c !important;
@@ -27,8 +45,14 @@
 .dungeon-navbar #navbar-supported-content a {
   color: #1a1717 !important;
   font-weight: 700;
+  transition: all 0.2s ease-in-out;
 }
 
 .dungeon-navbar #navbar-supported-content a:hover {
   color: #0e0c0c !important;
+  filter: drop-shadow(0px 0px 2px white);
+}
+
+.dungeon-navbar #navbar-supported-content a.active {
+  filter: drop-shadow(0px 0px 2px white);
 }
