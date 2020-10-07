@@ -136,7 +136,8 @@ export class World extends Schema {
     setTimeout(() => {
       try {
         for (let wall in this.walls) {
-          this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
+          if (this.walls[wall].size != 'collider')
+            this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
         }
         for (let player in this.players) {
           this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
@@ -208,8 +209,8 @@ export class World extends Schema {
   _updatePlayerVisibility(player, selectedPlayer) {
     if (this.players[player].mesh && player != selectedPlayer) {
       this.players[player].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.players[selectedPlayer].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[selectedPlayer].mesh.position.z);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1, this.players[player].mesh.position.z).subtract(origin));
+      var origin = new BABYLON.Vector3(this.players[selectedPlayer].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[selectedPlayer].mesh.position.z);
+      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[player].mesh.position.z).subtract(origin));
       var ray = new BABYLON.Ray(
         origin,
         target,

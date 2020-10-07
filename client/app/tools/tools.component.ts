@@ -22,8 +22,8 @@ export class ToolsComponent implements OnInit {
         name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: true,
         options: {
           remove: true,
-          adjustToGrid: true,
-          adjustTo: 'grid'
+          adjustTo: 'grid',
+          size: 'large'
         },
         actions: {
           toggle: () => {
@@ -31,9 +31,9 @@ export class ToolsComponent implements OnInit {
             this.controller.send('game', 'wall', { value: this.tools.walls.active, action: 'pickable' });
           },
           remove: (value) => { this.tools.walls.options.remove = value },
-          adjustToGrid: (value) => { this.tools.walls.options.adjustToGrid = value },
           adjustTo: (value) => { this.tools.walls.options.adjustTo = value },
           visibility: (visibility) => { this.controller.send('game', 'wall', { value: parseFloat(visibility.value), action: 'visibility' }) },
+          size: (value) => { this.tools.walls.options.size = value }
         }
       },
       rule: {

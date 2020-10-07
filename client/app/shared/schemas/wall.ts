@@ -8,6 +8,7 @@ export class Wall extends Schema {
   id?: string;
   from?: Point;
   to?: Point;
+  size?: string;
   //game objects
   mesh?: any;
 
@@ -27,7 +28,10 @@ export class Wall extends Schema {
   }
 
   doMesh() {
-    this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 2.55, width: 1, depth: 0.01 }, this.parameters.scene);
+    var height = 2.55;
+    if (this.size == 'medium') height = height / 2;
+    if (this.size == 'small' || this.size == 'collider') height = height / 4;
+    this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: height, width: 1, depth: 0.01 }, this.parameters.scene);
     // this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.01 }, this.parameters.scene);
     this.mesh.scaling.x = Vectors.distance(this.from, this.to);
     //set material of base tile mesh
@@ -39,7 +43,7 @@ export class Wall extends Schema {
 
     //positioning mesh
     var middlePoint = Vectors.middlePoint(this.from, this.to);
-    this.mesh.position.y = 1.25;
+    this.mesh.position.y = height / 2 - 0.05;
     // this.mesh.position.y = 0.45;
     this.mesh.position.x = middlePoint.x;
     this.mesh.position.z = middlePoint.y;

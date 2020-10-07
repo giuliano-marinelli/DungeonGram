@@ -81,13 +81,16 @@ export class World extends Schema {
             (this.command.wall.state.wallFirstPoint.x != data.x
               || this.command.wall.state.wallFirstPoint.y != data.y)) {
             var wallId = Utils.uuidv4();
-            this.walls[wallId] = new Wall(this.command.wall.state.wallFirstPoint, { x: data.x, y: data.y });
+            this.walls[wallId] = new Wall(this.command.wall.state.wallFirstPoint, { x: data.x, y: data.y }, data.size);
             this.walls[wallId].wallPhysics = this.worldPhysics.addEntity(wallId, 'wall',
               { from: this.command.wall.state.wallFirstPoint, to: { x: data.x, y: data.y } }); //add physics wall
           }
           this.command.wall.state.wallFirstPoint = null;
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (data: any) => {
+          return data.x != null && data.y != null && data.size != null &&
+            typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string"
+        }
       },
       remove: {
         do: (client: string, data: any) => {

@@ -37,7 +37,46 @@
             </div>
           </div>
 
-          <div *ngSwitchCase="'walls'">
+          <div *ngSwitchCase="'walls'" id="tool-walls-container">
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                  id="tool-walls-size-wall-large" #walls_type_wall_large value="large"
+                  (change)="tool.actions.size(walls_type_wall_large.value)" checked>
+                <img src="assets/images/tools/walls/wall_large.png" alt="Large" data-toggle-tooltip="tooltip"
+                  title="Large" data-placement="bottom" data-container="#tool-walls-container">
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                  id="tool-walls-size-wall-medium" #walls_type_wall_medium value="medium"
+                  (change)="tool.actions.size(walls_type_wall_medium.value)">
+                <img src="assets/images/tools/walls/wall_medium.png" alt='Medium' data-toggle-tooltip="tooltip"
+                  title="Medium" data-placement="bottom" data-container="#tool-walls-container">
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                  id="tool-walls-size-wall-small" #walls_type_wall_small value="small"
+                  (change)="tool.actions.size(walls_type_wall_small.value)">
+                <img src="assets/images/tools/walls/wall_small.png" alt='Small' data-toggle-tooltip="tooltip"
+                  title="Small" data-placement="bottom" data-container="#tool-walls-container">
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label>
+                <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                  id="tool-walls-size-wall-collider" #walls_type_wall_collider value="collider"
+                  (change)="tool.actions.size(walls_type_wall_collider.value)">
+                <img src="assets/images/tools/walls/wall_collider.png" alt='Only Collider' data-toggle-tooltip="tooltip"
+                  title="Only Collider" data-placement="bottom" data-container="#tool-walls-container">
+              </label>
+            </div>
+
+            <hr />
+
             <div class="form-group">
               <label>Visibility</label>
               <label style="float: right">{{walls_visibility.value}}</label>
@@ -73,11 +112,6 @@
                 (change)="tool.actions.remove(walls_remove.checked)" checked>
               <label class="custom-control-label" for="tool-walls-remove">Remove with Ctrl+Click</label>
             </div>
-            <!-- <div class="custom-control custom-switch">
-              <input type="checkbox" class="custom-control-input" id="tool-walls-adjust-to-grid" #walls_adjust_to_grid
-                (change)="tool.actions.adjustToGrid(walls_adjust_to_grid.checked)" checked>
-              <label class="custom-control-label" for="tool-walls-adjust-to-grid">Adjust to Grid</label>
-            </div> -->
           </div>
 
           <div *ngSwitchCase="'fogOfWar'">
