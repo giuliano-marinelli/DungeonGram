@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
-import {
-  GridMaterial
-} from '@babylonjs/materials';
 import { Controller } from '../shared/controller/controller';
 
 //game main schema

@@ -20,6 +20,11 @@
           </a>
         </li>
         <li class="nav-item">
+          <a routerLink="/character-editor" class="nav-link" routerLinkActive="active">
+            <i class="fa fa-fw fa-user"></i> Character Editor
+          </a>
+        </li>
+        <li class="nav-item">
           <a routerLink="/admin" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">
             <i class="fa fa-fw fa-users"></i> Users
           </a>

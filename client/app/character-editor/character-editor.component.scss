@@ -1,0 +1,144 @@
+#character-editor {
+  position: fixed;
+  width: 100%;
+  height: calc(100% - 58px);
+}
+
+canvas {
+  outline: none;
+}
+
+#renderCanvasCharacterEditor {
+  width: 100%;
+  height: 100%;
+}
+
+#equip {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+}
+
+.ce-container {
+  position: absolute;
+  width: 60px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 5px 0px 5px;
+  border-radius: 5px;
+}
+
+.ce-container h5 {
+  text-transform: capitalize;
+}
+
+.ce-container-head {
+  left: 20%;
+  top: 50px;
+}
+
+.ce-container-torso {
+  left: 20%;
+  top: 50%;
+}
+
+.ce-container-arms {
+  right: 20%;
+  top: 50px;
+}
+
+.ce-container-legs {
+  right: 20%;
+  top: 50%;
+}
+
+.ce-btn-container {
+  margin-bottom: 5px;
+}
+
+.ce-btn-container .dropdown-menu h5 {
+  text-transform: capitalize;
+}
+
+.ce-btn {
+  width: 50px;
+  height: 50px;
+  padding: 5px;
+}
+
+.ce-btn.active {
+  color: #ced4da;
+  background-color: #23272b;
+  border-color: #1d2124;
+  box-shadow: 0 0 0 0.2rem rgba(75, 81, 87, 0.5);
+}
+
+.ce-btn:focus {
+  color: #ced4da;
+  background-color: #343a40;
+  border-color: #343a40;
+  box-shadow: none;
+}
+
+.ce-btn > img {
+  width: 40px;
+  height: 40px;
+}
+
+.ce-btn.dropdown-toggle > img {
+  width: 30px;
+  height: 30px;
+}
+
+.ce-btn-container .dropdown-menu {
+  // top: 40px !important;
+  padding: 5px 10px;
+  width: 200px;
+}
+
+.ce-btn-container .dropright .dropdown-menu {
+  left: 55px !important;
+}
+
+.ce-btn-container .dropleft .dropdown-menu {
+  right: 55px !important;
+}
+
+//to make dropdown work on hover
+.ce-btn-container .dropright:hover > .dropdown-menu,
+.ce-btn-container .dropleft:hover > .dropdown-menu  {
+  display: block;
+}
+
+//adjust the container width for preserve menu on hover
+.ce-btn-container .dropright:hover {
+  width: 100px;
+}
+
+.ce-btn-container .dropleft:hover  {
+  width: 100px;
+  left: -50px;
+  padding-left: 50px;
+}
+
+/* HIDE RADIO */
+.form-check-input.check-image[type="radio"],
+.form-check-input.check-image[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+.form-check-input.check-image[type="radio"] + img,
+.form-check-input.check-image[type="checkbox"] + img {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+/* CHECKED STYLES */
+.form-check-input.check-image[type="radio"]:checked + img,
+.form-check-input.check-image[type="checkbox"]:checked + img  {
+  filter: drop-shadow(0px 0px 4px white);
+}

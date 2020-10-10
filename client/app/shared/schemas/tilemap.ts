@@ -1,10 +1,7 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
 import { Tile } from './tile';
-import {
-  GridMaterial,
-  ShadowOnlyMaterial
-} from '@babylonjs/materials';
+import { GridMaterial, ShadowOnlyMaterial } from '@babylonjs/materials';
 import { Vectors } from '../utils/vectors';
 
 export class TileMap extends Schema {

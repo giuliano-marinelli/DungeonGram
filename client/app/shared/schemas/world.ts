@@ -84,10 +84,10 @@ export class World extends Schema {
   initCamera() {
     //creates, angles, distances and targets the camera
     this.camera = new BABYLON.ArcRotateCamera("mainCamera", -1, 1, 30, new BABYLON.Vector3(3, 0, 3), this.parameters.scene);
-    //this positions the camera
+    this.camera.wheelPrecision = 40;
     this.camera.setPosition(new BABYLON.Vector3(20, 20, -15));
-    //this attaches the camera to the canvas
     this.camera.attachControl(this.parameters.canvas, true);
+
     //detach left click from camera control
     this.camera.inputs.attached.pointers.buttons[0] = null;
   }
@@ -98,6 +98,11 @@ export class World extends Schema {
     this.lights.baseLight.position = new BABYLON.Vector3(50, 100, 50);
     this.lights.baseLight.intensity = 1;
     this.lights.baseLight.specular = new BABYLON.Color3(0, 0, 0);
+
+    this.lights.secondLight = new BABYLON.DirectionalLight("secondLight", new BABYLON.Vector3(1, -2, 1), this.parameters.scene);
+    this.lights.secondLight.position = new BABYLON.Vector3(-50, 100, -50);
+    this.lights.secondLight.intensity = 1;
+    this.lights.secondLight.specular = new BABYLON.Color3(0, 0, 0);
 
     this.lights.fogLight = new BABYLON.DirectionalLight("fogLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
     this.lights.fogLight.position = new BABYLON.Vector3(50, 100, 50);
@@ -126,6 +131,13 @@ export class World extends Schema {
       if (this.lights.baseLight && this.tilemap?.terrain && !this.lights.baseLight.setted) {
         this.lights.baseLight.excludedMeshes.push(this.tilemap.terrain);
         this.lights.baseLight.setted = true;
+
+        this.lights.fogLight.includedOnlyMeshes.push(this.tilemap.terrain);
+      }
+
+      if (this.lights.secondLight && this.tilemap?.terrain && !this.lights.secondLight.setted) {
+        this.lights.secondLight.excludedMeshes.push(this.tilemap.terrain);
+        this.lights.secondLight.setted = true;
 
         this.lights.fogLight.includedOnlyMeshes.push(this.tilemap.terrain);
       }

@@ -2,55 +2,76 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Vectors } from '../utils/vectors';
 
 export class Animator {
-  planning: any[] = [];
-  animations: any = {};
   mesh: any;
-  scene: any;
-  playing: boolean = false;
-  actual: string;
-  rotationSpeed: number;
+  skeleton: any;
+  actual: any = { animation: null, loop: true };
+  rotationSpeed: number = 3;
   lastDirection: number = 0;
-  vectors: Vectors = Vectors;
+  transition: number = 0.05;
 
-  constructor(animations: any, mesh: any, scene: any, rotationSpeed: number = 3) {
-    this.animations = animations;
+  constructor(mesh: any, skeleton: any, options?: any) {
     this.mesh = mesh;
-    this.scene = scene;
-    this.rotationSpeed = rotationSpeed;
+    this.skeleton = skeleton;
+    if (options?.rotationSpeed) this.rotationSpeed = options?.rotationSpeed;
+    if (options?.transition) this.transition = options?.transition;
 
-    this.scene.onBeforeAnimationsObservable.add(() => {
-      if (!this.playing && this.planning.length) {
-        this.playing = true;
-        this.actual = this.planning.shift();
-        let obs = this.scene.onBeforeAnimationsObservable.add(() => {
-          for (let key in this.animations) {
-            if (this.actual != key)
-              this.animations[key].weight -= this.animations[key].weight > 0 ? 0.01 : 0;
-            else
-              this.animations[key].weight += this.animations[key].weight < 1 ? 0.01 : 0;
-          }
-          if (this.animations[this.actual].weight == 1) {
-            this.scene.onBeforeAnimationsObservable.remove(obs);
-            this.playing = false;
-          }
+    this.skeleton.enableBlending(this.transition);
+    for (let anim in this.skeleton._ranges) {
+      this.skeleton._ranges[anim].from = this.skeleton._ranges[anim].from + 1;
+    }
+
+    if (options?.actual) this.play(options?.actual);
+  }
+
+  play(animation, loop?) {
+    if (loop == null) loop = true;
+    if (animation != this.actual.animation || loop != this.actual.animation) {
+      this.skeleton.beginAnimation(animation, loop, 1);
+      // this.mesh.getChildren().forEach((child) => {
+      if (this.mesh._children) {
+        this.mesh._children.forEach((child) => { //for each formally registered child
+          child.skeleton?.beginAnimation(animation, loop, 1);
         });
       }
-    });
+      this.actual.animation = animation;
+      this.actual.loop = loop;
+    }
   }
 
-  play(animation) {
-    this.planning.push(animation);
+  parent(mesh) {
+    if (!this.mesh._children || !this.mesh._children.find((child) => { return child.uniqueId == mesh.uniqueId })) {
+      mesh.parent = this.mesh;
+      mesh.skeleton = this.mesh.skeleton.clone("childSkeleton");
+      // mesh.skeleton.enableBlending(this.transition);
+      // for (let anim in mesh.skeleton._ranges) {
+      //   mesh.skeleton._ranges[anim].from = mesh.skeleton._ranges[anim].from + 1;
+      // }
+      this.mesh._children.forEach((child) => { //for each formally registered child
+        child.skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
+      });
+      this.skeleton.beginAnimation(this.actual.animation, this.actual.loop, 1);
+    }
   }
 
-  clear() {
-    this.planning = [];
+  unparent(child) {
+    // var child = this.mesh._children.find((child) => { return child.uniqueId == uniqueId });
+    // if (child) {
+    //   child.parent = null;
+    //   child.setParent(null);
+    //   this.mesh.removeChild(child);
+    //   this.childs.
+    // }
+
+    child.parent = null;
+    child.setParent(null);
+    this.mesh.removeChild(child);
   }
 
-  rotate(direction) {
+  rotate(direction, invert) {
     BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
       this.rotationSpeed, 1, this.mesh?.rotation.y, this.mesh?.rotation.y + Math.PI * 2 / 8 * Vectors.distanceBetweenDirections(this.lastDirection, direction),
       BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
-        this.mesh.rotation.y = Math.PI * 2 / 8 * direction;
+        this.mesh.rotation.y = Math.PI * 2 / 8 * direction * (invert ? -1 : 1);
       });
 
     this.lastDirection = direction;

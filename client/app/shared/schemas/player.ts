@@ -4,6 +4,7 @@ import { Point } from './point';
 import { Schema } from './schema';
 import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
+import "@babylonjs/loaders/glTF/2.0/glTFLoader";
 
 export class Player extends Schema {
   //schema
@@ -57,23 +58,21 @@ export class Player extends Schema {
     changes?.forEach((change) => {
       switch (change.field) {
         case 'x':
-          this.animator?.clear();
-          if (!this.beignDragged) this.animator?.play('run');
+          if (!this.beignDragged) this.animator?.play('Run');
           BABYLON.Animation.CreateAndStartAnimation("moveX", this.mesh, "position.x",
             100, this.movementCooldown / 10, this.mesh?.position.x, this.x,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
-              if (!this.movementPath.to)
-                this.animator?.play('idle');
+              if (!this.movementPath.to && !this.beignDragged)
+                this.animator?.play('Idle');
             });
           break;
         case 'y':
-          this.animator?.clear();
-          if (!this.beignDragged) this.animator?.play('run');
+          if (!this.beignDragged) this.animator?.play('Run');
           BABYLON.Animation.CreateAndStartAnimation("moveZ", this.mesh, "position.z",
             100, this.movementCooldown / 10, this.mesh?.position.z, this.y,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
-              if (!this.movementPath.to)
-                this.animator?.play('idle');
+              if (!this.movementPath.to && !this.beignDragged)
+                this.animator?.play('Idle');
             });
           break;
         case 'direction':
@@ -81,10 +80,12 @@ export class Player extends Schema {
           break;
         case 'beignDragged':
           if (this.beignDragged) {
+            this.animator?.play('Float');
             if (this.collider) this.collider.isDragged = true;
             BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
               10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
           } else {
+            this.animator?.play('Idle');
             if (this.collider) this.collider.isDragged = false;
             BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
               10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -103,7 +104,7 @@ export class Player extends Schema {
           if (this.colliderPhysics)
             this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
           if (this.isCollidingPhysics)
-            this.animator?.play('idle');
+            this.animator?.play('Idle');
           break;
       }
     });
@@ -123,7 +124,7 @@ export class Player extends Schema {
 
   doMesh() {
     if (!this.mesh) {
-      BABYLON.SceneLoader.ImportMesh('', "assets/meshes/", "dummy.babylon", this.parameters.scene, (meshes, particleSystems, skeletons) => {
+      BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
         this.mesh = meshes[0];
         this.mesh.name = this.id;
 
@@ -154,22 +155,8 @@ export class Player extends Schema {
 
         this.skeleton = skeletons[0];
 
-        var idleRange = this.skeleton.getAnimationRange("YBot_Idle");
-        var walkRange = this.skeleton.getAnimationRange("YBot_Walk");
-        var runRange = this.skeleton.getAnimationRange("YBot_Run");
-        var leftRange = this.skeleton.getAnimationRange("YBot_LeftStrafeWalk");
-        var rightRange = this.skeleton.getAnimationRange("YBot_RightStrafeWalk");
-
         //create the animator to manage the transition between animations
-        this.animator = new Animator(
-          {
-            idle: this.parameters.scene.beginWeightedAnimation(this.skeleton, idleRange.from, idleRange.to, 1.0, true),
-            walk: this.parameters.scene.beginWeightedAnimation(this.skeleton, walkRange.from, walkRange.to, 0.0, true),
-            run: this.parameters.scene.beginWeightedAnimation(this.skeleton, runRange.from, runRange.to, 0.0, true),
-            left: this.parameters.scene.beginWeightedAnimation(this.skeleton, leftRange.from, leftRange.to, 0.0, true),
-            right: this.parameters.scene.beginWeightedAnimation(this.skeleton, rightRange.from, rightRange.to, 0.0, true)
-          }, this.mesh, this.parameters.scene
-        );
+        this.animator = new Animator(this.mesh, this.skeleton, { actual: 'Idle' });
 
         //adjust start direction
         this.animator.rotate(Vectors.directionToRotate(this.direction));

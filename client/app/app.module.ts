@@ -24,6 +24,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { GameComponent } from './game/game.component';
 import { ChatComponent } from './chat/chat.component';
 import { ToolsComponent } from './tools/tools.component';
+import { CharacterEditorComponent } from './character-editor/character-editor.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { ToolsComponent } from './tools/tools.component';
     EditorComponent,
     GameComponent,
     ChatComponent,
-    ToolsComponent
+    ToolsComponent,
+    CharacterEditorComponent
   ],
   imports: [
     AppRoutingModule,
