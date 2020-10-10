@@ -32,23 +32,28 @@ canvas {
 }
 
 .ce-container-head {
-  left: 20%;
-  top: 50px;
+  right: 5%;
+  top: 5%;
 }
 
 .ce-container-torso {
-  left: 20%;
-  top: 50%;
+  left: 5%;
+  top: 5%;
 }
 
 .ce-container-arms {
-  right: 20%;
-  top: 50px;
+  left: 5%;
+  top: calc(5% + 265px);
 }
 
 .ce-container-legs {
-  right: 20%;
-  top: 50%;
+  right: 5%;
+  top: calc(5% + 375px);
+}
+
+.ce-container-skin {
+  right: 5%;
+  top: calc(5% + 375px + 155px);
 }
 
 .ce-btn-container {
@@ -105,7 +110,7 @@ canvas {
 
 //to make dropdown work on hover
 .ce-btn-container .dropright:hover > .dropdown-menu,
-.ce-btn-container .dropleft:hover > .dropdown-menu  {
+.ce-btn-container .dropleft:hover > .dropdown-menu {
   display: block;
 }
 
@@ -114,7 +119,7 @@ canvas {
   width: 100px;
 }
 
-.ce-btn-container .dropleft:hover  {
+.ce-btn-container .dropleft:hover {
   width: 100px;
   left: -50px;
   padding-left: 50px;
@@ -139,6 +144,6 @@ canvas {
 
 /* CHECKED STYLES */
 .form-check-input.check-image[type="radio"]:checked + img,
-.form-check-input.check-image[type="checkbox"]:checked + img  {
+.form-check-input.check-image[type="checkbox"]:checked + img {
   filter: drop-shadow(0px 0px 4px white);
 }

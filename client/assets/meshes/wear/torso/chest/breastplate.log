@@ -92,22 +92,22 @@ Exporter version: 6.4.4, Blender version: 2.83.2
 		animation processing begun
 			processing action TPose.004:  in[1 - 2], out[0 - 2]
 		processing begun of material:  Material
-		num positions      :  253
-		num normals        :  253
-		num tangents       :  1012
+		num positions      :  1105
+		num normals        :  1105
+		num tangents       :  4420
 		num uvs            :  0
 		num uvs2           :  0
 		num colors         :  0
-		num triangles      :  100
+		num triangles      :  416
 		Skeleton stats:  
-			Total Influencers:  1012
-			Avg # of influencers per vertex:  4
-			Highest # of influencers observed:  4, num vertices with this:  253
-			exported as 4 influencers
-			num skeletonWeights and skeletonIndices:  1012
+			Total Influencers:  4405
+			Avg # of influencers per vertex:  3.9864
+			Highest # of influencers observed:  6, num vertices with this:  15
+			exported as 6 influencers
+			num skeletonWeights and skeletonIndices:  8840
 	processing begun of camera (UniversalCamera):  Camera
 ========= Writing of JSON file started =========
 	writing mesh:  Wear
 ========= Writing of JSON file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 2.0779 secs
+elapsed time:  0 min, 2.4272 secs

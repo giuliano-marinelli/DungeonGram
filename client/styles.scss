@@ -30,10 +30,12 @@ input:-webkit-autofill {
 ::-webkit-scrollbar {
   width: 8px;
   height: 1px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: #212529;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -47,3 +49,5 @@ input:-webkit-autofill {
 
 /* Importing Bootstrap SCSS file. */
 @import "~bootstrap/scss/bootstrap";
+
+@import "~bootstrap-colorpicker/src/sass/colorpicker.scss";

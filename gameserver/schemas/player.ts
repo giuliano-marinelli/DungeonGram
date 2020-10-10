@@ -1,8 +1,11 @@
-import { Schema, type } from '@colyseus/schema';
+import { Schema, type, MapSchema } from '@colyseus/schema';
 import { Path } from '../schemas/path';
 import { Point } from '../schemas/point';
+import { Wear } from '../schemas/wear';
 import { PlayerPhysics } from '../physics/player.physics';
 import { Vector } from 'matter-js';
+import { Utils } from '../rooms/game';
+
 export class Player extends Schema {
   @type("number")
   x = 0;
@@ -13,11 +16,13 @@ export class Player extends Schema {
   @type(Path)
   movementPath: Path = new Path();
   @type("number")
-  movementCooldown = 500;
+  movementCooldown = 400;
   @type("boolean")
   beignDragged = false;
   @type("number")
   visionRange = 10;
+  @type({ map: Wear })
+  wears = new MapSchema<Wear>();
   //internal attributes
   movementAcum = 0;
   collide = false;
@@ -30,6 +35,25 @@ export class Player extends Schema {
   yPhysics = 0;
   @type("boolean")
   isCollidingPhysics = false;
+
+  constructor() {
+    super();
+    // var skinColor = Utils.randomHexColor();
+    // this.wears[Utils.uuidv4()] = new Wear('skin', 'color', 'none', skinColor);
+    // this.wears[Utils.uuidv4()] = new Wear('head', 'ears', 'elf.ears', skinColor);
+    // this.wears[Utils.uuidv4()] = new Wear('head', 'hair', 'mohicano', Utils.randomHexColor());
+    // this.wears[Utils.uuidv4()] = new Wear('torso', 'chest', 'padded.armor.chest', Utils.randomHexColor());
+    // this.wears[Utils.uuidv4()] = new Wear('torso', 'hips', 'padded.armor.hips', Utils.randomHexColor());
+    // this.wears[Utils.uuidv4()] = new Wear('legs', 'feet', 'leather.boots', Utils.randomHexColor());
+    // this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', Utils.randomHexColor());
+    this.wears[Utils.uuidv4()] = new Wear('skin', 'color', 'none', '#dc9b78');
+    this.wears[Utils.uuidv4()] = new Wear('head', 'ears', 'elf.ears', '#dc9b78');
+    this.wears[Utils.uuidv4()] = new Wear('head', 'hair', 'mohicano', '#ffc107');
+    this.wears[Utils.uuidv4()] = new Wear('torso', 'chest', 'breastplate', '#c8e1eb');
+    this.wears[Utils.uuidv4()] = new Wear('torso', 'hips', 'padded.armor.hips', '#8c3c32');
+    this.wears[Utils.uuidv4()] = new Wear('legs', 'feet', 'leather.boots', '#111111');
+    this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', '#c8e1eb');
+  }
 
   update(deltaTime: number) {
     if (this.movementPath.points.length) {

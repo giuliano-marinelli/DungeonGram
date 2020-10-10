@@ -31,6 +31,7 @@
               "node_modules/@forevolve/bootstrap-dark/dist/css/bootstrap-dark.min.css",
               "node_modules/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap.min.css",
               "node_modules/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap-dark.min.css",
+              "node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
               "node_modules/material-design-icons/iconfont/material-icons.css",
               "client/styles.scss"
@@ -40,6 +41,7 @@
               "node_modules/tether/dist/js/tether.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js",
               "client/assets/js/utils.js",
               "client/assets/js/dungeon.editor.js"
             ]
@@ -100,7 +102,10 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/@forevolve/bootstrap-dark/dist/css/bootstrap-dark.min.css",
+              "node_modules/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap.min.css",
+              "node_modules/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap-dark.min.css",
+              "node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
               "node_modules/material-design-icons/iconfont/material-icons.css",
               "client/styles.scss"
@@ -110,6 +115,7 @@
               "node_modules/tether/dist/js/tether.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js",
               "client/assets/js/utils.js",
               "client/assets/js/dungeon.editor.js"
             ],

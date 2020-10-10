@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Path } from './path';
 import { Point } from './point';
+import { Wear } from './wear';
 import { Schema } from './schema';
 import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
@@ -16,10 +17,11 @@ export class Player extends Schema {
   movementCooldown?: number;
   beignDragged?: boolean;
   visionRange?: number;
+  wears?: Wear[];
   //game objects
   mesh?: any;
+  wearsMeshes?: any = {};
   collider?: any;
-  skeleton?: any;
   animator?: any;
   visionLight?: any;
   visionRays?: any = [];
@@ -49,7 +51,8 @@ export class Player extends Schema {
               playerId: this.id
             }
           }
-        }
+        },
+        wears: { type: Wear, datatype: Array, parameters: (key) => { return { id: key } } }
       }
     );
   }
@@ -103,7 +106,7 @@ export class Player extends Schema {
         case 'isCollidingPhysics':
           if (this.colliderPhysics)
             this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
-          if (this.isCollidingPhysics)
+          if (this.isCollidingPhysics && !this.beignDragged)
             this.animator?.play('Idle');
           break;
       }
@@ -134,6 +137,10 @@ export class Player extends Schema {
         this.mesh.position.z = this.y;
         this.mesh.isPickable = false;
 
+        //set mesh material
+        var material = new BABYLON.StandardMaterial(this.id + "Material", this.parameters.scene);
+        this.mesh.material = material;
+
         //set collider mesh
         this.collider = BABYLON.MeshBuilder.CreateCylinder('', { height: 1.5, diameter: 0.5 }, this.parameters.scene);
         this.collider.parent = this.mesh;
@@ -153,13 +160,14 @@ export class Player extends Schema {
         this.colliderPhysics.isPickable = false;
         this.colliderPhysics.material = new BABYLON.StandardMaterial("colliderPhysicsMaterial", this.parameters.scene);
 
-        this.skeleton = skeletons[0];
-
         //create the animator to manage the transition between animations
-        this.animator = new Animator(this.mesh, this.skeleton, { actual: 'Idle' });
+        this.animator = new Animator(this.mesh, this.mesh.skeleton, { actual: 'Idle' });
 
         //adjust start direction
         this.animator.rotate(Vectors.directionToRotate(this.direction));
+
+        //create the wears meshes and parent to player mesh
+        this.doWears();
 
         //set action on mouse in/out/click
         this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
@@ -202,6 +210,22 @@ export class Player extends Schema {
 
         this.update();
       });
+    }
+  }
+
+  doWears() {
+    for (let wearId in this.wears) {
+      if (this.wears[wearId].category != "skin") {
+        BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
+          this.wearsMeshes[wearId] = meshes[0];
+          var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
+          material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
+          this.wearsMeshes[wearId].material = material;
+          this.animator.parent(this.wearsMeshes[wearId]);
+        });
+      } else {
+        this.mesh.material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
+      }
     }
   }
 

@@ -189,7 +189,7 @@ export class World extends Schema {
     var selectedPlayer = this.users[this.parameters.room.sessionId]?.selectedPlayer;
     if (selectedPlayer && this.players[selectedPlayer]?.mesh) {
       setTimeout(() => {
-        this.players[selectedPlayer].mesh.visibility = 1;
+        this.players[selectedPlayer].animator.visibility(1);
         // this.players[selectedPlayer]?.visionRays.forEach(visionRay => {
         //   visionRay?.dispose();
         // });
@@ -203,7 +203,7 @@ export class World extends Schema {
         }
         this.players[selectedPlayer].collider.isCollible = true;
         // this.players[selectedPlayer]?.visiblePlayers?.forEach(playerMesh => {
-        //   if (playerMesh) playerMesh.visibility = 1;
+        //   if (playerMesh) playerMesh.animator.visibility(1);
         // });
       }, this.players[selectedPlayer].movementCooldown);
     } else {
@@ -211,7 +211,7 @@ export class World extends Schema {
         for (let player in this.players) {
           if (this.players[player].mesh) {
             this.players[player].collider.isPickable = true;
-            this.players[player].mesh.visibility = 1;
+            this.players[player].animator.visibility(1);
           }
         }
       });
@@ -219,7 +219,7 @@ export class World extends Schema {
   }
 
   _updatePlayerVisibility(player, selectedPlayer) {
-    if (this.players[player].mesh && player != selectedPlayer) {
+    if (this.players[player] && this.players[player].mesh && player != selectedPlayer) {
       this.players[player].collider.isPickable = true;
       var origin = new BABYLON.Vector3(this.players[selectedPlayer].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[selectedPlayer].mesh.position.z);
       var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[player].mesh.position.z).subtract(origin));
@@ -233,9 +233,9 @@ export class World extends Schema {
         return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
       })?.pickedMesh;
       if (pickedMesh && this.players[player].id == pickedMesh.name)
-        this.players[player].mesh.visibility = 1;
+        this.players[player].animator.visibility(1);
       else {
-        this.players[player].mesh.visibility = 0;
+        this.players[player].animator.visibility(0);
         this.players[player].collider.isPickable = false;
       }
     }

@@ -8,6 +8,7 @@ export class Animator {
   rotationSpeed: number = 3;
   lastDirection: number = 0;
   transition: number = 0.05;
+  registeredChildren: any = {};
 
   constructor(mesh: any, skeleton: any, options?: any) {
     this.mesh = mesh;
@@ -25,14 +26,16 @@ export class Animator {
 
   play(animation, loop?) {
     if (loop == null) loop = true;
-    if (animation != this.actual.animation || loop != this.actual.animation) {
+    if (animation != this.actual.animation || loop != this.actual.loop) {
       this.skeleton.beginAnimation(animation, loop, 1);
       // this.mesh.getChildren().forEach((child) => {
-      if (this.mesh._children) {
-        this.mesh._children.forEach((child) => { //for each formally registered child
-          child.skeleton?.beginAnimation(animation, loop, 1);
-        });
+      // if (this.mesh._children) {
+      // this.mesh._children.forEach((child) => {
+      for (let childId in this.registeredChildren) {//for each formally registered child
+        this.registeredChildren[childId].skeleton?.beginAnimation(animation, loop, 1);
       }
+      // });
+      // }
       this.actual.animation = animation;
       this.actual.loop = loop;
     }
@@ -40,15 +43,19 @@ export class Animator {
 
   parent(mesh) {
     if (!this.mesh._children || !this.mesh._children.find((child) => { return child.uniqueId == mesh.uniqueId })) {
+      this.registeredChildren[mesh.uniqueId] = mesh;
       mesh.parent = this.mesh;
       mesh.skeleton = this.mesh.skeleton.clone("childSkeleton");
       // mesh.skeleton.enableBlending(this.transition);
       // for (let anim in mesh.skeleton._ranges) {
       //   mesh.skeleton._ranges[anim].from = mesh.skeleton._ranges[anim].from + 1;
       // }
-      this.mesh._children.forEach((child) => { //for each formally registered child
-        child.skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
-      });
+      // this.mesh._children.forEach((child) => {
+      //   child.skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
+      // });
+      for (let childId in this.registeredChildren) {//for each formally registered child
+        this.registeredChildren[childId].skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
+      }
       this.skeleton.beginAnimation(this.actual.animation, this.actual.loop, 1);
     }
   }
@@ -62,9 +69,17 @@ export class Animator {
     //   this.childs.
     // }
 
+    delete this.registeredChildren[child.uniqueId];
     child.parent = null;
     child.setParent(null);
     this.mesh.removeChild(child);
+  }
+
+  visibility(value) {
+    this.mesh.visibility = value;
+    for (let childId in this.registeredChildren) {
+      this.registeredChildren[childId].visibility = value;
+    }
   }
 
   rotate(direction, invert) {
@@ -75,6 +90,12 @@ export class Animator {
       });
 
     this.lastDirection = direction;
+  }
+
+  static cameraSpinTo = function (camera, whichprop, targetval, speed) {
+    var ease = new BABYLON.CubicEase();
+    ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+    BABYLON.Animation.CreateAndStartAnimation('at4', camera, whichprop, speed, 120, camera[whichprop], targetval, 0, ease);
   }
 
 }

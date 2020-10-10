@@ -62,7 +62,6 @@ export class User extends Schema {
             break;
           case 'selectedPlayer':
             this.parameters.world.updatePlayersVisibility();
-            console.log(change.previousValue, change.value);
             if (change.previousValue && this.parameters.world.players) this.parameters.world.players[change.previousValue]?.initVisionLight();
             if (change.value && this.parameters.world.players) this.parameters.world.players[change.value]?.initVisionLight();
             this.parameters.world.updateLights();
