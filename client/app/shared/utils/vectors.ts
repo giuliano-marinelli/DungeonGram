@@ -32,9 +32,11 @@ export class Vectors {
   }
 
   static directionToRotate(direction) {
-    switch (direction.x) {
+    var dirX = Math.round(direction.x);
+    var dirY = Math.round(direction.y);
+    switch (dirX) {
       case 1:
-        switch (direction.y) {
+        switch (dirY) {
           case 1:
             return 1;
           case 0:
@@ -44,7 +46,7 @@ export class Vectors {
         }
         break;
       case 0:
-        switch (direction.y) {
+        switch (dirY) {
           case 1:
             return 0;
           case 0:
@@ -54,7 +56,7 @@ export class Vectors {
         }
         break;
       case -1:
-        switch (direction.y) {
+        switch (dirY) {
           case 1:
             return 7;
           case 0:
@@ -63,6 +65,9 @@ export class Vectors {
             return 5;
         }
         break;
+      default: {
+        return 0;
+      }
     }
   }
 

@@ -25,16 +25,13 @@ export class Path extends Schema {
   }
 
   update(changes) {
-    // changes?.forEach((change) => {
-    //   switch (change.field) {
-    //     case 'to':
-    //       this.doMeshTo();
-    //       break;
-    //     case 'points':
-    //       this.doMeshPoints();
-    //       break;
-    //   }
-    // });
+    changes?.forEach((change) => {
+      switch (change.field) {
+        case 'to':
+          this.parameters.player.animator?.play('Idle');
+          break;
+      }
+    });
     this.doMeshTo();
     this.doMeshPoints();
   }

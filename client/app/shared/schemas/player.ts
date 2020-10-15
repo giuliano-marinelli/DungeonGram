@@ -48,6 +48,7 @@ export class Player extends Schema {
               world: parameters.world,
               scene: parameters.scene,
               room: parameters.room,
+              player: this,
               playerId: this.id
             }
           }
@@ -79,7 +80,7 @@ export class Player extends Schema {
             });
           break;
         case 'direction':
-          this.animator?.rotate(Vectors.directionToRotate(this.direction));
+          this.animator?.rotate(this.direction);
           break;
         case 'beignDragged':
           if (this.beignDragged) {
@@ -164,7 +165,7 @@ export class Player extends Schema {
         this.animator = new Animator(this.mesh, this.mesh.skeleton, { actual: 'Idle' });
 
         //adjust start direction
-        this.animator.rotate(Vectors.directionToRotate(this.direction));
+        this.animator.rotate(this.direction);
 
         //create the wears meshes and parent to player mesh
         this.doWears();
@@ -187,8 +188,8 @@ export class Player extends Schema {
                 this.parameters.controller.send('game', 'player', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
               }
             }
-            var drop = () => {
-              this.parameters.controller.send('game', 'player', { id: this.id, action: 'drop' });
+            var drop = (e) => {
+              this.parameters.controller.send('game', 'player', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
               this.parameters.canvas.removeEventListener("pointerup", drop, false);
               this.parameters.canvas.removeEventListener("pointermove", drag, false);
               setTimeout(() => {

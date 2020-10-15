@@ -1,7 +1,6 @@
 import { Schema, type } from "@colyseus/schema";
 import { Dice } from './dice';
 
-
 export class Roll extends Schema {
   rollString: string;
   rolls: string[] = [];

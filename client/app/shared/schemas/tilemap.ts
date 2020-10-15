@@ -135,7 +135,13 @@ export class TileMap extends Schema {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick.pickedPoint) {
           if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction) {
-            this.parameters.controller.send('game', 'player', { x: Math.round(pick.pickedPoint.x), y: Math.round(pick.pickedPoint.z), action: 'move' });
+            var xToMove = pick.pickedPoint.x;
+            var zToMove = pick.pickedPoint.z;
+            if (!e.altKey) {
+              xToMove = Math.round(pick.pickedPoint.x);
+              zToMove = Math.round(pick.pickedPoint.z);
+            }
+            this.parameters.controller.send('game', 'player', { x: xToMove, y: zToMove, action: 'move' });
           } else if (this.parameters.controller.activeTool?.name == 'walls') {
             var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
               this.parameters.controller.activeTool?.options?.adjustTo);

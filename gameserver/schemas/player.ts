@@ -4,7 +4,7 @@ import { Point } from '../schemas/point';
 import { Wear } from '../schemas/wear';
 import { PlayerPhysics } from '../physics/player.physics';
 import { Vector } from 'matter-js';
-import { Utils } from '../rooms/game';
+import { Utils } from '../utils';
 
 export class Player extends Schema {
   @type("number")
@@ -16,7 +16,7 @@ export class Player extends Schema {
   @type(Path)
   movementPath: Path = new Path();
   @type("number")
-  movementCooldown = 400;
+  movementCooldown = 200;
   @type("boolean")
   beignDragged = false;
   @type("number")
@@ -59,16 +59,16 @@ export class Player extends Schema {
     if (this.movementPath.points.length) {
       //update physics position previous to logic position for check that it's not collide
       //firt move to middle grid
-      if (this.movementAcum > 55 && this.movementAcum <= 100) {
-        var middlePoint = Vector.div(Vector.add({ x: this.x, y: this.y }, this.movementPath.points[0]), 2);
-        this.playerPhysics.move(middlePoint.x, middlePoint.y);
-        this.collide = this.playerPhysics.isColliding; //save colliding info
-      }
+      // if (this.movementAcum > 55 && this.movementAcum <= 100) {
+      //   var middlePoint = Vector.div(Vector.add({ x: this.x, y: this.y }, this.movementPath.points[0]), 2);
+      //   this.playerPhysics.move(middlePoint.x, middlePoint.y);
+      //    this.collide = this.playerPhysics.isColliding; //save colliding info
+      // }
       //then move to the target grid
-      if (this.movementAcum > 10 && this.movementAcum <= 55) {
-        this.playerPhysics.move(this.movementPath.points[0].x, this.movementPath.points[0].y);
-        if (!this.collide) this.collide = this.playerPhysics.isColliding; //save colliding info
-      }
+      // if (this.movementAcum > 10 && this.movementAcum <= 55) {
+      //   this.playerPhysics.move(this.movementPath.points[0].x, this.movementPath.points[0].y);
+      //    if (!this.collide) this.collide = this.playerPhysics.isColliding; //save colliding info
+      // }
       //then moves the logic position if the physics not collide in any of previous
       if (this.movementAcum == 0) {
         if (!this.collide) {
@@ -106,8 +106,15 @@ export class Player extends Schema {
   move(movement: any) {
     if (movement.x != this.x || movement.y != this.y) {
       //set a initial cooldown so physics movement do first
-      this.movementAcum = 100;
-      this.movementPath.set(new Point(this.x, this.y), new Point(movement.x, movement.y));
+      // this.movementAcum = 100;
+      var path = this.playerPhysics.getPath({ x: movement.x, y: movement.y });
+      if (path.length) {
+        this.movementPath.set({
+          from: new Point(this.x, this.y),
+          to: new Point(path[path.length - 1].x, path[path.length - 1].y),//new Point(movement.x, movement.y),
+          path: path
+        });
+      }
     }
     // console.log(JSON.stringify(this.movementPath.from), JSON.stringify(this.movementPath.to));
     // console.table(this.movementPath.points);
@@ -126,10 +133,10 @@ export class Player extends Schema {
     }
   }
 
-  drop() {
+  drop(snapToGrid) {
     this.beignDragged = false;
-    this.x = Math.round(this.x);
-    this.y = Math.round(this.y);
+    this.x = snapToGrid == null || snapToGrid ? Math.round(this.x) : this.x;
+    this.y = snapToGrid == null || snapToGrid ? Math.round(this.y) : this.y;
     this.playerPhysics.move(this.x, this.y); //update physics position
   }
 }

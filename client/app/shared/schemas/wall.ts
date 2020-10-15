@@ -11,6 +11,9 @@ export class Wall extends Schema {
   size?: string;
   //game objects
   mesh?: any;
+  //physics
+  tilesPhysics?: Point[];
+  tilesPhysicsColliders?: any[] = [];
 
   constructor(schema, parameters) {
     super(parameters);
@@ -20,7 +23,8 @@ export class Wall extends Schema {
     this.synchronizeSchema(schema,
       {
         from: { type: Point, datatype: Object },
-        to: { type: Point, datatype: Object }
+        to: { type: Point, datatype: Object },
+        tilesPhysics: { type: Point, datatype: Array, onAdd: 'last', onRemove: 'first' }
       }
     );
 
@@ -54,6 +58,18 @@ export class Wall extends Schema {
     // if (this.from.x == this.to.x)
     this.mesh.rotate(BABYLON.Axis.Y, Vectors.angle(this.from, this.to), BABYLON.Space.WORLD);
 
+    this.tilesPhysics.forEach((tile) => {
+      var tileCollider = BABYLON.MeshBuilder.CreateBox('', { height: 0.1, width: 0.5, depth: 0.5 }, this.parameters.scene);
+      this.tilesPhysicsColliders.push(tileCollider);
+      var material = new BABYLON.StandardMaterial('', this.parameters.scene);
+      material.diffuseColor = BABYLON.Color3.Red();
+      tileCollider.material = material;
+      tileCollider.visibility = 0;
+      tileCollider.position.x = tile.x;
+      tileCollider.position.z = tile.y;
+      tileCollider.position.y = 0.05;
+    });
+
     //set action on mouse in/out
     this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
@@ -78,6 +94,9 @@ export class Wall extends Schema {
   remove() {
     super.remove();
     this.mesh.dispose();
+    this.tilesPhysicsColliders.forEach((tilesPhysicsCollider) => {
+      tilesPhysicsCollider.dispose();
+    })
     this.parameters.world.updatePlayersVisibility();
   }
 }

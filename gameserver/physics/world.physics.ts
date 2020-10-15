@@ -3,6 +3,8 @@ import { EntityPhysics } from './entity.physics';
 import { PlayerPhysics } from './player.physics';
 import { WallPhysics } from './wall.physics';
 
+var PF = require('pathfinding');
+
 export class WorldPhysics {
   engine: Engine;
   entities: EntityPhysics[] = [];
@@ -10,10 +12,12 @@ export class WorldPhysics {
     player: PlayerPhysics,
     wall: WallPhysics
   }
+  grid: any;
+  gridSize: any = { width: 40, height: 40 };
 
   addEntity(id: string, type: string, parameters: any) {
     var uniqueId = type + id;
-    this.entities[uniqueId] = new this.types[type](uniqueId, type, parameters);
+    this.entities[uniqueId] = new this.types[type](uniqueId, type, this.grid, parameters);
     World.add(this.engine.world, [this.entities[uniqueId].body]);
     console.log('GameRoom[Physics]: added entity', type, uniqueId);
     return this.entities[uniqueId];
@@ -21,8 +25,11 @@ export class WorldPhysics {
 
   removeEntity(id: string, type: string) {
     var uniqueId = type + id;
+    var wasWalkable = this.entities[uniqueId].isWalkable;
     World.remove(this.engine.world, [this.entities[uniqueId].body]);
     delete this.entities[uniqueId];
+    if (!wasWalkable)
+      this.updateGrid();
     console.log('GameRoom[Physics]: removed entity', type, uniqueId);
   }
 
@@ -34,7 +41,7 @@ export class WorldPhysics {
     this.engine.world.gravity.y = 0;
     //capture event when entities start colliding
     Events.on(this.engine, "collisionStart", (e) => {
-      console.log('GameRoom[Physics]: collision started', e.pairs);
+      // console.log('GameRoom[Physics]: collision started', e.pairs);
       for (let pair of e.pairs) {
         if (this.entities[pair.bodyA.id]) this.entities[pair.bodyA.id].setColliding(true, this.entities[pair.bodyB.id]);
         if (this.entities[pair.bodyB.id]) this.entities[pair.bodyB.id].setColliding(true, this.entities[pair.bodyA.id]);
@@ -50,6 +57,23 @@ export class WorldPhysics {
     });
 
     console.log('GameRoom[Physics]: created');
+  }
+
+  setGrid(size) {
+    this.gridSize = { width: size.width * 2 + 1, height: size.height * 2 + 1 };
+    this.grid = new PF.Grid(this.gridSize.width, this.gridSize.height);
+    this.updateGrid();
+  }
+
+  updateGrid() {
+    for (let x = 0; x < this.gridSize.width; x++) {
+      for (let y = 0; y < this.gridSize.height; y++) {
+        this.grid.setWalkableAt(x, y, true);
+      }
+    }
+    for (let entity in this.entities) {
+      this.entities[entity].updateGrid(this.grid);
+    }
   }
 
   update(deltaTime) {

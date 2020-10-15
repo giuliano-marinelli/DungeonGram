@@ -6,7 +6,7 @@ export class Animator {
   skeleton: any;
   actual: any = { animation: null, loop: true };
   rotationSpeed: number = 3;
-  lastDirection: number = 0;
+  lastDirection: BABYLON.Vector2 = new BABYLON.Vector2(0, 1);
   transition: number = 0.05;
   registeredChildren: any = {};
 
@@ -82,14 +82,20 @@ export class Animator {
     }
   }
 
-  rotate(direction, invert) {
-    BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
-      this.rotationSpeed, 1, this.mesh?.rotation.y, this.mesh?.rotation.y + Math.PI * 2 / 8 * Vectors.distanceBetweenDirections(this.lastDirection, direction),
-      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
-        this.mesh.rotation.y = Math.PI * 2 / 8 * direction * (invert ? -1 : 1);
-      });
+  rotate(direction) {
+    if (direction.x != 0 || direction.y != 0) {
+      var vectorDirection = new BABYLON.Vector2(direction.y, direction.x);
+      // console.log(this.lastDirection, vectorDirection, this.mesh?.rotation.y, this.mesh?.rotation.y + BABYLON.Angle.BetweenTwoPoints(this.lastDirection, vectorDirection).radians());
+      // BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
+      //   this.rotationSpeed, 1, this.mesh?.rotation.y, BABYLON.Angle.BetweenTwoPoints(this.lastDirection, vectorDirection).radians(),
+      //   BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
+      //     this.mesh.rotation.y = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).radians();
+      //   });
 
-    this.lastDirection = direction;
+      this.mesh.rotation.y = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).radians();
+
+      this.lastDirection = vectorDirection;
+    }
   }
 
   static cameraSpinTo = function (camera, whichprop, targetval, speed) {

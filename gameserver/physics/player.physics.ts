@@ -1,12 +1,12 @@
 import { World, Body, Bodies, Constraint } from 'matter-js';
 import { EntityPhysics } from './entity.physics';
 
-export class PlayerPhysics extends EntityPhysics {
-  body: any;
-  isColliding: boolean = false;
+var PF = require('pathfinding');
 
-  constructor(id: string, type: string, parameters: any) {
-    super(type);
+export class PlayerPhysics extends EntityPhysics {
+
+  constructor(id: string, type: string, grid: any, parameters: any) {
+    super(type, grid);
     //isSensor: triggers collision events, but doesn't react with colliding body physically
     this.body = Bodies.rectangle(parameters.x, parameters.y, 0.9, 0.9, { isSensor: true });
     this.body.id = id;
@@ -21,5 +21,19 @@ export class PlayerPhysics extends EntityPhysics {
       this.isColliding = isColliding;
     else if (!isColliding)
       this.isColliding = isColliding
+  }
+
+  getPath(point) {
+    var gridForPath = this.grid.clone();
+    var finder = new PF.AStarFinder({
+      allowDiagonal: true,
+      heuristic: PF.Heuristic.chebyshev
+    });
+    var path = finder.findPath(Math.ceil((this.body.position.x + 0.5) * 2), Math.ceil((this.body.position.y + 0.5) * 2), Math.ceil((point.x + 0.5) * 2), Math.ceil((point.y + 0.5) * 2), gridForPath);
+    var normalizedPath = []
+    path.forEach((point) => {
+      normalizedPath.push({ x: (point[0] / 2) - 0.5, y: (point[1] / 2) - 0.5 });
+    })
+    return normalizedPath;
   }
 }

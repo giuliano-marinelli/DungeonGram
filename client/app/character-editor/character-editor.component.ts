@@ -28,7 +28,7 @@ export class CharacterEditorComponent implements OnInit {
       shoulders: []
     },
     head: {
-      beard: [],
+      beard: ["big.mostacho.beard", "chinless.beard", "disheveled.beard", "full.beard", "long.beard"],
       ears: ["human.ears", "half.elf.ears", "elf.ears"],
       eyebrows: [],
       hair: ["mohicano"],

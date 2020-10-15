@@ -4,8 +4,9 @@ import { Player } from '../schemas/player';
 import { TileMap } from '../schemas/tilemap';
 import { Point } from './point';
 import { Wall } from './wall';
-import { Utils } from '../rooms/game';
+import { Utils } from '../utils';
 import { WorldPhysics } from '../physics/world.physics';
+
 export class World extends Schema {
   @type({ map: User })
   users = new MapSchema<User>();
@@ -14,9 +15,9 @@ export class World extends Schema {
   @type({ map: Wall })
   walls = new MapSchema<Wall>();
   @type(TileMap)
-  tilemap: TileMap = new TileMap(20, 20);
+  tilemap: TileMap;
   //physics
-  worldPhysics: WorldPhysics = new WorldPhysics();
+  worldPhysics: WorldPhysics;
 
   command = {
     user: {
@@ -56,7 +57,7 @@ export class World extends Schema {
       },
       drop: {
         do: (client: string, data: any) => {
-          this.players[data.id].drop();
+          this.players[data.id].drop(data.snapToGrid);
         },
         validate: (data: any) => { return data.id != null && typeof data.id === "string" }
       },
@@ -77,13 +78,14 @@ export class World extends Schema {
       },
       end: {
         do: (client: string, data: any) => {
-          if (this.command.wall.state.wallFirstPoint &&
+          if (this.command.wall.state.wallFirstPoint != null &&
             (this.command.wall.state.wallFirstPoint.x != data.x
               || this.command.wall.state.wallFirstPoint.y != data.y)) {
             var wallId = Utils.uuidv4();
             this.walls[wallId] = new Wall(this.command.wall.state.wallFirstPoint, { x: data.x, y: data.y }, data.size);
             this.walls[wallId].wallPhysics = this.worldPhysics.addEntity(wallId, 'wall',
               { from: this.command.wall.state.wallFirstPoint, to: { x: data.x, y: data.y } }); //add physics wall
+            this.walls[wallId].updatePhysics();
           }
           this.command.wall.state.wallFirstPoint = null;
         },
@@ -116,8 +118,10 @@ export class World extends Schema {
       resize: {
         do: (client: string, data: any) => {
           if (data.width >= 2 && data.width <= 1000 && data.height >= 2 && data.height <= 1000
-            && data.width % 2 == 0 && data.height % 2 == 0)
+            && data.width % 2 == 0 && data.height % 2 == 0) {
             this.tilemap.changeSize(data.width, data.height);
+            this.worldPhysics.setGrid({ width: data.width, height: data.height });
+          }
         },
         validate: (data: any) => { return data.width != null && data.height != null && typeof data.width === "number" && typeof data.height === "number" }
       },
@@ -213,6 +217,13 @@ export class World extends Schema {
         validate: (data: any) => { return data.value != null && typeof data.value === "number" }
       }
     }
+  }
+
+  constructor() {
+    super();
+    this.worldPhysics = new WorldPhysics();
+    this.tilemap = new TileMap(20, 20);
+    this.worldPhysics.setGrid({ width: 20, height: 20 });
   }
 
   execCommand(client?: string, type?: string | number, data?: any) {
