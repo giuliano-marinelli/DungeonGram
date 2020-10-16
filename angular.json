@@ -34,6 +34,7 @@
               "node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
               "node_modules/material-design-icons/iconfont/material-icons.css",
+              "node_modules/izitoast/dist/css/iziToast.min.css",
               "client/styles.scss"
             ],
             "scripts": [
@@ -41,9 +42,9 @@
               "node_modules/tether/dist/js/tether.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js",
-              "client/assets/js/utils.js",
-              "client/assets/js/dungeon.editor.js"
+              "node_modules/izitoast/dist/js/iziToast.min.js",
+              "client/assets/js/bootstrap.addons.js",
+              "client/assets/js/utils.js"
             ]
           },
           "configurations": {
@@ -108,6 +109,7 @@
               "node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
               "node_modules/material-design-icons/iconfont/material-icons.css",
+              "node_modules/izitoast/dist/css/iziToast.min.css",
               "client/styles.scss"
             ],
             "scripts": [
@@ -115,9 +117,9 @@
               "node_modules/tether/dist/js/tether.min.js",
               "node_modules/popper.js/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js",
-              "client/assets/js/utils.js",
-              "client/assets/js/dungeon.editor.js"
+              "node_modules/izitoast/dist/js/iziToast.min.js",
+              "client/assets/js/bootstrap.addons.js",
+              "client/assets/js/utils.js"
             ],
             "assets": [
               "client/assets/favicon.ico",

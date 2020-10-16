@@ -1,20 +1,29 @@
 <app-loading [condition]="isLoading"></app-loading>
 
-<app-toast [message]="toast.message"></app-toast>
-
 <div class="jumbotron text-center" *ngIf="!isLoading">
   <div class="card">
     <h4 class="card-header">Account settings</h4>
     <div class="card-body">
-      <form #accountForm="ngForm" (ngSubmit)="save(user)">
+      <form [formGroup]="accountForm" (ngSubmit)="save()" autocomplete="off">
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">
               <i class="fa fa-fw fa-user"></i>
             </span>
           </div>
-          <input class="form-control" type="text" name="username" [(ngModel)]="user.username" placeholder="Username"
-            required>
+          <input class="form-control" type="text" name="username" formControlName="username" placeholder="Username"
+            [ngClass]="setValid('username')" autocomplete="off">
+          <div class="invalid-feedback">
+            <div *ngIf="username.errors && username.errors.required">
+              Username is required
+            </div>
+            <div *ngIf="username.errors && (username.errors.minlength || username.errors.maxlength)">
+              Username must be at 4-30 characters long
+            </div>
+            <div *ngIf="username.errors && username.errors.pattern">
+              Username can only have characters, numbers and _ or - symbols
+            </div>
+          </div>
         </div>
         <div class="input-group">
           <div class="input-group-prepend">
@@ -22,7 +31,19 @@
               <i class="fa fa-fw fa-envelope"></i>
             </span>
           </div>
-          <input class="form-control" type="email" name="email" [(ngModel)]="user.email" placeholder="Email" required>
+          <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email"
+            [ngClass]="setValid('email')">
+          <div class="invalid-feedback">
+            <div *ngIf="email.errors && email.errors.required">
+              Email is required.
+            </div>
+            <div *ngIf="email.errors && email.errors.maxlength">
+              Email must be as maximum 100 characters long
+            </div>
+            <div *ngIf="email.errors && email.errors.email">
+              Email must be on the format example@email.com
+            </div>
+          </div>
         </div>
         <div class="input-group" *ngIf="auth.loggedIn && auth.isAdmin">
           <div class="input-group-prepend">
@@ -30,13 +51,13 @@
               <i class="fa fa-fw fa-black-tie"></i>
             </span>
           </div>
-          <select class="custom-select" name="role" [(ngModel)]="user.role">
+          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')">
             <option value="" disabled>Role</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <button class="btn btn-dark pull-right" type="submit" [disabled]="!accountForm.form.valid">
+        <button class="btn btn-dark pull-right" type="submit">
           <i class="fa fa-save"></i> Save
         </button>
       </form>

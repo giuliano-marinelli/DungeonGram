@@ -8,14 +8,18 @@ import { monitor } from '@colyseus/monitor';
 //import room handlers
 import { ChatRoom } from "./rooms/chat";
 import { GameRoom } from "./rooms/game";
+//for mongodb
+import * as dotenv from 'dotenv';
+import setMongo from '../database/mongo';
 
 const port = Number(process.env.PORT || 3001) + Number(process.env.NODE_APP_INSTANCE || 0);
 const app = express();
+dotenv.config();
 
 // app.use(cors());
 app.use(express.json());
 
-// Attach WebSocket Server on HTTP Server.
+//attach WebSocket Server on HTTP Server.
 const gameServer = new Server({
   server: createServer(app),
   express: app,
@@ -45,4 +49,14 @@ gameServer.onShutdown(function () {
 
 gameServer.listen(port);
 
-console.log(`DungeonGram gameserver listening on port ${port}`);
+async function main(): Promise<any> {
+  try {
+    //set mongoose access
+    await setMongo();
+    console.log(`DungeonGram gameserver listening on port ${port}`);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+main();

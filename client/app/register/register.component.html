@@ -1,7 +1,5 @@
-<app-toast [message]="toast.message"></app-toast>
-
 <div class="modal-content">
-  <form [formGroup]="registerForm" (ngSubmit)="register()">
+  <form [formGroup]="registerForm" (ngSubmit)="register()" autocomplete="off">
     <div class="modal-header">
       <h5 class="modal-title">Sign Up</h5>
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"
@@ -10,32 +8,81 @@
       </button>
     </div>
     <div class="modal-body">
-      <div class="input-group" [ngClass]="setClassUsername()">
+      <div class="input-group">
         <div class="input-group-prepend">
           <span class="input-group-text">
             <i class="fa fa-fw fa-user"></i>
           </span>
         </div>
         <input class="form-control" type="text" name="username" formControlName="username" placeholder="Username"
-          autofocus>
+          [ngClass]="setValid('username')" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="username.errors && username.errors.required">
+            Username is required
+          </div>
+          <div *ngIf="username.errors && (username.errors.minlength || username.errors.maxlength)">
+            Username must be at 4-30 characters long
+          </div>
+          <div *ngIf="username.errors && username.errors.pattern">
+            Username can only have characters, numbers and _ or - symbols
+          </div>
+        </div>
       </div>
-      <div class="input-group" [ngClass]="setClassEmail()">
+      <div class="input-group">
         <div class="input-group-prepend">
           <span class="input-group-text">
             <i class="fa fa-fw fa-envelope"></i>
           </span>
         </div>
-        <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email">
+        <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email"
+          [ngClass]="setValid('email')">
+        <div class="invalid-feedback">
+          <div *ngIf="email.errors && email.errors.required">
+            Email is required.
+          </div>
+          <div *ngIf="email.errors && email.errors.maxlength">
+            Email must be as maximum 100 characters long
+          </div>
+          <div *ngIf="email.errors && email.errors.email">
+            Email must be on the format example@email.com
+          </div>
+        </div>
       </div>
-      <div class="input-group" [ngClass]="setClassPassword()">
+      <div class="input-group">
         <div class="input-group-prepend">
           <span class="input-group-text">
             <i class="fa fa-fw fa-key"></i>
           </span>
         </div>
-        <input class="form-control" type="password" name="password" formControlName="password" placeholder="Password">
+        <input class="form-control" type="password" name="password" formControlName="password" placeholder="Password"
+          [ngClass]="setValid('password')" (keyup)="confirmPassword.updateValueAndValidity()" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="password.errors && password.errors.required">
+            Password is required
+          </div>
+          <div *ngIf="password.errors && (password.errors.minlength || password.errors.maxlength)">
+            Password must be at 6-30 characters long
+          </div>
+        </div>
       </div>
       <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">
+            <i class="fa fa-fw fa-key"></i>
+          </span>
+        </div>
+        <input class="form-control" type="password" name="confirmPassword" formControlName="confirmPassword" placeholder="Confirm Password"
+          [ngClass]="setValid('confirmPassword')" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="confirmPassword.errors && confirmPassword.errors.required">
+            This field is required
+          </div>
+          <div *ngIf="confirmPassword.errors && confirmPassword.errors.equals">
+            Passwords must be equals
+          </div>
+        </div>
+      </div>
+      <div class="input-group" *ngIf="auth.loggedIn && auth.isAdmin">
         <div class="input-group-prepend">
           <span class="input-group-text">
             <i class="fa fa-fw fa-black-tie"></i>
@@ -51,7 +98,7 @@
     <div class="modal-footer">
       <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
         (click)="activeModal.dismiss('Close click')">Close</button>
-      <button type="button" class="btn btn-dark" type="submit" [disabled]="!registerForm.valid">
+      <button type="button" class="btn btn-dark" type="submit">
         <i class="fa fa-user-plus"></i> Sign Up
       </button>
     </div>

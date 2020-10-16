@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 async function setMongo(): Promise<any> {
   let mongodbURI;

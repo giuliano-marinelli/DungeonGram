@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { AuthService } from '../services/auth.service';
-import { ToastComponent } from '../shared/toast/toast.component';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+declare var iziToast;
 
 @Component({
   selector: 'app-login',
@@ -16,19 +17,19 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   email = new FormControl('', [
     Validators.required,
-    Validators.minLength(3),
-    Validators.maxLength(100)
+    Validators.maxLength(100),
+    Validators.email
   ]);
   password = new FormControl('', [
     Validators.required,
-    Validators.minLength(6)
+    Validators.minLength(6),
+    Validators.maxLength(30)
   ]);
 
   constructor(
     private auth: AuthService,
     private formBuilder: FormBuilder,
     private router: Router,
-    public toast: ToastComponent,
     public activeModal: NgbActiveModal
   ) { }
 
@@ -42,16 +43,20 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  setClassEmail(): object {
-    return { 'has-danger': !this.email.pristine && !this.email.valid };
-  }
-
-  setClassPassword(): object {
-    return { 'has-danger': !this.password.pristine && !this.password.valid };
+  setValid(control): object {
+    return {
+      'is-invalid': this[control].touched && !this[control].valid,
+      'is-valid': this[control].touched && this[control].valid
+    };
   }
 
   login(): void {
-    this.auth.login(this.loginForm.value);
+    this.loginForm.markAllAsTouched();
+    if (this.loginForm.valid) {
+      this.auth.login(this.loginForm.value);
+    } else {
+      iziToast.error({ message: 'Some values are invalid, please check.' });
+    }
   }
 
 }

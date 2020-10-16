@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { ToastComponent } from './toast/toast.component';
 import { LoadingComponent } from './loading/loading.component';
+import { LeaveGuardWarningComponent } from './leave-guard-warning/leave-guard-warning.component';
 
 @NgModule({
   imports: [
@@ -25,7 +26,8 @@ import { LoadingComponent } from './loading/loading.component';
   ],
   declarations: [
     ToastComponent,
-    LoadingComponent
+    LoadingComponent,
+    LeaveGuardWarningComponent
   ],
   providers: [
     ToastComponent

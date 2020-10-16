@@ -1,9 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../dist/server",
+    "outDir": "../dist",
     "baseUrl": "",
-    "module": "commonjs"
+    "module": "commonjs",
+    "esModuleInterop": true
   },
   "include": [
     "**/*.ts"
