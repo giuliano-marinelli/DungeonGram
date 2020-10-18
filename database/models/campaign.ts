@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const campaignSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  name: String,
+  title: String,
   description: String,
   players: {
     type: "array",
@@ -11,6 +11,7 @@ const campaignSchema = new mongoose.Schema({
       ref: 'User'
     }
   },
+  private: Boolean
 });
 
 //omit the __v when returning a campaign

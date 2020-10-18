@@ -43,6 +43,7 @@ userSchema.set('toJSON', {
 //decode the header authorization of a request in a User object (it's the actual logged user)
 userSchema.statics.findByAuthorization = async function (req) {
   var authorization = req?.headers?.authorization?.split(' ')[1];
+  if (!authorization) authorization = req;
   try {
     var decoded = jwt.verify(authorization, process.env.SECRET_TOKEN);
     const user = await User.findOne({ _id: decoded.user._id });

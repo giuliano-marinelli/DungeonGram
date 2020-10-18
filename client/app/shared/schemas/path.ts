@@ -50,7 +50,7 @@ export class Path extends Schema {
       delete this.meshTo;
     }
 
-    if (this.parameters.playerId == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer &&
+    if (this.parameters.playerId == this.parameters.world.users[this.parameters.token].selectedPlayer &&
       this.to) {
       //create mesh
       this.meshTo = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.4 }, this.parameters.scene);
@@ -81,7 +81,7 @@ export class Path extends Schema {
       this.rays = [];
     }
 
-    if (this.parameters.playerId == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer &&
+    if (this.parameters.playerId == this.parameters.world.users[this.parameters.token].selectedPlayer &&
       this.points.length) {
       for (let i = 0; i < this.points.length; i++) {
         var point = this.points[i];

@@ -10,6 +10,7 @@ declare var $;
 })
 export class ChatComponent implements OnInit {
   @Input() controller: Controller;
+  @Input() campaign: any;
 
   chatRoom: any;
   message: string;
@@ -17,13 +18,15 @@ export class ChatComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    var host = window.document.location.host.replace(/:.*/, '');
-    var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
-    client.joinOrCreate("chat").then((room: any) => {
-      this.chatRoom = room;
-      this.controller.rooms.chat = this.chatRoom;
-      this.initChat();
-    });
+    if (this.campaign) {
+      var host = window.document.location.host.replace(/:.*/, '');
+      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
+      client.joinOrCreate("chat", { campaign: this.campaign, token: localStorage.getItem('token') }).then((room: any) => {
+        this.chatRoom = room;
+        this.controller.rooms.chat = this.chatRoom;
+        this.initChat();
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -33,7 +36,7 @@ export class ChatComponent implements OnInit {
   initChat() {
     console.log("Joined Chat");
     this.chatRoom.onStateChange.once(function (state) {
-      console.log("ChatRoom: Initial State", state);
+      console.log("ChatRoom: initial state", state);
     });
 
     // new room state

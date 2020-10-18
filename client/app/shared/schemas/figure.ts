@@ -38,7 +38,7 @@ export class Figure extends Schema {
 
   update(changes?) {
     changes?.forEach((change) => {
-      if (this.shared || this.parameters.userId == this.parameters.room.sessionId) {
+      if (this.shared || this.parameters.userId == this.parameters.token) {
         switch (change.field) {
           case 'points':
             this.doMeshPoints();

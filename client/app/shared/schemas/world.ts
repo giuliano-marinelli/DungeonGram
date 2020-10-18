@@ -35,6 +35,7 @@ export class World extends Schema {
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
+              token: parameters.token,
               controller: parameters.controller,
               id: key
             }
@@ -47,6 +48,7 @@ export class World extends Schema {
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
+              token: parameters.token,
               lights: this.lights,
               controller: parameters.controller,
               id: key
@@ -60,6 +62,7 @@ export class World extends Schema {
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
+              token: parameters.token,
               lights: this.lights,
               controller: parameters.controller,
               id: key
@@ -73,6 +76,7 @@ export class World extends Schema {
               canvas: parameters.canvas,
               scene: parameters.scene,
               room: parameters.room,
+              token: parameters.token,
               controller: parameters.controller
             }
           }
@@ -160,7 +164,7 @@ export class World extends Schema {
 
   updateWalls() {
     setTimeout(() => {
-      var user = this.users[this.parameters.room.sessionId];
+      var user = this.users[this.parameters.token];
       for (let wall in this.walls) {
         this.walls[wall].mesh.isPickable = user.wallsPickable;
         this.walls[wall].mesh.visibility = user.wallsVisibility;
@@ -170,14 +174,14 @@ export class World extends Schema {
 
   updateFogOfWar() {
     setTimeout(() => {
-      var user = this.users[this.parameters.room.sessionId];
+      var user = this.users[this.parameters.token];
       this.lights.fogLight.intensity = user.fogOfWarVisibility;
     });
   }
 
   updateTilemap() {
     setTimeout(() => {
-      var user = this.users[this.parameters.room.sessionId];
+      var user = this.users[this.parameters.token];
       if (user.tilemapShowGrid)
         this.tilemap.ground.material = this.tilemap.gridMaterial;
       else
@@ -186,7 +190,7 @@ export class World extends Schema {
   }
 
   updatePlayersVisibility(player?) {
-    var selectedPlayer = this.users[this.parameters.room.sessionId]?.selectedPlayer;
+    var selectedPlayer = this.users[this.parameters.token]?.selectedPlayer;
     if (selectedPlayer && this.players[selectedPlayer]?.mesh) {
       setTimeout(() => {
         this.players[selectedPlayer].animator.visibility(1);

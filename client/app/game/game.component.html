@@ -1,9 +1,15 @@
 <div id="game">
   <canvas id="renderCanvas" touch-action="none" width="100%" height="100%"></canvas>
-  <div id="chat-container">
-    <app-chat [controller]="this.controller"></app-chat>
+  <div id="chat-container" *ngIf="this.access">
+    <app-chat [controller]="this.controller" [campaign]="this.campaign"></app-chat>
   </div>
-  <div id="tools-container">
+  <div id="tools-container" *ngIf="this.access">
     <app-tools [controller]="this.controller"></app-tools>
   </div>
+</div>
+<div class="alert alert-light text-center w-50 mt-5" role="alert" style="margin: 0 auto;" *ngIf="this.access == false">
+  <h4 class="alert-heading">Access Denied</h4>
+  <p>Seems that you have no access for this campaign.</p>
+  <p>Try creating <a routerLink="/campaigns">your own campaign</a> or tell your friends to invite you to their
+    campaigns</p>
 </div>

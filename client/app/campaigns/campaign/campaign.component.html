@@ -1,0 +1,59 @@
+<div class="modal-content" *ngIf="auth.loggedIn">
+  <form [formGroup]="campaignForm" (ngSubmit)="addCampaign()" autocomplete="off">
+    <div class="modal-header">
+      <h5 class="modal-title">{{this.campaign ? 'Edit Campaign' : 'New Campaign'}}</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="isLoading">
+      <app-loading [condition]="isLoading"></app-loading>
+    </div>
+    <div class="modal-body" *ngIf="!isLoading">
+      <div class="mb-3">
+        <label for="title">Title <small class="text-muted">*</small></label>
+        <input class="form-control" type="text" name="title" formControlName="title"
+          placeholder="This my First DungeonGram Campaign" [ngClass]="setValid('title')" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="title.errors && title.errors.required">
+            Title is required
+          </div>
+          <div *ngIf="title.errors && (title.errors.minlength || title.errors.maxlength)">
+            Title must be at 4-50 characters long
+          </div>
+          <div *ngIf="title.errors && title.errors.pattern">
+            Title can only have characters, numbers and _ or - symbols
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="description">Description</label>
+        <textarea class="form-control" type="text" name="description" formControlName="description" rows="8"
+          placeholder="Here goes the description of my first campaign..."
+          [ngClass]="setValid('description')"></textarea>
+        <div class="invalid-feedback">
+          <div *ngIf="description.errors && description.errors.required">
+            Description is required.
+          </div>
+          <div *ngIf="description.errors && (description.errors.minlength || description.errors.maxlength)">
+            Description must be as maximum 200 characters long
+          </div>
+        </div>
+      </div>
+      <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
+        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you and the players of
+            this campaign can see
+            it)</small></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
+        (click)="activeModal.dismiss('Close click')">Cancel</button>
+      <button type="button" class="btn btn-dark" type="submit">
+        <i class="fa fa-floppy-o"></i> Save
+      </button>
+    </div>
+  </form>
+</div>

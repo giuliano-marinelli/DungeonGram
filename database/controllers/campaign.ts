@@ -9,9 +9,49 @@ class CampaignCtrl extends BaseCtrl {
   getAll = async (req, res) => {
     try {
       const resu = await User.findByAuthorization(req);
-      if (resu.status != 200) throw new Error('unauthorized');
+      // if (resu.status != 200) throw new Error('unauthorized');
 
-      const docs = await this.model.find({ owner: resu.user._id });
+      var docs;
+      if (req.query.own) {
+        if (resu.status != 200) throw new Error('unauthorized');
+        docs = await this.model.aggregate([
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner_info"
+            }
+          },
+          { $unwind: "$owner_info" },
+          {
+            $match: {
+              $or: [
+                { owner: resu.user._id },
+                { players: { $in: [resu.user._id] } }
+              ]
+            }
+          }
+        ]);
+      } else {
+        docs = await this.model.aggregate([
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner_info"
+            }
+          },
+          { $unwind: "$owner_info" },
+          {
+            $match: {
+              owner: { $ne: resu?.user?._id },
+              private: false
+            }
+          }
+        ]);
+      }
       res.status(200).json(docs);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -22,9 +62,9 @@ class CampaignCtrl extends BaseCtrl {
   count = async (req, res) => {
     try {
       const resu = await User.findByAuthorization(req);
-      if (resu.status != 200) throw new Error('unauthorized');
+      // if (resu.status != 200) throw new Error('unauthorized');
 
-      const count = await this.model.count({ owner: resu.user._id });
+      const count = await this.model.count({ $or: [{ owner: resu?.user?._id }, { private: false }] });
       res.status(200).json(count);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -37,7 +77,7 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      req.body.user = resu.user._id;
+      req.body.owner = resu.user._id;
       const obj = await new this.model(req.body).save();
       res.status(201).json(obj);
     } catch (err) {
@@ -49,9 +89,9 @@ class CampaignCtrl extends BaseCtrl {
   get = async (req, res) => {
     try {
       const resu = await User.findByAuthorization(req);
-      if (resu.status != 200) throw new Error('unauthorized');
+      // if (resu.status != 200) throw new Error('unauthorized');
 
-      const obj = await this.model.findOne({ _id: req.params.id, owner: resu.user._id });
+      const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
       res.status(200).json(obj);
     } catch (err) {
       return res.status(500).json({ error: err.message });

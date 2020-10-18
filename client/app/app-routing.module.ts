@@ -15,6 +15,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { GameComponent } from './game/game.component';
 import { CharacterEditorComponent } from './character-editor/character-editor.component';
+import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
 
 const routes: Routes = [
   { path: '', component: AboutComponent },
@@ -25,7 +26,8 @@ const routes: Routes = [
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardAdmin] },
   { path: 'notfound', component: NotFoundComponent },
   { path: 'editor', component: EditorComponent },
-  { path: 'game', component: GameComponent },
+  { path: 'game/:campaign', component: GameComponent },
+  { path: 'campaigns', component: CampaignListComponent },
   { path: 'character-editor', component: CharacterEditorComponent },
   { path: '**', redirectTo: '/notfound' },
 ];

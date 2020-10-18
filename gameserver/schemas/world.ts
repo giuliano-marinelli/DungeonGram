@@ -23,18 +23,22 @@ export class World extends Schema {
     user: {
       join: {
         do: (client: string, data: any) => {
-          this.users[client] = new User();
-          this.users[client].selectedPlayer = client;
+          if (!this.users[client]) {
+            this.users[client] = new User();
+            this.users[client].selectedPlayer = client;
+          }
 
-          this.players[client] = new Player();
-          this.players[client].playerPhysics = this.worldPhysics.addEntity(client, 'player', { x: this.players[client].x, y: this.players[client].y }) //add physics player
+          if (!this.players[client]) {
+            this.players[client] = new Player();
+            this.players[client].playerPhysics = this.worldPhysics.addEntity(client, 'player', { x: this.players[client].x, y: this.players[client].y }) //add physics player
+          }
         }
       },
       leave: {
         do: (client: string, data: any) => {
           delete this.users[client];
-          delete this.players[client];
-          this.worldPhysics.removeEntity(client, 'player'); //remove physics player
+          // delete this.players[client];
+          // this.worldPhysics.removeEntity(client, 'player'); //remove physics player
         }
       },
     },

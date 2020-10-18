@@ -48,6 +48,7 @@ export class Player extends Schema {
               world: parameters.world,
               scene: parameters.scene,
               room: parameters.room,
+              token: parameters.token,
               player: this,
               playerId: this.id
             }
@@ -113,7 +114,7 @@ export class Player extends Schema {
       }
     });
 
-    if (this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer != null) {
+    if (this.parameters.world.users[this.parameters.token].selectedPlayer != null) {
       this.parameters.world.updatePlayersVisibility(this.id);
       this.initVisionLight();
     }
@@ -232,7 +233,7 @@ export class Player extends Schema {
 
   initVisionLight() {
     //add vision light
-    if (this.id == this.parameters.world.users[this.parameters.room.sessionId].selectedPlayer) {
+    if (this.id == this.parameters.world.users[this.parameters.token].selectedPlayer) {
       if (!this.visionLight && this.mesh) {
         this.visionLight = new BABYLON.PointLight("playerLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
         this.visionLight.range = this.visionRange;
@@ -255,7 +256,7 @@ export class Player extends Schema {
   }
 
   doVisionRays() {
-    if (this.id == this.parameters.room.sessionId) {
+    if (this.id == this.parameters.token) {
       this.visionRays.forEach(visionRay => {
         visionRay.dispose();
       });

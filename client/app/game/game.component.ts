@@ -5,6 +5,8 @@ import { Controller } from '../shared/controller/controller';
 
 //game main schema
 import { World } from '../shared/schemas/world';
+import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-game',
@@ -20,40 +22,67 @@ export class GameComponent implements OnInit {
   //game
   gameRoom: any;
   controller: any;
+  campaign: any;
+  access: boolean;
+  token: string;
 
   //game schemas
   world: any;
 
-  constructor() { }
+  constructor(
+    private route: ActivatedRoute,
+    public auth: AuthService
+  ) {
+    this.route.params.subscribe(params => {
+      this.campaign = params.campaign;
+      // this.ngOnInit();
+    });
+  }
 
   ngOnInit(): void {
-    this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+    if (this.campaign && this.access == null) {
+      this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-    this.engine = new BABYLON.Engine(this.canvas, true);
-    this.scene = new BABYLON.Scene(this.engine);
-    this.scene.actionManager = new BABYLON.ActionManager(this.scene);
+      this.engine = new BABYLON.Engine(this.canvas, true);
+      this.scene = new BABYLON.Scene(this.engine);
+      this.scene.actionManager = new BABYLON.ActionManager(this.scene);
 
-    this.controller = new Controller();
+      this.controller = new Controller();
 
-    var host = window.document.location.host.replace(/:.*/, '');
-    var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
-    client.joinOrCreate("game").then((room: any) => {
-      this.gameRoom = room;
-      this.controller.rooms.game = this.gameRoom;
-      this.initGame();
-    });
+      var host = window.document.location.host.replace(/:.*/, '');
+      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + ':3001');
+      client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
+        .then((room: any) => {
+          this.gameRoom = room;
+          this.controller.rooms.game = this.gameRoom;
+          this.access = true;
+          this.initGame();
+        }).catch((err: any) => {
+          this.access = false;
+        });
 
-    //resize canvas on resize window
-    window.onresize = () => {
-      this.engine.resize();
-    };
+      //resize canvas on resize window
+      window.onresize = () => {
+        this.engine.resize();
+      };
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.gameRoom.leave();
   }
 
   initGame() {
     console.log("Joined Game");
     this.gameRoom.onStateChange.once(() => {
       //create the root schema object
-      this.world = new World(this.gameRoom.state.world, { scene: this.scene, room: this.gameRoom, canvas: this.canvas, controller: this.controller });
+      this.world = new World(this.gameRoom.state.world, {
+        scene: this.scene,
+        room: this.gameRoom,
+        canvas: this.canvas,
+        controller: this.controller,
+        token: this.auth.currentUser._id
+      });
 
       //register a render loop to repeatedly render the scene
       this.engine.runRenderLoop(() => {

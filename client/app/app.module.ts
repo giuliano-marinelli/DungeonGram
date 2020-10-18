@@ -21,6 +21,7 @@ import { ColorTwitterModule } from 'ngx-color/twitter'; // <color-twitter></colo
 import { ColorShadeModule } from 'ngx-color/shade'; // <color-shade-picker></color-shade-picker>
 // Services
 import { UserService } from './services/user.service';
+import { CampaignService } from './services/campaign.service';
 import { AssetService } from './services/asset.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
@@ -40,6 +41,9 @@ import { GameComponent } from './game/game.component';
 import { ChatComponent } from './chat/chat.component';
 import { ToolsComponent } from './tools/tools.component';
 import { CharacterEditorComponent } from './character-editor/character-editor.component';
+import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
+import { CampaignComponent } from './campaigns/campaign/campaign.component';
+import { CampaignEditComponent } from './campaigns/campaign-edit/campaign-edit.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +59,10 @@ import { CharacterEditorComponent } from './character-editor/character-editor.co
     GameComponent,
     ChatComponent,
     ToolsComponent,
-    CharacterEditorComponent
+    CharacterEditorComponent,
+    CampaignListComponent,
+    CampaignComponent,
+    CampaignEditComponent
   ],
   imports: [
     AppRoutingModule,
@@ -87,6 +94,7 @@ import { CharacterEditorComponent } from './character-editor/character-editor.co
     AuthGuardLogin,
     AuthGuardAdmin,
     UserService,
+    CampaignService,
     AssetService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

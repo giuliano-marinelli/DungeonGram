@@ -26,6 +26,7 @@ export class User extends Schema {
             canvas: parameters.canvas,
             scene: parameters.scene,
             room: parameters.room,
+            token: parameters.token,
             controller: parameters.controller
           }
         }
@@ -37,6 +38,7 @@ export class User extends Schema {
             canvas: parameters.canvas,
             scene: parameters.scene,
             room: parameters.room,
+            token: parameters.token,
             controller: parameters.controller
           }
         }
@@ -45,7 +47,7 @@ export class User extends Schema {
   }
 
   update(changes?) {
-    if (this.id == this.parameters.room.sessionId) {
+    if (this.id == this.parameters.token) {
       changes?.forEach((change) => {
         switch (change.field) {
           case 'wallsVisibility':

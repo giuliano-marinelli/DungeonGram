@@ -26,8 +26,8 @@ const gameServer = new Server({
   pingInterval: 0,
 });
 
-gameServer.define("game", GameRoom);
-gameServer.define("chat", ChatRoom).enableRealtimeListing();
+gameServer.define("game", GameRoom).filterBy(["campaign"]);
+gameServer.define("chat", ChatRoom).enableRealtimeListing().filterBy(["campaign"]);
 
 app.use('/', serveIndex(path.join(__dirname, "static"), { 'icons': true }))
 app.use('/', express.static(path.join(__dirname, "static")));
