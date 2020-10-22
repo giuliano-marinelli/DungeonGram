@@ -2,12 +2,14 @@ import * as express from 'express';
 
 import UserCtrl from '../database/controllers/user';
 import CampaignCtrl from '../database/controllers/campaign';
+import CharacterCtrl from '../database/controllers/character';
 import AssetCtrl from '../database/controllers/asset';
 
 function setRoutes(app): void {
   const router = express.Router();
   const userCtrl = new UserCtrl();
   const campaignCtrl = new CampaignCtrl();
+  const characterCtrl = new CharacterCtrl();
   const assetCtrl = new AssetCtrl();
 
   // Users
@@ -26,6 +28,14 @@ function setRoutes(app): void {
   router.route('/campaign/:id').get(campaignCtrl.get);
   router.route('/campaign/:id').put(campaignCtrl.update);
   router.route('/campaign/:id').delete(campaignCtrl.delete);
+
+  // Campaign
+  router.route('/characters').get(characterCtrl.getAll);
+  router.route('/characters/count').get(characterCtrl.count);
+  router.route('/character').post(characterCtrl.insert);
+  router.route('/character/:id').get(characterCtrl.get);
+  router.route('/character/:id').put(characterCtrl.update);
+  router.route('/character/:id').delete(characterCtrl.delete);
 
   //assets
   router.route('/assets').get(assetCtrl.getAll);

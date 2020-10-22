@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
 import { User } from './user';
-import { Player } from './player';
+import { Character } from './character';
 import { Wall } from './wall';
 import { TileMap } from './tilemap';
 import {
@@ -12,7 +12,7 @@ import {
 export class World extends Schema {
   //schema
   users?: User[];
-  players?: Player[];
+  characters?: Character[];
   walls?: Wall[];
   tilemap?: TileMap;
   //game objects
@@ -41,8 +41,8 @@ export class World extends Schema {
             }
           }
         },
-        players: {
-          type: Player, datatype: Array, parameters: (key) => {
+        characters: {
+          type: Character, datatype: Array, parameters: (key) => {
             return {
               world: this,
               canvas: parameters.canvas,
@@ -127,9 +127,9 @@ export class World extends Schema {
 
   updateLights() {
     setTimeout(() => {
-      if (this.lights.playerLight && this.tilemap?.terrain && !this.lights.playerLight.setted) {
-        this.lights.playerLight.includedOnlyMeshes.push(this.tilemap.terrain);
-        this.lights.playerLight.setted = true;
+      if (this.lights.characterLight && this.tilemap?.terrain && !this.lights.characterLight.setted) {
+        this.lights.characterLight.includedOnlyMeshes.push(this.tilemap.terrain);
+        this.lights.characterLight.setted = true;
       }
 
       if (this.lights.baseLight && this.tilemap?.terrain && !this.lights.baseLight.setted) {
@@ -153,10 +153,10 @@ export class World extends Schema {
       try {
         for (let wall in this.walls) {
           if (this.walls[wall].size != 'collider')
-            this.lights.playerLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
+            this.lights.characterLight._shadowGenerator.addShadowCaster(this.walls[wall].mesh);
         }
-        for (let player in this.players) {
-          this.lights.baseLight._shadowGenerator.addShadowCaster(this.players[player].mesh);
+        for (let character in this.characters) {
+          this.lights.baseLight._shadowGenerator.addShadowCaster(this.characters[character].mesh);
         }
       } catch (err) { }
     });
@@ -189,58 +189,58 @@ export class World extends Schema {
     });
   }
 
-  updatePlayersVisibility(player?) {
-    var selectedPlayer = this.users[this.parameters.token]?.selectedPlayer;
-    if (selectedPlayer && this.players[selectedPlayer]?.mesh) {
+  updateCharactersVisibility(character?) {
+    var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
+    if (selectedCharacter && this.characters[selectedCharacter]?.mesh) {
       setTimeout(() => {
-        this.players[selectedPlayer].animator.visibility(1);
-        // this.players[selectedPlayer]?.visionRays.forEach(visionRay => {
+        this.characters[selectedCharacter].animator.visibility(1);
+        // this.characters[selectedCharacter]?.visionRays.forEach(visionRay => {
         //   visionRay?.dispose();
         // });
-        this.players[selectedPlayer].collider.isCollible = false;
-        if (!player || player == selectedPlayer) {
-          for (let player in this.players) {
-            this._updatePlayerVisibility(player, selectedPlayer)
+        this.characters[selectedCharacter].collider.isCollible = false;
+        if (!character || character == selectedCharacter) {
+          for (let character in this.characters) {
+            this._updateCharacterVisibility(character, selectedCharacter)
           }
         } else {
-          this._updatePlayerVisibility(player, selectedPlayer)
+          this._updateCharacterVisibility(character, selectedCharacter)
         }
-        this.players[selectedPlayer].collider.isCollible = true;
-        // this.players[selectedPlayer]?.visiblePlayers?.forEach(playerMesh => {
-        //   if (playerMesh) playerMesh.animator.visibility(1);
+        this.characters[selectedCharacter].collider.isCollible = true;
+        // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
+        //   if (characterMesh) characterMesh.animator.visibility(1);
         // });
-      }, this.players[selectedPlayer].movementCooldown);
+      }, this.characters[selectedCharacter].movementCooldown);
     } else {
       setTimeout(() => {
-        for (let player in this.players) {
-          if (this.players[player].mesh) {
-            this.players[player].collider.isPickable = true;
-            this.players[player].animator.visibility(1);
+        for (let character in this.characters) {
+          if (this.characters[character].mesh) {
+            this.characters[character].collider.isPickable = true;
+            this.characters[character].animator.visibility(1);
           }
         }
       });
     }
   }
 
-  _updatePlayerVisibility(player, selectedPlayer) {
-    if (this.players[player] && this.players[player].mesh && player != selectedPlayer) {
-      this.players[player].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.players[selectedPlayer].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[selectedPlayer].mesh.position.z);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.players[player].mesh.position.x, this.players[player].mesh.position.y + 1.65, this.players[player].mesh.position.z).subtract(origin));
+  _updateCharacterVisibility(character, selectedCharacter) {
+    if (this.characters[character] && this.characters[character].mesh && character != selectedCharacter) {
+      this.characters[character].collider.isPickable = true;
+      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[character].mesh.position.y + 1.65, this.characters[selectedCharacter].mesh.position.z);
+      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.characters[character].mesh.position.x, this.characters[character].mesh.position.y + 1.65, this.characters[character].mesh.position.z).subtract(origin));
       var ray = new BABYLON.Ray(
         origin,
         target,
-        this.players[selectedPlayer].visionRange - 1
+        this.characters[selectedCharacter].visionRange - 1
       );
-      // this.players[selectedPlayer].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+      // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
-        return mesh.isCollible && (!mesh.isPlayer || mesh.name == this.players[player].id)
+        return mesh.isCollible && (!mesh.isCharacter || mesh.name == this.characters[character].id)
       })?.pickedMesh;
-      if (pickedMesh && this.players[player].id == pickedMesh.name)
-        this.players[player].animator.visibility(1);
+      if (pickedMesh && this.characters[character].id == pickedMesh.name)
+        this.characters[character].animator.visibility(1);
       else {
-        this.players[player].animator.visibility(0);
-        this.players[player].collider.isPickable = false;
+        this.characters[character].animator.visibility(0);
+        this.characters[character].collider.isPickable = false;
       }
     }
   }

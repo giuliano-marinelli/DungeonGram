@@ -69,7 +69,7 @@ export class CampaignComponent implements OnInit {
     );
   }
 
-  addCampaign(): void {
+  saveCampaign(): void {
     this.campaignForm.markAllAsTouched();
     if (this.campaignForm.valid) {
       if (!this.campaign) {

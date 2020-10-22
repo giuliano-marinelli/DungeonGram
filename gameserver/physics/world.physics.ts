@@ -1,6 +1,6 @@
 import { Engine, World, Events } from 'matter-js';
 import { EntityPhysics } from './entity.physics';
-import { PlayerPhysics } from './player.physics';
+import { CharacterPhysics } from './character.physics';
 import { WallPhysics } from './wall.physics';
 
 var PF = require('pathfinding');
@@ -9,7 +9,7 @@ export class WorldPhysics {
   engine: Engine;
   entities: EntityPhysics[] = [];
   types: any = {
-    player: PlayerPhysics,
+    character: CharacterPhysics,
     wall: WallPhysics
   }
   grid: any;
@@ -62,17 +62,17 @@ export class WorldPhysics {
   setGrid(size) {
     this.gridSize = { width: size.width * 2 + 1, height: size.height * 2 + 1 };
     this.grid = new PF.Grid(this.gridSize.width, this.gridSize.height);
-    this.updateGrid();
+    this.updateGrid(this.grid);
   }
 
-  updateGrid() {
+  updateGrid(newGrid?) {
     for (let x = 0; x < this.gridSize.width; x++) {
       for (let y = 0; y < this.gridSize.height; y++) {
         this.grid.setWalkableAt(x, y, true);
       }
     }
     for (let entity in this.entities) {
-      this.entities[entity].updateGrid(this.grid);
+      this.entities[entity].updateGrid(newGrid);
     }
   }
 

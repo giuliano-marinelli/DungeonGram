@@ -16,11 +16,11 @@ export class User extends Schema {
   @type(Figure)
   figureDrawer: Figure;
   @type("string")
-  selectedPlayer: string;
+  selectedCharacter: string;
 
   constructor(wallsVisibility: number = 0.5, wallsPickable: boolean = false,
     fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,
-    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedPlayer?: string) {
+    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedCharacter?: string) {
     super();
     this.wallsVisibility = wallsVisibility;
     this.wallsPickable = wallsPickable;
@@ -28,6 +28,6 @@ export class User extends Schema {
     this.tilemapShowGrid = tilemapShowGrid;
     this.rule = rule;
     this.figureDrawer = figureDrawer;
-    this.selectedPlayer = selectedPlayer;
+    this.selectedCharacter = selectedCharacter;
   }
 }

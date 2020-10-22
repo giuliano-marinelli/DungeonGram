@@ -1,0 +1,164 @@
+<div class="modal-content" *ngIf="auth.loggedIn">
+  <form [formGroup]="characterForm" (ngSubmit)="saveCharacter()" autocomplete="off">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="fa fa-fw fa-user-circle-o"></i>
+        {{this.character ? 'Edit Character' : 'New Character'}}</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="isLoading">
+      <app-loading [condition]="isLoading"></app-loading>
+    </div>
+    <div class="modal-body" *ngIf="!isLoading">
+
+      <div id="character">
+        <canvas #renderCanvasCharacter id="renderCanvasCharacter" touch-action="none" width="100%"
+          height="100%"></canvas>
+
+        <div *ngFor="let wearCategory of wearsAvailable | keyvalue"
+          class="ce-container ce-container-{{wearCategory.key}}">
+          <h5>{{wearCategory.key}}</h5>
+
+          <div *ngFor="let wearSubcategory of wearCategory.value | keyvalue" class="ce-btn-container">
+
+            <div
+              class="{{wearCategory.key == 'head' || wearCategory.key == 'legs' || wearCategory.key == 'skin' ? 'dropleft' : 'dropright'}}">
+
+              <button type="button" class="btn btn-dark ce-btn dropdown-toggle" attr.data-toggle="dropdown"
+                attr.data-toggle-tooltip="tooltip" data-placement="right">
+                <img src="assets/images/characters/{{wearSubcategory.key}}.png" alt="{{wearSubcategory.key}}"
+                  onerror="this.src='assets/images/characters/default.png'">
+              </button>
+
+              <div
+                class="dropdown-menu {{wearCategory.key == 'arms' || wearCategory.key == 'legs' || wearCategory.key == 'skin' ? 'to-up': ''}}">
+                <h5>{{wearSubcategory.key}}</h5>
+
+                <div id="ce-{{wearSubcategory.key}}-container">
+
+                  <div *ngIf="wearCategory.key != 'skin' && wearSubcategory.key != 'character'"
+                    class="form-check form-check-inline">
+                    <label>
+                      <input class="form-check-input check-image" type="radio" name="ce-{{wearSubcategory.key}}-radio"
+                        value="none" (change)="scenario.wearChange(wearCategory.key, wearSubcategory.key, 'none')"
+                        checked>
+                      <img src="assets/images/characters/none.png" alt="None"
+                        onerror="this.src='assets/images/characters/default.png'" title="None"
+                        data-toggle-tooltip="tooltip" data-placement="bottom"
+                        attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                    </label>
+                  </div>
+
+                  <div *ngFor="let wear of wearSubcategory.value" class="form-check form-check-inline">
+                    <label>
+                      <input class="form-check-input check-image" type="radio" name="ce-{{wearSubcategory.key}}-radio"
+                        value="{{wear}}"
+                        (change)="scenario.wearChange(wearCategory.key, wearSubcategory.key, wear, colorPicker)">
+                      <img src="assets/images/characters/{{wearCategory.key}}/{{wearSubcategory.key}}/{{wear}}.png"
+                        (error)="onImageError($event, 'assets/images/characters/' + wearSubcategory.key + '.png')"
+                        data-toggle-tooltip="tooltip" data-placement="bottom" title="{{wear}}"
+                        attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                    </label>
+                  </div>
+
+                  <color-circle #colorPicker id="ce-{{wearSubcategory.key}}-color"
+                    [hidden]="wearSubcategory.key == 'ears' || wearSubcategory.key == 'character'"
+                    color="{{wearSubcategory.key == 'color' ? '#dc9b78':'#f44336'}}"
+                    [colors]='["#f44336","#e91e63","#9c27b0","#673ab7","#3f51b5","#2196f3","#03a9f4","#00bcd4","#009688","#4caf50","#8bc34a","#cddc39","#ffeb3b","#ffc107","#ff9800","#ff5722","#795548","#607d8b","#c8e1eb","#111111","#ffffff","#a5becd","#7891a5","#55647d","#37415a","#191e3c","#14465a","#0f7373","#0fa569","#41cd73","#73ff73","#dc9b78","#b26247","#8c3c32","#5a1423","#370a14","#ffd2a5","#f5a56e","#e66e46","#c3412d","#8c2323","#410041","#7d0041","#aa143c","#d72d2d","#f06923","#ffaa32","#ffe65a","#bed72d","#64a51e","#237d14","#0f5519","#0f3223","#82ffe1","#41d7d7","#14a0cd","#1469c3","#0f379b","#0f0f69","#3c1e8c","#642db4","#a041d7","#e65ae6","#ff8cc8","#4b143c","#820a64","#b4236e","#e65078","#ff8c8c","#ffcdb4","#e69b96","#be6973","#96465f","#6e2850"]'
+                    (onChangeComplete)="scenario.wearColorChange($event, wearCategory.key, wearSubcategory.key)"
+                    circleSize="15" circleSpacing="5" width="190"></color-circle>
+
+                  <div *ngIf="wearSubcategory.key == 'character'">
+                    <div class="mb-3">
+                      <label for="name">Name <small class="text-muted">*</small></label>
+                      <input class="form-control" type="text" name="name" formControlName="name" placeholder="Jonh Doe"
+                        [ngClass]="setValid('name')" autocomplete="off">
+                      <div class="invalid-feedback">
+                        <div *ngIf="name.errors && name.errors.required">
+                          Title is required
+                        </div>
+                        <div *ngIf="name.errors && (name.errors.minlength || name.errors.maxlength)">
+                          Title must be at 1-50 characters long
+                        </div>
+                        <div *ngIf="name.errors && name.errors.pattern">
+                          Title can only have characters, numbers and _ or - symbols
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="description">Description</label>
+                      <textarea class="form-control" type="text" name="description" formControlName="description"
+                        rows="8" placeholder="Here goes the description of my character..."
+                        [ngClass]="setValid('description')"></textarea>
+                      <div class="invalid-feedback">
+                        <div *ngIf="description.errors && description.errors.required">
+                          Description is required.
+                        </div>
+                        <div
+                          *ngIf="description.errors && (description.errors.minlength || description.errors.maxlength)">
+                          Description must be as maximum 200 characters long
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="description">Height</label>
+                      <br>
+                      <div class="form-check form-check-inline">
+                        <label>
+                          <input class="form-check-input check-image" type="radio" formControlName="height" value=1.25
+                            (change)="scenario.heightChange($event)" name="height">
+                          <img src="assets/images/characters/height_large.png" alt="Large" data-toggle-tooltip="tooltip"
+                            title="Large" data-placement="bottom"
+                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <label>
+                          <input class="form-check-input check-image" type="radio" formControlName="height" value=1
+                            (change)="scenario.heightChange($event)" name="height" checked>
+                          <img src="assets/images/characters/height_medium.png" alt='Medium'
+                            data-toggle-tooltip="tooltip" title="Medium" data-placement="bottom"
+                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <label>
+                          <input class="form-check-input check-image" type="radio" formControlName="height" value=0.75
+                            (change)="scenario.heightChange($event)" name="height">
+                          <img src="assets/images/characters/height_small.png" alt='Small' data-toggle-tooltip="tooltip"
+                            title="Small" data-placement="bottom"
+                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
+                      <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can
+                          see it)</small></label>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
+        (click)="activeModal.dismiss('Close click')">Cancel</button>
+      <button type="submit" class="btn btn-dark">
+        <i class="fa fa-floppy-o"></i> Save
+      </button>
+    </div>
+  </form>
+</div>

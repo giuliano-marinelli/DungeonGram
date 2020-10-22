@@ -78,7 +78,7 @@ export class TileMap extends Schema {
   }
 
   initActions() {
-    //click action on ground for move player
+    //click action on ground for move character
     // this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
     this.parameters.canvas.addEventListener("pointerdown", (e) => {
@@ -141,7 +141,7 @@ export class TileMap extends Schema {
               xToMove = Math.round(pick.pickedPoint.x);
               zToMove = Math.round(pick.pickedPoint.z);
             }
-            this.parameters.controller.send('game', 'player', { x: xToMove, y: zToMove, action: 'move' });
+            this.parameters.controller.send('game', 'character', { x: xToMove, y: zToMove, action: 'move' });
           } else if (this.parameters.controller.activeTool?.name == 'walls') {
             var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
               this.parameters.controller.activeTool?.options?.adjustTo);

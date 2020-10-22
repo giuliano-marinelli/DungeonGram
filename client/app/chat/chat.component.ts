@@ -30,7 +30,7 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    this.chatRoom.leave();
+    this.chatRoom?.leave();
   }
 
   initChat() {

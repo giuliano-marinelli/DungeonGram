@@ -10,8 +10,8 @@ export class WallPhysics extends EntityPhysics {
 
   constructor(id: string, type: string, grid: any, parameters: any) {
     super(type, grid);
-    this.from = { x: (parameters.from.x + 0.5) * 2, y: (parameters.from.y + 0.5) * 2 };
-    this.to = { x: (parameters.to.x + 0.5) * 2, y: (parameters.to.y + 0.5) * 2 };
+    this.from = { x: Math.round((parameters.from.x + 0.5) * 2), y: Math.round((parameters.from.y + 0.5) * 2) };
+    this.to = { x: Math.round((parameters.to.x + 0.5) * 2), y: Math.round((parameters.to.y + 0.5) * 2) };
     var middlePoint = Vector.div(Vector.add(parameters.from, parameters.to), 2);
     var subVector = Vector.sub(parameters.from, parameters.to);
     var distance = Math.sqrt(subVector.x * subVector.x + subVector.y * subVector.y);

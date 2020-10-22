@@ -1,0 +1,74 @@
+<div class="card character-container own" *ngIf="auth.loggedIn">
+  <h4 class="card-header">My Characters</h4>
+  <div class="card-body" *ngIf="isLoadingOwn">
+    <app-loading [condition]="isLoadingOwn"></app-loading>
+  </div>
+  <div class="card-body" *ngIf="!isLoadingOwn">
+    <p class="card-text">
+      <span class="d-inline-block" title="{{!auth.loggedIn ? 'You must be logged in to create characters' : ''}}"
+        attr.data-toggle-tooltip="{{!auth.loggedIn ? 'tooltip' : ''}}" data-placement="right">
+        <button type="button" class="btn btn-dark character-btn" (click)="openCharacter()" [disabled]="!auth.loggedIn"
+          attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
+          <i class="fa fa-plus"></i> New Character
+        </button>
+      </span>
+    </p>
+    <p *ngIf="ownCharacters.length <= 0" class="card-text">
+      You have not created characters yet
+    </p>
+    <div *ngIf="ownCharacters.length > 0"
+      class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+      <div *ngFor="let character of ownCharacters" class="col mb-4">
+        <ng-container [ngTemplateOutlet]="characterCard" [ngTemplateOutletContext]="{character: character}">
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card character-container">
+  <h4 class="card-header">Public Characters</h4>
+  <div class="card-body" *ngIf="isLoadingPublic">
+    <app-loading [condition]="isLoadingPublic"></app-loading>
+  </div>
+  <div class="card-body" *ngIf="!isLoadingPublic">
+    <p *ngIf="publicCharacters.length <= 0" class="card-text">
+      There are no public characters created yet
+    </p>
+    <div *ngIf="publicCharacters.length > 0"
+      class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+      <div *ngFor="let character of publicCharacters" class="col mb-4">
+        <ng-container [ngTemplateOutlet]="characterCard" [ngTemplateOutletContext]="{character: character}">
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #characterCard let-character='character'>
+  <div class="card h-100">
+    <img src="assets/images/characters/default-preview.jpg" class="card-img-top character-img"
+      alt="{{character.title}}">
+    <div class="card-body">
+      <h5 class="card-title"><i *ngIf="character.private" title="This character is private"
+          data-toggle-tooltip="tooltip" data-placement="top"
+          class="fa fa-user-secret">&nbsp;</i>{{character.name}}<br />
+        <small class="text-muted">created by {{character.owner_info.username}}</small>
+      </h5>
+      <p class="card-text character-description mb-4" title="{{character.description}}" data-toggle-tooltip="tooltip"
+        data-placement="right">{{character.description}}</p>
+      <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
+        <button class="btn btn-sm btn-dark character-btn-alt ml-2" (click)="openCharacter(character)"
+          [hidden]="auth.currentUser._id != character.owner" title="Edit" data-toggle-tooltip="tooltip"
+          data-placement="top">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-danger ml-2" (click)="deleteCharacter(character)"
+          [hidden]="auth.currentUser._id != character.owner" title="Delete" data-toggle-tooltip="tooltip"
+          data-placement="top">
+          <i class="fa fa-trash"></i>
+        </button>
+      </p>
+    </div>
+  </div>
+</ng-template>

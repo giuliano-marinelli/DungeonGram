@@ -22,6 +22,7 @@ import { ColorShadeModule } from 'ngx-color/shade'; // <color-shade-picker></col
 // Services
 import { UserService } from './services/user.service';
 import { CampaignService } from './services/campaign.service';
+import { CharacterService } from './services/character.service';
 import { AssetService } from './services/asset.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
@@ -40,10 +41,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { GameComponent } from './game/game.component';
 import { ChatComponent } from './chat/chat.component';
 import { ToolsComponent } from './tools/tools.component';
-import { CharacterEditorComponent } from './character-editor/character-editor.component';
+import { CharacterComponent } from './characters/character/character.component';
 import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
 import { CampaignComponent } from './campaigns/campaign/campaign.component';
-import { CampaignEditComponent } from './campaigns/campaign-edit/campaign-edit.component';
+import { CharacterListComponent } from './characters/character-list/character-list.component';
 
 @NgModule({
   declarations: [
@@ -59,10 +60,10 @@ import { CampaignEditComponent } from './campaigns/campaign-edit/campaign-edit.c
     GameComponent,
     ChatComponent,
     ToolsComponent,
-    CharacterEditorComponent,
+    CharacterListComponent,
+    CharacterComponent,
     CampaignListComponent,
-    CampaignComponent,
-    CampaignEditComponent
+    CampaignComponent
   ],
   imports: [
     AppRoutingModule,
@@ -95,6 +96,7 @@ import { CampaignEditComponent } from './campaigns/campaign-edit/campaign-edit.c
     AuthGuardAdmin,
     UserService,
     CampaignService,
+    CharacterService,
     AssetService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

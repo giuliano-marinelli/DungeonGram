@@ -86,7 +86,7 @@ export class Wall extends Schema {
         this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
     }));
 
-    this.parameters.world.updatePlayersVisibility();
+    this.parameters.world.updateCharactersVisibility();
     this.parameters.world.updateShadows();
     this.parameters.world.updateWalls();
   }
@@ -97,6 +97,6 @@ export class Wall extends Schema {
     this.tilesPhysicsColliders.forEach((tilesPhysicsCollider) => {
       tilesPhysicsCollider.dispose();
     })
-    this.parameters.world.updatePlayersVisibility();
+    this.parameters.world.updateCharactersVisibility();
   }
 }

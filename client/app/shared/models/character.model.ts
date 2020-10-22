@@ -1,9 +1,10 @@
-export class Campaign {
+export class Character {
   // tslint:disable-next-line: variable-name
   _id?: string;
   owner?: string;
-  title?: string;
+  name?: string;
   description?: string;
-  players: string[];
+  wears: object[];
+  height: number;
   private: boolean;
 }

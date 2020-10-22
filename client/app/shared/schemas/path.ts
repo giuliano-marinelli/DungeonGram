@@ -28,7 +28,7 @@ export class Path extends Schema {
     changes?.forEach((change) => {
       switch (change.field) {
         case 'to':
-          this.parameters.player.animator?.play('Idle');
+          this.parameters.character.animator?.play('Idle');
           break;
       }
     });
@@ -50,7 +50,7 @@ export class Path extends Schema {
       delete this.meshTo;
     }
 
-    if (this.parameters.playerId == this.parameters.world.users[this.parameters.token].selectedPlayer &&
+    if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.to) {
       //create mesh
       this.meshTo = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.4 }, this.parameters.scene);
@@ -81,7 +81,7 @@ export class Path extends Schema {
       this.rays = [];
     }
 
-    if (this.parameters.playerId == this.parameters.world.users[this.parameters.token].selectedPlayer &&
+    if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.points.length) {
       for (let i = 0; i < this.points.length; i++) {
         var point = this.points[i];

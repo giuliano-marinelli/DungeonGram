@@ -3,7 +3,7 @@ import { EntityPhysics } from './entity.physics';
 
 var PF = require('pathfinding');
 
-export class PlayerPhysics extends EntityPhysics {
+export class CharacterPhysics extends EntityPhysics {
 
   constructor(id: string, type: string, grid: any, parameters: any) {
     super(type, grid);

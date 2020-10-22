@@ -11,7 +11,7 @@ export class User extends Schema {
   tilemapShowGrid?: number;
   rule?: Rule;
   figureDrawer?: Figure;
-  selectedPlayer?: string;
+  selectedCharacter?: string;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -62,10 +62,10 @@ export class User extends Schema {
           case 'tilemapShowGrid':
             this.parameters.world.updateTilemap();
             break;
-          case 'selectedPlayer':
-            this.parameters.world.updatePlayersVisibility();
-            if (change.previousValue && this.parameters.world.players) this.parameters.world.players[change.previousValue]?.initVisionLight();
-            if (change.value && this.parameters.world.players) this.parameters.world.players[change.value]?.initVisionLight();
+          case 'selectedCharacter':
+            this.parameters.world.updateCharactersVisibility();
+            if (change.previousValue && this.parameters.world.characters) this.parameters.world.characters[change.previousValue]?.initVisionLight();
+            if (change.value && this.parameters.world.characters) this.parameters.world.characters[change.value]?.initVisionLight();
             this.parameters.world.updateLights();
             this.parameters.world.updateShadows();
             break;

@@ -69,7 +69,8 @@ export class GameComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    this.gameRoom.leave();
+    this.engine.dispose();
+    this.gameRoom?.leave();
   }
 
   initGame() {

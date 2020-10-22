@@ -11,12 +11,14 @@ const campaignSchema = new mongoose.Schema({
       ref: 'User'
     }
   },
-  private: Boolean
+  private: Boolean,
+  state: Object
 });
 
-//omit the __v when returning a campaign
+//omit the __v and state when returning a campaign
 campaignSchema.set('toJSON', {
   transform: (doc, ret, options) => {
+    delete ret.state;
     delete ret.__v;
     return ret;
   }

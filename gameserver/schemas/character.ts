@@ -1,12 +1,12 @@
 import { Schema, type, MapSchema } from '@colyseus/schema';
-import { Path } from '../schemas/path';
-import { Point } from '../schemas/point';
-import { Wear } from '../schemas/wear';
-import { PlayerPhysics } from '../physics/player.physics';
+import { Path } from './path';
+import { Point } from './point';
+import { Wear } from './wear';
+import { CharacterPhysics } from '../physics/character.physics';
 import { Vector } from 'matter-js';
 import { Utils } from '../utils';
 
-export class Player extends Schema {
+export class Character extends Schema {
   @type("number")
   x = 0;
   @type("number")
@@ -27,7 +27,7 @@ export class Player extends Schema {
   movementAcum = 0;
   collide = false;
   //physics
-  playerPhysics: PlayerPhysics;
+  characterPhysics: CharacterPhysics;
   //shared physics attributes for test
   @type("number")
   xPhysics = 0;
@@ -61,13 +61,13 @@ export class Player extends Schema {
       //firt move to middle grid
       // if (this.movementAcum > 55 && this.movementAcum <= 100) {
       //   var middlePoint = Vector.div(Vector.add({ x: this.x, y: this.y }, this.movementPath.points[0]), 2);
-      //   this.playerPhysics.move(middlePoint.x, middlePoint.y);
-      //    this.collide = this.playerPhysics.isColliding; //save colliding info
+      //   this.characterPhysics.move(middlePoint.x, middlePoint.y);
+      //    this.collide = this.characterPhysics.isColliding; //save colliding info
       // }
       //then move to the target grid
       // if (this.movementAcum > 10 && this.movementAcum <= 55) {
-      //   this.playerPhysics.move(this.movementPath.points[0].x, this.movementPath.points[0].y);
-      //    if (!this.collide) this.collide = this.playerPhysics.isColliding; //save colliding info
+      //   this.characterPhysics.move(this.movementPath.points[0].x, this.movementPath.points[0].y);
+      //    if (!this.collide) this.collide = this.characterPhysics.isColliding; //save colliding info
       // }
       //then moves the logic position if the physics not collide in any of previous
       if (this.movementAcum == 0) {
@@ -76,14 +76,14 @@ export class Player extends Schema {
           this.direction.y = this.movementPath.points[0].y - this.y;
           this.x = this.movementPath.points[0].x;
           this.y = this.movementPath.points[0].y;
-          this.playerPhysics.move(this.x, this.y);
+          this.characterPhysics.move(this.x, this.y);
           this.movementPath.doPoint();
           if (this.movementPath.points.length) {
             this.movementAcum = this.movementCooldown;
           }
         } else {
           this.movementPath.unset();
-          this.playerPhysics.move(this.x, this.y);
+          this.characterPhysics.move(this.x, this.y);
           this.collide = false;
         }
       } else {
@@ -94,20 +94,20 @@ export class Player extends Schema {
   }
 
   updatePhysics() {
-    // console.log(this.playerPhysics.body.position);
-    if (this.xPhysics != this.playerPhysics.body.position.x)
-      this.xPhysics = this.playerPhysics.body.position.x;
-    if (this.yPhysics != this.playerPhysics.body.position.y)
-      this.yPhysics = this.playerPhysics.body.position.y;
-    if (this.isCollidingPhysics != this.playerPhysics.isColliding)
-      this.isCollidingPhysics = this.playerPhysics.isColliding;
+    // console.log(this.characterPhysics.body.position);
+    if (this.xPhysics != this.characterPhysics.body.position.x)
+      this.xPhysics = this.characterPhysics.body.position.x;
+    if (this.yPhysics != this.characterPhysics.body.position.y)
+      this.yPhysics = this.characterPhysics.body.position.y;
+    if (this.isCollidingPhysics != this.characterPhysics.isColliding)
+      this.isCollidingPhysics = this.characterPhysics.isColliding;
   }
 
   move(movement: any) {
     if (movement.x != this.x || movement.y != this.y) {
       //set a initial cooldown so physics movement do first
       // this.movementAcum = 100;
-      var path = this.playerPhysics.getPath({ x: movement.x, y: movement.y });
+      var path = this.characterPhysics.getPath({ x: movement.x, y: movement.y });
       if (path.length) {
         this.movementPath.set({
           from: new Point(this.x, this.y),
@@ -129,7 +129,7 @@ export class Player extends Schema {
     if (position) {
       this.x = position.x;
       this.y = position.y;
-      this.playerPhysics.move(this.x, this.y); //update physics position
+      this.characterPhysics.move(this.x, this.y); //update physics position
     }
   }
 
@@ -137,6 +137,6 @@ export class Player extends Schema {
     this.beignDragged = false;
     this.x = snapToGrid == null || snapToGrid ? Math.round(this.x) : this.x;
     this.y = snapToGrid == null || snapToGrid ? Math.round(this.y) : this.y;
-    this.playerPhysics.move(this.x, this.y); //update physics position
+    this.characterPhysics.move(this.x, this.y); //update physics position
   }
 }

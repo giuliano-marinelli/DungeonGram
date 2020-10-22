@@ -1,8 +1,7 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { User } from './user';
-import { Player } from '../schemas/player';
+import { Character } from './character';
 import { TileMap } from '../schemas/tilemap';
-import { Point } from './point';
 import { Wall } from './wall';
 import { Utils } from '../utils';
 import { WorldPhysics } from '../physics/world.physics';
@@ -10,8 +9,8 @@ import { WorldPhysics } from '../physics/world.physics';
 export class World extends Schema {
   @type({ map: User })
   users = new MapSchema<User>();
-  @type({ map: Player })
-  players = new MapSchema<Player>();
+  @type({ map: Character })
+  characters = new MapSchema<Character>();
   @type({ map: Wall })
   walls = new MapSchema<Wall>();
   @type(TileMap)
@@ -25,49 +24,49 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           if (!this.users[client]) {
             this.users[client] = new User();
-            this.users[client].selectedPlayer = client;
+            this.users[client].selectedCharacter = client;
           }
 
-          if (!this.players[client]) {
-            this.players[client] = new Player();
-            this.players[client].playerPhysics = this.worldPhysics.addEntity(client, 'player', { x: this.players[client].x, y: this.players[client].y }) //add physics player
+          if (!this.characters[client]) {
+            this.characters[client] = new Character();
+            this.characters[client].characterPhysics = this.worldPhysics.addEntity(client, 'character', { x: this.characters[client].x, y: this.characters[client].y }) //add physics character
           }
         }
       },
       leave: {
         do: (client: string, data: any) => {
-          delete this.users[client];
-          // delete this.players[client];
-          // this.worldPhysics.removeEntity(client, 'player'); //remove physics player
+          // delete this.users[client];
+          // delete this.characters[client];
+          // this.worldPhysics.removeEntity(client, 'character'); //remove physics character
         }
       },
     },
-    player: {
+    character: {
       move: {
         do: (client: string, data: any) => {
-          if (this.users[client].selectedPlayer &&
+          if (this.users[client].selectedCharacter &&
             data.x >= 0 && data.y >= 0 &&
             data.x < this.tilemap.width && data.y < this.tilemap.height)
-            this.players[this.users[client].selectedPlayer].move({ x: data.x, y: data.y });
+            this.characters[this.users[client].selectedCharacter].move({ x: data.x, y: data.y });
         },
         validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       drag: {
         do: (client: string, data: any) => {
           var point = data.x || data.y ? { x: data.x, y: data.y } : null;
-          this.players[data.id].drag(point);
+          this.characters[data.id].drag(point);
         },
         validate: (data: any) => { return data.id != null && typeof data.id === "string" }
       },
       drop: {
         do: (client: string, data: any) => {
-          this.players[data.id].drop(data.snapToGrid);
+          this.characters[data.id].drop(data.snapToGrid);
         },
         validate: (data: any) => { return data.id != null && typeof data.id === "string" }
       },
       select: {
         do: (client: string, data: any) => {
-          this.users[client].selectedPlayer = this.users[client].selectedPlayer != data.id ? data.id : null;
+          this.users[client].selectedCharacter = this.users[client].selectedCharacter != data.id ? data.id : null;
         },
         validate: (data: any) => { return data.id != null && typeof data.id === "string" }
       },
@@ -256,9 +255,9 @@ export class World extends Schema {
     //udpate physics world
     this.worldPhysics.update(deltaTime);
 
-    //update each player (their update their physics individually)
-    for (var id in this.players) {
-      this.players[id].update(deltaTime);
+    //update each character (their update their physics individually)
+    for (var id in this.characters) {
+      this.characters[id].update(deltaTime);
     }
   }
 }

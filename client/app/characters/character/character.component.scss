@@ -1,14 +1,15 @@
-#character-editor {
-  position: fixed;
+#character {
+  position: relative;
   width: 100%;
-  height: calc(100% - 58px);
+  height: 700px;
+  background-color: #191919;
 }
 
 canvas {
   outline: none;
 }
 
-#renderCanvasCharacterEditor {
+#renderCanvasCharacter {
   width: 100%;
   height: 100%;
 }
@@ -29,31 +30,37 @@ canvas {
 
 .ce-container h5 {
   text-transform: capitalize;
+  text-align: center;
 }
 
 .ce-container-head {
   right: 5%;
-  top: 5%;
+  top: 2%;
 }
 
 .ce-container-torso {
   left: 5%;
-  top: 5%;
+  top: calc(2% + 100px);
 }
 
 .ce-container-arms {
   left: 5%;
-  top: calc(5% + 265px);
+  top: calc(2% + 265px + 100px);
 }
 
 .ce-container-legs {
   right: 5%;
-  top: calc(5% + 375px);
+  top: calc(2% + 375px);
 }
 
 .ce-container-skin {
   right: 5%;
-  top: calc(5% + 375px + 155px);
+  top: calc(2% + 375px + 155px);
+}
+
+.ce-container-info {
+  left: 5%;
+  top: 2%;
 }
 
 .ce-btn-container {
@@ -106,6 +113,12 @@ canvas {
 
 .ce-btn-container .dropleft .dropdown-menu {
   right: 55px !important;
+}
+
+.ce-btn-container .dropleft .dropdown-menu.to-up,
+.ce-btn-container .dropright .dropdown-menu.to-up {
+  bottom: 0px !important;
+  top: auto !important;
 }
 
 //to make dropdown work on hover

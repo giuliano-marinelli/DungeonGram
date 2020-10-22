@@ -14,7 +14,8 @@ import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { GameComponent } from './game/game.component';
-import { CharacterEditorComponent } from './character-editor/character-editor.component';
+import { CharacterComponent } from './characters/character/character.component';
+import { CharacterListComponent } from './characters/character-list/character-list.component';
 import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
 
 const routes: Routes = [
@@ -28,7 +29,7 @@ const routes: Routes = [
   { path: 'editor', component: EditorComponent },
   { path: 'game/:campaign', component: GameComponent },
   { path: 'campaigns', component: CampaignListComponent },
-  { path: 'character-editor', component: CharacterEditorComponent },
+  { path: 'characters', component: CharacterListComponent },
   { path: '**', redirectTo: '/notfound' },
 ];
 
