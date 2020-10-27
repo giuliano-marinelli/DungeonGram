@@ -2,7 +2,7 @@ import { Room, Client } from 'colyseus';
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 //schemas
 import { World } from '../schemas/world';
-import { User as UserSchema } from '../schemas/user';
+import { User } from '../schemas/user';
 import { Character } from '../schemas/character';
 import { Wall } from '../schemas/wall';
 import { Door } from '../schemas/door';
@@ -21,8 +21,8 @@ import { CharacterPhysics } from '../physics/character.physics';
 import { WallPhysics } from '../physics/wall.physics';
 
 //database models
-import User from '../../database/models/user';
-import Campaign from '../../database/models/campaign';
+import { default as UserDB } from '../../database/models/user';
+import { default as CampaignDB } from '../../database/models/campaign';
 
 //serializer
 import * as serialijse from "serialijse";
@@ -44,6 +44,7 @@ export class GameRoom extends Room<State> {
     console.log('GameRoom-', this.roomId, '-: created');
 
     this.setState(new State());
+    this.state.world.load(this.campaignId);
 
     this.onMessage('*', (client, type, data) => {
       console.log('GameRoom-', this.roomId, '-: user', this.clientUserObj[client.sessionId].username, 'send command "' + type + '" =>', data);
@@ -56,8 +57,8 @@ export class GameRoom extends Room<State> {
   async onAuth(client: Client, options, req) {
     // console.log("auth", options);
     if (options && options.campaign && options.token) {
-      const resu = await User.findByAuthorization(options.token);
-      const campaign = await Campaign.findOne({
+      const resu = await UserDB.findByAuthorization(options.token);
+      const campaign = await CampaignDB.findOne({
         _id: options.campaign,
         $or: [
           { owner: resu.user._id },
@@ -91,18 +92,22 @@ export class GameRoom extends Room<State> {
   async onDispose() {
     console.log('GameRoom-', this.roomId, '-: disposed');
 
-    console.log('GameRoom-', this.roomId, '-: saving world state');
-    const campaign = await Campaign.findOne({ _id: this.campaignId });
+    //persist actual world before dispose room
+    this.state.world?.persist();
+
+    // console.log('GameRoom-', this.roomId, '-: saving world state');
+    // const campaign = await CampaignDB.findOne({ _id: this.campaignId });
 
     //serialization
     // this.declarePersistableClasses();
     // campaign.state = serialijse.serialize(this.state);
     // console.log(this.state);
 
-    await Campaign.findOneAndUpdate({ _id: this.campaignId }, campaign);
-    console.log('GameRoom-', this.roomId, '-: finish saving state');
+    // await CampaignDB.findOneAndUpdate({ _id: this.campaignId }, campaign);
+    // console.log('GameRoom-', this.roomId, '-: finish saving state');
   }
 
+  //NOT USED
   declarePersistableClasses() {
     //colyseus types
     serialijse.declarePersistable(Schema);
@@ -114,7 +119,7 @@ export class GameRoom extends Room<State> {
     //schemas types
     serialijse.declarePersistable(State);
     serialijse.declarePersistable(World);
-    serialijse.declarePersistable(UserSchema);
+    serialijse.declarePersistable(User);
     serialijse.declarePersistable(Character);
     serialijse.declarePersistable(Wall);
     serialijse.declarePersistable(Door);

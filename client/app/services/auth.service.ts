@@ -8,6 +8,8 @@ import { ToastComponent } from '../shared/toast/toast.component';
 import { User } from '../shared/models/user.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
+declare var iziToast;
+
 @Injectable()
 export class AuthService {
   loggedIn = false;
@@ -32,6 +34,7 @@ export class AuthService {
   login(emailAndPassword): void {
     this.userService.login(emailAndPassword).subscribe(
       res => {
+        iziToast.success({ message: 'Logged successfully.' });
         localStorage.setItem('token', res.token);
         const decodedUser = this.decodeUserFromToken(res.token);
         this.setCurrentUser(decodedUser);
@@ -40,7 +43,7 @@ export class AuthService {
         // close all open modals
         this.modalService.dismissAll();
       },
-      error => this.toast.setMessage('invalid email or password!', 'danger')
+      error => iziToast.error({ message: 'Email or password are invalid.' })
     );
   }
 

@@ -9,6 +9,10 @@ export class Path extends Schema {
   @type([Point])
   points = new ArraySchema<Point>();
 
+  //for destroy the object
+  @type('boolean')
+  destroy: boolean = false;
+
   constructor() {
     super();
   }
@@ -77,5 +81,8 @@ export class Path extends Schema {
     }
   }
 
+  remove() {
+    this.destroy = true;
+  }
 
 }

@@ -12,13 +12,31 @@ const campaignSchema = new mongoose.Schema({
     }
   },
   private: Boolean,
-  state: Object
+  maps: {
+    type: "array",
+    contains: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Map'
+    }
+  },
+  openedMap: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Map'
+  },
+  users: [
+    {
+      ref: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      settings: Object,
+    }
+  ]
 });
 
 //omit the __v and state when returning a campaign
 campaignSchema.set('toJSON', {
   transform: (doc, ret, options) => {
-    delete ret.state;
     delete ret.__v;
     return ret;
   }

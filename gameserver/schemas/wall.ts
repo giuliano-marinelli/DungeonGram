@@ -15,6 +15,10 @@ export class Wall extends Schema {
   @type([Point])
   tilesPhysics = new ArraySchema<Point>();
 
+  //for destroy the object
+  @type('boolean')
+  destroy: boolean = false;
+
   constructor(from: any, to: any, size: string) {
     super();
     this.from = new Point(from.x, from.y);
@@ -26,5 +30,9 @@ export class Wall extends Schema {
     this.wallPhysics.tiles.forEach((tile) => {
       this.tilesPhysics.push(new Point((tile.x / 2) - 0.5, (tile.y / 2) - 0.5));
     });
+  }
+
+  remove() {
+    this.destroy = true;
   }
 }

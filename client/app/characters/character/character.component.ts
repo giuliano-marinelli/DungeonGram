@@ -27,7 +27,7 @@ export class CharacterComponent implements OnInit {
 
   characterForm: FormGroup;
   _id;
-  owner;
+  // owner;
   name = new FormControl('', [
     Validators.required,
     Validators.minLength(1),
@@ -96,7 +96,7 @@ export class CharacterComponent implements OnInit {
   ngOnInit(): void {
     this.characterForm = this.formBuilder.group({
       _id: this._id,
-      owner: this.owner,
+      // owner: this.owner,
       name: this.name,
       description: this.description,
       wears: this.wears,
@@ -110,7 +110,7 @@ export class CharacterComponent implements OnInit {
 
   ngOnDestroy(): void {
     console.log('ngOnDestroy character.component')
-    this.engine.dispose();
+    this.engine?.dispose();
   }
 
   setValid(control): object {
@@ -182,7 +182,7 @@ export class CharacterComponent implements OnInit {
   getCharacter(): void {
     this.characterService.getCharacter(this.character).subscribe(
       data => {
-        this.characterForm.setValue(data)
+        this.characterForm.patchValue(data)
       },
       error => console.log(error),
       () => this.isLoading = false

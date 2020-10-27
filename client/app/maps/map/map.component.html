@@ -1,0 +1,57 @@
+<div class="modal-content" *ngIf="auth.loggedIn">
+  <form [formGroup]="mapForm" (ngSubmit)="saveMap()" autocomplete="off">
+    <div class="modal-header">
+      <h5 class="modal-name"><i class="fa fa-fw fa-map"></i> {{this.map ? 'Edit Map' : 'New Map'}}</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="isLoading">
+      <app-loading [condition]="isLoading"></app-loading>
+    </div>
+    <div class="modal-body" *ngIf="!isLoading">
+      <div class="mb-3">
+        <label for="name">Name <small class="text-muted">*</small></label>
+        <input class="form-control" type="text" name="name" formControlName="name"
+          placeholder="My Map Name" [ngClass]="setValid('name')" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="name.errors && name.errors.required">
+            Name is required
+          </div>
+          <div *ngIf="name.errors && (name.errors.minlength || name.errors.maxlength)">
+            Name must be at 1-50 characters long
+          </div>
+          <div *ngIf="name.errors && name.errors.pattern">
+            Name can only have characters, numbers and _ or - symbols
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="description">Description</label>
+        <textarea class="form-control" type="text" name="description" formControlName="description" rows="8"
+          placeholder="Here goes the description of my map..."
+          [ngClass]="setValid('description')"></textarea>
+        <div class="invalid-feedback">
+          <div *ngIf="description.errors && description.errors.required">
+            Description is required.
+          </div>
+          <div *ngIf="description.errors && (description.errors.minlength || description.errors.maxlength)">
+            Description must be as maximum 150 characters long
+          </div>
+        </div>
+      </div>
+      <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
+        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can use it)</small></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
+        (click)="activeModal.dismiss('Close click')">Cancel</button>
+      <button type="button" class="btn btn-dark" type="submit">
+        <i class="fa fa-floppy-o"></i> Save
+      </button>
+    </div>
+  </form>
+</div>

@@ -20,7 +20,7 @@
             Title is required
           </div>
           <div *ngIf="title.errors && (title.errors.minlength || title.errors.maxlength)">
-            Title must be at 4-50 characters long
+            Title must be at 1-50 characters long
           </div>
           <div *ngIf="title.errors && title.errors.pattern">
             Title can only have characters, numbers and _ or - symbols

@@ -32,7 +32,7 @@
             </span>
           </div>
           <input class="form-control" type="email" name="email" formControlName="email" placeholder="Email"
-            [ngClass]="setValid('email')">
+            [ngClass]="setValid('email')" disabled>
           <div class="invalid-feedback">
             <div *ngIf="email.errors && email.errors.required">
               Email is required.
@@ -51,7 +51,7 @@
               <i class="fa fa-fw fa-black-tie"></i>
             </span>
           </div>
-          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')">
+          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')" disabled>
             <option value="" disabled>Role</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>

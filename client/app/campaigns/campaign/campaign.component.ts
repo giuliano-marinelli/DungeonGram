@@ -21,10 +21,10 @@ export class CampaignComponent implements OnInit {
   isLoading = true;
   campaignForm: FormGroup;
   _id;
-  owner;
+  // owner;
   title = new FormControl('', [
     Validators.required,
-    Validators.minLength(4),
+    Validators.minLength(1),
     Validators.maxLength(50)
   ]);
   description = new FormControl('', [
@@ -32,7 +32,8 @@ export class CampaignComponent implements OnInit {
     Validators.maxLength(200)
   ]);
   private = new FormControl(false, []);
-  players = new FormControl('', []);
+  // players = new FormControl([], []);
+  // maps = new FormControl([], []);
 
   constructor(
     private formBuilder: FormBuilder,
@@ -45,10 +46,11 @@ export class CampaignComponent implements OnInit {
   ngOnInit(): void {
     this.campaignForm = this.formBuilder.group({
       _id: this._id,
-      owner: this.owner,
+      // owner: this.owner,
       title: this.title,
       description: this.description,
-      players: this.players,
+      // players: this.players,
+      // maps: this.maps,
       private: this.private
     });
     if (this.campaign) this.getCampaign(); else this.isLoading = false
@@ -63,7 +65,7 @@ export class CampaignComponent implements OnInit {
 
   getCampaign(): void {
     this.campaignService.getCampaign(this.campaign).subscribe(
-      data => this.campaignForm.setValue(data),
+      data => this.campaignForm.patchValue(data),
       error => console.log(error),
       () => this.isLoading = false
     );
@@ -77,6 +79,7 @@ export class CampaignComponent implements OnInit {
           res => {
             iziToast.success({ message: 'Campaign created correctly, now you can invite your friends!' });
             // this.router.navigate(['/login']);
+            this.getCampaigns.emit();
             this.modalService.dismissAll();
           },
           error => iziToast.error({ message: 'There was an error, campaign can\'t be created.' })
@@ -86,6 +89,7 @@ export class CampaignComponent implements OnInit {
           res => {
             iziToast.success({ message: 'Campaign was changed correctly.' });
             // this.router.navigate(['/login']);
+            this.getCampaigns.emit();
             this.modalService.dismissAll();
           },
           error => iziToast.error({ message: 'There was an error, campaign can\'t be changed.' })
@@ -94,7 +98,5 @@ export class CampaignComponent implements OnInit {
     } else {
       iziToast.error({ message: 'Some values are invalid, please check.' });
     }
-
-    this.getCampaigns.emit();
   }
 }

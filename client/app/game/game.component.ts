@@ -63,13 +63,13 @@ export class GameComponent implements OnInit {
 
       //resize canvas on resize window
       window.onresize = () => {
-        this.engine.resize();
+        this.engine?.resize();
       };
     }
   }
 
   ngOnDestroy(): void {
-    this.engine.dispose();
+    this.engine?.dispose();
     this.gameRoom?.leave();
   }
 

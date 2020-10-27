@@ -31,9 +31,14 @@ class UserCtrl extends BaseCtrl {
 
   insert = async (req, res) => {
     try {
-      req.body.role = 'user';
-      const obj = await new this.model(req.body).save();
-      res.status(201).json(obj);
+      const existent = await this.model.findOne({ email: req.body.email });
+      if (!existent) {
+        req.body.role = 'user';
+        const obj = await new this.model(req.body).save();
+        res.status(201).json(obj);
+      } else {
+        throw new Error('email already exists');
+      }
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -46,13 +51,14 @@ class UserCtrl extends BaseCtrl {
 
       const obj = await this.model.findOne({ _id: req.params.id });
       req.body.role = JSON.parse(JSON.stringify(obj)).role;
-      await this.model.findOneAndUpdate({ _id: req.params.id }, req.body);
+      req.body.email = resu.user.email;
+
+      await this.model.findOneAndUpdate({ _id: req.params.id, email: resu.user.email }, req.body);
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
   }
-
 }
 
 export default UserCtrl;

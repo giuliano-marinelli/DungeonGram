@@ -11,9 +11,67 @@
         <img src="{{tool.image}}">
       </button>
 
-      <div *ngIf="tool.dropdown" class="dropdown-menu">
+      <div *ngIf="tool.dropdown" class="dropdown-menu" [style.width]="tool.name == 'maps' ? '226px' : '200px'">
         <div [ngSwitch]="tool.name">
           <h5>{{tool.label}}</h5>
+
+          <div *ngSwitchCase="'maps'" id="tool-maps-container">
+            <div id="maps-list">
+
+              <div *ngIf="isLoadingCampaign">
+                <app-loading [condition]="isLoadingCampaign"></app-loading>
+              </div>
+
+              <div *ngIf="!isLoadingCampaign" class="row row-cols-2">
+                <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
+                  <div class="card h-100">
+                    <img src="assets/images/campaigns/default.jpg" class="card-img-top"
+                      attr.data-original-title="<b>{{map['name']}}</b><br />{{map['description']}}"
+                      data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-maps-container">
+                    <div class="card-body p-0">
+                      <!-- <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private"
+                          data-toggle-tooltip="tooltip" data-placement="top"
+                          class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />
+                        <small class="text-muted">created by {{campaign.owner_info.username}}</small>
+                      </h5> -->
+                      <!-- <p class="card-text campaign-description mb-4" title="{{campaign.description}}"
+                        data-toggle-tooltip="tooltip" data-placement="right">{{campaign.description}}</p> -->
+                      <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
+                          attr.data-original-title="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
+                          data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
+                          data-trigger="hover">
+                          <i class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" title="Edit"
+                          data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
+                          data-trigger="hover">
+                          <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" (click)="deleteMap(map)" title="Delete"
+                          data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
+                          data-trigger="hover">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 mb-2">
+                  <div class="card" style="height: 20px;">
+                    <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
+                      style="width: 100%; height: 100%; font-size: 10px;" title="Add Map" data-toggle-tooltip="tooltip"
+                      data-placement="bottom">
+                      <i class="fa fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
 
           <div *ngSwitchCase="'grid'">
             <div class="form-group">
@@ -21,18 +79,18 @@
               <label style="float: right">{{grid_width.value}}</label>
               <input type="range" class="form-control-range" #grid_width
                 (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
-                max="1000" step="2" value="50" />
+                max="1000" step="2" value="{{tool.options.gridWidth?.value}}" />
             </div>
             <div class="form-group">
               <label>Height</label>
               <label style="float: right">{{grid_height.value}}</label>
               <input type="range" class="form-control-range" #grid_height
                 (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
-                max="1000" step="2" value="50" />
+                max="1000" step="2" value="{{tool.options.gridHeight?.value}}" />
             </div>
             <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="tool-grid-show" #grid_show
-                (change)="tool.actions.show(grid_show.checked)" checked="true">
+                (change)="tool.actions.show(grid_show.checked)" [(ngModel)]="tool.options.tilemapShowGrid.value">
               <label class="custom-control-label" for="tool-grid-show">Show</label>
             </div>
           </div>
@@ -82,7 +140,7 @@
               <label style="float: right">{{walls_visibility.value}}</label>
               <input type="range" class="form-control-range" #walls_visibility
                 (change)="tool.actions.visibility({ value: walls_visibility.value })" min="0" max="1" step="0.1"
-                value="0.5" />
+                value="{{tool.options.wallsVisibility?.value}}" />
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="tool-walls-adjust-to" id="tool-walls-adjust-to-grid"
@@ -120,7 +178,7 @@
               <label style="float: right">{{fogOfWar_visibility.value}}</label>
               <input type="range" class="form-control-range" #fogOfWar_visibility
                 (change)="tool.actions.visibility({ value: fogOfWar_visibility.value })" min="0" max="1" step="0.1"
-                value="0" />
+                value="{{tool.options.fogOfWarVisibility?.value}}" />
             </div>
           </div>
 

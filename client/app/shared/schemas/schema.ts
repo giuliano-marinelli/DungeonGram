@@ -1,36 +1,52 @@
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 
+declare var $;
 export class Schema {
   parameters?: any = {};
   _schema: any;
   _subschemas?: any;
   _parentUpdate?: any = () => { };
 
+  // _parentSchema?: Schema;
+  // _referenceAttr?: string;
+
   constructor(parameters?) {
     this.parameters = parameters;
+    // this._parentSchema = parameters._parentSchema;
+    // this._referenceAttr = parameters._referenceAttr;
   }
 
   synchronizeSchema(schema, subschemas?) {
     this._schema = schema;
     this._subschemas = subschemas;
-
     schema.onChange = (changes) => {
       changes.forEach((change) => {
         if (typeof change.value != 'object' && typeof change.value != 'undefined') {
-          this[change.field] = change.value;
+          if (change.field == 'destroy' && change.value) {
+            // this.remove();
+            // setTimeout(() => {
+            //   this._parentSchema[this._referenceAttr] = null;
+            // }, 1000);
+          } else
+            this[change.field] = change.value;
         } else {
           if (subschemas[change.field].datatype == Object) {
-            if (!change.value) {
+            if (change.value && !change.value.destroy) {
+              if (!this[change.field] || this[change.field].destroy) {
+                var itemParameters = { _parentSchema: this, _referenceAttr: change.field };
+                if (subschemas[change.field].parameters)
+                  $.extend(itemParameters, subschemas[change.field].parameters());
+
+                this[change.field] = new subschemas[change.field].type(change.value, itemParameters);
+
+                // if (itemParameters.parent)
+                //   this[change.field]._parentUpdate = (changes) => { this.childUpdate(changes, change.field) };
+              }
+            } else {
+              // console.log("called '", change.field, "' remove from", this);
+              this[change.field]?.remove();
+              // this[change.field].destroy = true;
               this[change.field] = null;
-            } else if (!this[change.field]) {
-              var itemParameters = { parent: null };
-              if (subschemas[change.field].parameters)
-                itemParameters = subschemas[change.field].parameters();
-
-              this[change.field] = new subschemas[change.field].type(change.value, itemParameters);
-
-              // if (itemParameters.parent)
-              //   this[change.field]._parentUpdate = (changes) => { this.childUpdate(changes, change.field) };
             }
           } else if (subschemas[change.field].datatype == Array) {
             if (!Array.isArray(change.value)) {
@@ -40,9 +56,9 @@ export class Schema {
                 schema[change.field].onAdd = (itemSchema, key) => {
                   // key = key ? key : itemSchema.id;
                   // if (!this[change.field][key]) {
-                  var itemParameters = { parent: null };
+                  var itemParameters = { _parentSchema: this, _referenceAttr: change.field };
                   if (subschemas[change.field].parameters)
-                    itemParameters = subschemas[change.field].parameters(key);
+                    $.extend(itemParameters, subschemas[change.field].parameters(key));
 
                   this[change.field][key] = new subschemas[change.field].type(itemSchema, itemParameters);
 
@@ -70,8 +86,9 @@ export class Schema {
               if (!this[change.field]) {
                 this[change.field] = [];
                 change.value.forEach((itemSchema, index) => {
+                  var itemParameters = { _parentSchema: this, _referenceAttr: change.field };
                   if (subschemas[change.field].parameters)
-                    itemParameters = subschemas[change.field].parameters();
+                    $.extend(itemParameters, subschemas[change.field].parameters());
 
                   this[change.field].push(new subschemas[change.field].type(itemSchema, itemParameters));
                 });
@@ -79,8 +96,9 @@ export class Schema {
                 var start;
                 var end;
                 if (change.value.length > this[change.field].length) { //when array adds element
+                  var itemParameters = { _parentSchema: this, _referenceAttr: change.field };
                   if (subschemas[change.field].parameters)
-                    itemParameters = subschemas[change.field].parameters();
+                    $.extend(itemParameters, subschemas[change.field].parameters());
 
                   if (subschemas[change.field].onAdd == 'last') {
                     start = this[change.field].length;
@@ -128,6 +146,7 @@ export class Schema {
   }
 
   remove() {
+    // console.log("called remove", this);
     if (this._subschemas) {
       for (var subschemaName in this._subschemas) {
         var subschema = this._subschemas[subschemaName];
@@ -135,10 +154,10 @@ export class Schema {
           if (this[subschemaName] != null)
             this[subschemaName].remove();
         } else if (subschema.datatype == Array) {
-          this[subschemaName].forEach(function (subschemaItem) {
+          for (var subschemaItem in this[subschemaName]) {
             if (subschemaItem != null)
-              subschemaItem.remove();
-          })
+              this[subschemaName][subschemaItem].remove();
+          }
         }
       }
     }

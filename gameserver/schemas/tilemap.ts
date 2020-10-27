@@ -9,7 +9,11 @@ export class TileMap extends Schema {
   // @type({ map: Tile })
   // tiles = new MapSchema<Tile>();
 
-  constructor(width: number = 10, height: number = 10) {
+  //for destroy the object
+  @type('boolean')
+  destroy: boolean = false;
+
+  constructor(width: number = 20, height: number = 20) {
     super();
     this.width = width;
     this.height = height;
@@ -23,5 +27,9 @@ export class TileMap extends Schema {
   changeSize(width: number, height: number) {
     this.width = width;
     this.height = height;
+  }
+
+  remove() {
+    this.destroy = true;
   }
 }

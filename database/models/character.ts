@@ -4,12 +4,14 @@ const characterSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   name: String,
   description: String,
-  wears: {
-    type: "array",
-    contains: {
-      type: mongoose.Schema.Types.Object
+  wears: [
+    {
+      category: String,
+      subcategory: String,
+      name: String,
+      color: String
     }
-  },
+  ],
   height: Number,
   private: Boolean
 });

@@ -66,7 +66,7 @@ export class CharacterListComponent implements OnInit {
       zindex: 1051,
       color: 'red',
       icon: 'fa fa-trash',
-      message: 'Are you sure to delete <b>' + character.name + '</b>?',
+      message: 'Are you sure to delete character <b>' + character.name + '</b>?',
       position: 'topCenter',
       buttons: [
         ['<button>Cancel</button>', function (instance, toast) {

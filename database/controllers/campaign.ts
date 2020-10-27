@@ -2,6 +2,8 @@ import Campaign from '../models/campaign';
 import User from '../models/user';
 import BaseCtrl from './base';
 
+import mongoose from 'mongoose';
+
 class CampaignCtrl extends BaseCtrl {
   model = Campaign;
 
@@ -25,6 +27,30 @@ class CampaignCtrl extends BaseCtrl {
           },
           { $unwind: "$owner_info" },
           {
+            $lookup: {
+              from: "users",
+              localField: "players",
+              foreignField: "_id",
+              as: "players_info"
+            }
+          },
+          {
+            $lookup: {
+              from: "maps",
+              localField: "maps",
+              foreignField: "_id",
+              as: "maps_info"
+            }
+          },
+          {
+            $lookup: {
+              from: "maps",
+              localField: "openedMap",
+              foreignField: "_id",
+              as: "openedMap_info"
+            }
+          },
+          {
             $match: {
               $or: [
                 { owner: resu.user._id },
@@ -44,6 +70,30 @@ class CampaignCtrl extends BaseCtrl {
             }
           },
           { $unwind: "$owner_info" },
+          {
+            $lookup: {
+              from: "users",
+              localField: "players",
+              foreignField: "_id",
+              as: "players_info"
+            }
+          },
+          {
+            $lookup: {
+              from: "maps",
+              localField: "maps",
+              foreignField: "_id",
+              as: "maps_info"
+            }
+          },
+          {
+            $lookup: {
+              from: "maps",
+              localField: "openedMap",
+              foreignField: "_id",
+              as: "openedMap_info"
+            }
+          },
           {
             $match: {
               owner: { $ne: resu?.user?._id },
@@ -91,7 +141,56 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
 
-      const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
+      // const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
+
+      var docs = await this.model.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner_info"
+          }
+        },
+        { $unwind: "$owner_info" },
+        {
+          $lookup: {
+            from: "users",
+            localField: "players",
+            foreignField: "_id",
+            as: "players_info"
+          }
+        },
+        {
+          $lookup: {
+            from: "maps",
+            localField: "maps",
+            foreignField: "_id",
+            as: "maps_info"
+          }
+        },
+        {
+          $lookup: {
+            from: "maps",
+            localField: "openedMap",
+            foreignField: "_id",
+            as: "openedMap_info"
+          }
+        },
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(req.params.id),
+            $or: [
+              { owner: resu.user._id },
+              { players: { $in: [resu.user._id] } },
+              { private: false }
+            ]
+          }
+        }
+      ]);
+
+      const obj = docs[0];
+
       res.status(200).json(obj);
     } catch (err) {
       return res.status(500).json({ error: err.message });

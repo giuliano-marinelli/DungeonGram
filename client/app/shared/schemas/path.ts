@@ -42,6 +42,9 @@ export class Path extends Schema {
     this.meshPoints?.forEach(meshPoint => {
       meshPoint.dispose();
     });
+    this.rays?.forEach(ray => {
+      ray.dispose();
+    });
   }
 
   doMeshTo() {

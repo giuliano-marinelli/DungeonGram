@@ -66,7 +66,7 @@ export class CampaignListComponent implements OnInit {
       zindex: 1051,
       color: 'red',
       icon: 'fa fa-trash',
-      message: 'Are you sure to delete <b>' + campaign.title + '</b>?',
+      message: 'Are you sure to delete campaign <b>' + campaign.title + '</b>?',
       position: 'topCenter',
       buttons: [
         ['<button>Cancel</button>', function (instance, toast) {

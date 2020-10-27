@@ -6,6 +6,8 @@ import { CharacterPhysics } from '../physics/character.physics';
 import { Vector } from 'matter-js';
 import { Utils } from '../utils';
 
+import { default as CharacterDB } from '../../database/models/character';
+
 export class Character extends Schema {
   @type("number")
   x = 0;
@@ -23,6 +25,8 @@ export class Character extends Schema {
   visionRange = 10;
   @type({ map: Wear })
   wears = new MapSchema<Wear>();
+  @type("number")
+  height = 1;
   //internal attributes
   movementAcum = 0;
   collide = false;
@@ -36,6 +40,13 @@ export class Character extends Schema {
   @type("boolean")
   isCollidingPhysics = false;
 
+  //for destroy the object
+  @type('boolean')
+  destroy: boolean = false;
+
+  db: any;
+  dbId: string;
+
   constructor() {
     super();
     // var skinColor = Utils.randomHexColor();
@@ -46,13 +57,25 @@ export class Character extends Schema {
     // this.wears[Utils.uuidv4()] = new Wear('torso', 'hips', 'padded.armor.hips', Utils.randomHexColor());
     // this.wears[Utils.uuidv4()] = new Wear('legs', 'feet', 'leather.boots', Utils.randomHexColor());
     // this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', Utils.randomHexColor());
-    this.wears[Utils.uuidv4()] = new Wear('skin', 'color', 'none', '#dc9b78');
-    this.wears[Utils.uuidv4()] = new Wear('head', 'ears', 'elf.ears', '#dc9b78');
-    this.wears[Utils.uuidv4()] = new Wear('head', 'hair', 'mohicano', '#ffc107');
-    this.wears[Utils.uuidv4()] = new Wear('torso', 'chest', 'breastplate', '#c8e1eb');
-    this.wears[Utils.uuidv4()] = new Wear('torso', 'hips', 'padded.armor.hips', '#8c3c32');
-    this.wears[Utils.uuidv4()] = new Wear('legs', 'feet', 'leather.boots', '#111111');
-    this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', '#c8e1eb');
+
+    // this.wears[Utils.uuidv4()] = new Wear('skin', 'color', 'none', '#dc9b78');
+    // this.wears[Utils.uuidv4()] = new Wear('head', 'ears', 'elf.ears', '#dc9b78');
+    // this.wears[Utils.uuidv4()] = new Wear('head', 'hair', 'mohicano', '#ffc107');
+    // this.wears[Utils.uuidv4()] = new Wear('torso', 'chest', 'breastplate', '#c8e1eb');
+    // this.wears[Utils.uuidv4()] = new Wear('torso', 'hips', 'padded.armor.hips', '#8c3c32');
+    // this.wears[Utils.uuidv4()] = new Wear('legs', 'feet', 'leather.boots', '#111111');
+    // this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', '#c8e1eb');
+  }
+
+  async load(characterId: string) {
+    this.dbId = characterId;
+    this.db = await CharacterDB.findOne({ _id: characterId });
+
+    this.db.wears.forEach((wear) => {
+      this.wears[Utils.uuidv4()] = new Wear(wear.category, wear.subcategory, wear.name, wear.color);
+    });
+
+    this.height = this.db.height;
   }
 
   update(deltaTime: number) {
@@ -138,5 +161,10 @@ export class Character extends Schema {
     this.x = snapToGrid == null || snapToGrid ? Math.round(this.x) : this.x;
     this.y = snapToGrid == null || snapToGrid ? Math.round(this.y) : this.y;
     this.characterPhysics.move(this.x, this.y); //update physics position
+  }
+
+  remove() {
+    this.movementPath.remove();
+    this.destroy = true;
   }
 }

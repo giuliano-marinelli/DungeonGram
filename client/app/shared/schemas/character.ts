@@ -18,6 +18,7 @@ export class Character extends Schema {
   beignDragged?: boolean;
   visionRange?: number;
   wears?: Wear[];
+  height?: number;
   //game objects
   mesh?: any;
   wearsMeshes?: any = {};
@@ -60,6 +61,15 @@ export class Character extends Schema {
   }
 
   update(changes?) {
+    // console.log("characterChanges", changes);
+    // changes?.forEach((change) => {
+    //   switch (change.field) {
+    //     case 'destroy':
+    //       console.log("characterDestroy", change.value);
+    //       break;
+    //   }
+    // });
+
     changes?.forEach((change) => {
       switch (change.field) {
         case 'x':
@@ -132,6 +142,9 @@ export class Character extends Schema {
       BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
         this.mesh = meshes[0];
         this.mesh.name = this.id;
+
+        //scaling mesh by height
+        this.mesh.scaling.y = this.height;
 
         //positioning mesh
         this.mesh.position.y = -0.05;
@@ -242,7 +255,7 @@ export class Character extends Schema {
         this.visionLight.specular = new BABYLON.Color3(0, 0, 0);
         this.visionLight.shadowMinZ = 0.1;
         this.visionLight.intensity = 100;
-        this.parameters.lights.characterLight = this.visionLight;
+        this.parameters.world.lights.characterLight = this.visionLight;
 
         //add shadow generator for the vision light
         new BABYLON.ShadowGenerator(1024, this.visionLight);

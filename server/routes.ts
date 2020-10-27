@@ -3,6 +3,7 @@ import * as express from 'express';
 import UserCtrl from '../database/controllers/user';
 import CampaignCtrl from '../database/controllers/campaign';
 import CharacterCtrl from '../database/controllers/character';
+import MapCtrl from '../database/controllers/map';
 import AssetCtrl from '../database/controllers/asset';
 
 function setRoutes(app): void {
@@ -10,6 +11,7 @@ function setRoutes(app): void {
   const userCtrl = new UserCtrl();
   const campaignCtrl = new CampaignCtrl();
   const characterCtrl = new CharacterCtrl();
+  const mapCtrl = new MapCtrl();
   const assetCtrl = new AssetCtrl();
 
   // Users
@@ -29,13 +31,21 @@ function setRoutes(app): void {
   router.route('/campaign/:id').put(campaignCtrl.update);
   router.route('/campaign/:id').delete(campaignCtrl.delete);
 
-  // Campaign
+  // Characters
   router.route('/characters').get(characterCtrl.getAll);
   router.route('/characters/count').get(characterCtrl.count);
   router.route('/character').post(characterCtrl.insert);
   router.route('/character/:id').get(characterCtrl.get);
   router.route('/character/:id').put(characterCtrl.update);
   router.route('/character/:id').delete(characterCtrl.delete);
+
+  // maps
+  router.route('/maps').get(mapCtrl.getAll);
+  router.route('/maps/count').get(mapCtrl.count);
+  router.route('/map').post(mapCtrl.insert);
+  router.route('/map/:id').get(mapCtrl.get);
+  router.route('/map/:id').put(mapCtrl.update);
+  router.route('/map/:id').delete(mapCtrl.delete);
 
   //assets
   router.route('/assets').get(assetCtrl.getAll);

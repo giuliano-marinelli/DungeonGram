@@ -20,6 +20,8 @@ export class TileMap extends Schema {
   temporalWallEndPoint?: any;
   temporalWallRay?: any[] = [];
   dragWall?: any;
+  //global actions registered
+  actions: any[] = [];
 
   constructor(schema, parameters) {
     super(parameters);
@@ -39,10 +41,20 @@ export class TileMap extends Schema {
 
   remove() {
     super.remove();
-    this.baseTileMesh.dispose();
+    this.baseTileMesh?.dispose();
+    this.ground?.dispose();
+    this.terrain?.dispose();
+    this.terrainShadows?.dispose();
+    this.gridMaterial?.dispose();
+    this.actions.forEach((action) => {
+      this.parameters.canvas.removeEventListener("pointerdown", action, false);
+      this.parameters.canvas.removeEventListener("pointerup", action, false);
+    })
   }
 
   update(changes) {
+    this.parameters.controller.updateSetting('gridWidth', this.width);
+    this.parameters.controller.updateSetting('gridHeight', this.height);
     this.initGround();
     this.initTerrain();
   }
@@ -75,13 +87,16 @@ export class TileMap extends Schema {
 
     //set material of ground
     this.ground.material = this.gridMaterial;
+
+    //update tilemap visibility
+    this.parameters.world.updateTilemap();
   }
 
   initActions() {
     //click action on ground for move character
     // this.ground.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-    this.parameters.canvas.addEventListener("pointerdown", (e) => {
+    this.actions.push((e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.button == 0) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround || mesh.isWall });
@@ -127,9 +142,10 @@ export class TileMap extends Schema {
           }
         }
       }
-    }, false);
+    });
+    this.parameters.canvas.addEventListener("pointerdown", this.actions[this.actions.length - 1], false);
     // this.ground.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
-    this.parameters.canvas.addEventListener("pointerup", (e) => {
+    this.actions.push((e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.button == 0) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
@@ -157,7 +173,8 @@ export class TileMap extends Schema {
           }
         }
       }
-    }, false);
+    });
+    this.parameters.canvas.addEventListener("pointerup", this.actions[this.actions.length - 1], false);
   }
 
   initTerrain() {
@@ -183,7 +200,9 @@ export class TileMap extends Schema {
       //standard material
       var material = new BABYLON.StandardMaterial("terrain", this.parameters.scene);
       // var texture = new BABYLON.Texture('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ff727761-d6b1-4548-916b-3b9033c9149d/ddbvz3t-02a6fb39-0481-46c3-96c2-7eeea043447f.jpg/v1/fill/w_1920,h_1920,q_75,strp/empty_dungeon_map_by_zatnikotel_ddbvz3t-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD0xOTIwIiwicGF0aCI6IlwvZlwvZmY3Mjc3NjEtZDZiMS00NTQ4LTkxNmItM2I5MDMzYzkxNDlkXC9kZGJ2ejN0LTAyYTZmYjM5LTA0ODEtNDZjMy05NmMyLTdlZWVhMDQzNDQ3Zi5qcGciLCJ3aWR0aCI6Ijw9MTkyMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.cLV4Dlz3BMU8z6D7uGnV6HsL37wNFxNLYJOATxYmUDY',
-      var texture = new BABYLON.Texture('https://i.imgur.com/bc3ECkA.jpg',
+      // var texture = new BABYLON.Texture('https://i.imgur.com/bc3ECkA.jpg',
+      // var texture = new BABYLON.Texture('../uploads/414828b4b8adbd332c9d5d6043ab5809.jpg',
+      var texture = new BABYLON.Texture('assets/images/game/default_terrain.png',
         this.parameters.scene);
       material.diffuseTexture = texture;
 

@@ -25,6 +25,10 @@ export class CampaignService {
     return this.http.get<Campaign>(`/api/campaign/${campaign._id}`);
   }
 
+  getCampaignById(id: string): Observable<Campaign> {
+    return this.http.get<Campaign>(`/api/campaign/${id}`);
+  }
+
   editCampaign(campaign: Campaign): Observable<any> {
     return this.http.put(`/api/campaign/${campaign._id}`, campaign, { responseType: 'text' });
   }

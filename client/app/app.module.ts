@@ -23,6 +23,7 @@ import { ColorShadeModule } from 'ngx-color/shade'; // <color-shade-picker></col
 import { UserService } from './services/user.service';
 import { CampaignService } from './services/campaign.service';
 import { CharacterService } from './services/character.service';
+import { MapService } from './services/map.service';
 import { AssetService } from './services/asset.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
@@ -45,6 +46,7 @@ import { CharacterComponent } from './characters/character/character.component';
 import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
 import { CampaignComponent } from './campaigns/campaign/campaign.component';
 import { CharacterListComponent } from './characters/character-list/character-list.component';
+import { MapComponent } from './maps/map/map.component';
 
 @NgModule({
   declarations: [
@@ -63,7 +65,8 @@ import { CharacterListComponent } from './characters/character-list/character-li
     CharacterListComponent,
     CharacterComponent,
     CampaignListComponent,
-    CampaignComponent
+    CampaignComponent,
+    MapComponent
   ],
   imports: [
     AppRoutingModule,
@@ -97,6 +100,7 @@ import { CharacterListComponent } from './characters/character-list/character-li
     UserService,
     CampaignService,
     CharacterService,
+    MapService,
     AssetService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

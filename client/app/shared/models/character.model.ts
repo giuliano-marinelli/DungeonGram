@@ -4,7 +4,7 @@ export class Character {
   owner?: string;
   name?: string;
   description?: string;
-  wears: object[];
-  height: number;
-  private: boolean;
+  wears?: object[];
+  height?: number;
+  private?: boolean;
 }
