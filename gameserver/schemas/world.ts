@@ -53,7 +53,8 @@ export class World extends Schema {
     character: {
       move: {
         do: (client: string, data: any) => {
-          if (this.users[client].selectedCharacter &&
+          if (!this.users[client].addingModeCharacter &&
+            this.users[client].selectedCharacter &&
             data.x >= 0 && data.y >= 0 &&
             data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
             this.map.characters[this.users[client].selectedCharacter].move({ x: data.x, y: data.y });
@@ -62,23 +63,78 @@ export class World extends Schema {
       },
       drag: {
         do: (client: string, data: any) => {
-          var point = data.x || data.y ? { x: data.x, y: data.y } : null;
-          this.map.characters[data.id].drag(point);
+          if (!this.users[client].addingModeCharacter || this.users[client].addingModeCharacter == data.id) {
+            var point = data.x || data.y ? { x: data.x, y: data.y } : null;
+            this.map.characters[data.id].drag(point);
+          }
         },
         validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
       drop: {
         do: (client: string, data: any) => {
-          this.map.characters[data.id].drop(data.snapToGrid);
+          if (!this.users[client].addingModeCharacter)
+            this.map.characters[data.id].drop(data.snapToGrid);
         },
         validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
       select: {
         do: (client: string, data: any) => {
-          this.users[client].selectedCharacter = this.users[client].selectedCharacter != data.id ? data.id : null;
+          if (!this.users[client].addingModeCharacter)
+            this.users[client].selectedCharacter = this.users[client].selectedCharacter != data.id ? data.id : null;
         },
         validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
+      addingModeOn: {
+        do: async (client: string, data: any) => {
+          if (!this.users[client].addingModeCharacter) {
+            //add adding mode character
+            var id = await this.map.addCharacter({ model: data.model })
+            this.map.characters[id].addingMode = true;
+
+            //activate adding mode on user with the created characeter
+            this.users[client].addingModeCharacter = id;
+            this.users[client].addingModeModel = data.model;
+
+            //drag adding mode character to the point sended
+            var point = data.x || data.y ? { x: data.x, y: data.y } : null;
+            this.map.characters[id].drag(point);
+          } else {
+            var lastAddingModeModel = this.users[client].addingModeModel;
+            this.execCommand(client, 'character', { action: 'addingModeOff' });
+            if (lastAddingModeModel != data.model)
+              this.execCommand(client, 'character', data);
+          }
+        },
+        validate: (data: any) => { return this.map != null && data.model != null && typeof data.model === "string" }
+      },
+      addingModeOff: {
+        do: (client: string, data: any) => {
+          //remove adding mode character
+          delete this.map.characters[this.users[client].addingModeCharacter]
+
+          //deactivate adding mode on user
+          this.users[client].addingModeCharacter = null;
+          this.users[client].addingModeModel = null;
+        },
+        validate: (data: any) => { return this.map != null }
+      },
+      add: {
+        do: (client: string, data: any) => {
+          if (this.users[client].addingModeCharacter) {
+            //add character to the map
+            this.map.addCharacter({
+              model: this.map.characters[this.users[client].addingModeCharacter].dbId,
+              position: { x: data.x, y: data.y }
+            });
+          }
+        },
+        validate: (data: any) => { return this.map != null && data.x != null && typeof data.x === "number" && data.y != null && typeof data.y === "number" }
+      },
+      update: {
+        do: (client: string, data: any) => {
+          data.roomRef.broadcast('characterUpdate');
+        }
+      }
     },
     wall: {
       state: { wallFirstPoint: null },
@@ -247,6 +303,7 @@ export class World extends Schema {
               this.map.load(data.map);
             }, 1000);
           }
+          data.roomRef?.broadcast('mapUpdate');
         },
         validate: (data: any) => { return data.map != null && typeof data.map === "string" }
       },
@@ -256,16 +313,28 @@ export class World extends Schema {
           this.map.remove();
           this.map = null;
           await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
+          data.roomRef?.broadcast('mapUpdate');
         },
         validate: (data: any) => { return this.map != null }
       },
       discard: {
         do: async (client: string, data: any) => {
-          if (this.map) {
-            this.map.remove();
-            this.map = null;
-            await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
-          }
+          this.map.remove();
+          this.map = null;
+          await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
+          data.roomRef?.broadcast('mapUpdate');
+        },
+        validate: (data: any) => { return this.map != null }
+      },
+      updateTilemap: {
+        do: async (client: string, data: any) => {
+          this.map.updateTilemap();
+        },
+        validate: (data: any) => { return this.map != null }
+      },
+      update: {
+        do: (client: string, data: any) => {
+          data.roomRef?.broadcast('mapUpdate');
         }
       }
     }
@@ -308,7 +377,8 @@ export class World extends Schema {
       } else
         throw new Error('inexistent action "' + data?.action + '" for command "' + type + '"');
     } catch (err) {
-      console.warn('GameRoom: client', client, 'send', err.message, '=>', data);
+      delete data.roomRef;
+      console.warn('GameRoom: client', client, 'send action that produce an error:', err.message, '... data:', data);
     }
   }
 

@@ -17,6 +17,10 @@ export class User extends Schema {
   figureDrawer: Figure;
   @type("string")
   selectedCharacter: string;
+  @type("string")
+  addingModeCharacter: string;
+  @type("string")
+  addingModeModel: string;
 
   constructor(wallsVisibility: number = 0.5, wallsPickable: boolean = false,
     fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,

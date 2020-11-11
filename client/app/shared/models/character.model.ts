@@ -7,4 +7,5 @@ export class Character {
   wears?: object[];
   height?: number;
   private?: boolean;
+  portrait?: string;
 }

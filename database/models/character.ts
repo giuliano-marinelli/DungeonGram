@@ -13,7 +13,8 @@ const characterSchema = new mongoose.Schema({
     }
   ],
   height: Number,
-  private: Boolean
+  private: Boolean,
+  portrait: String
 });
 
 //omit the __v when returning a character

@@ -9,6 +9,7 @@ export class Animator {
   lastDirection: BABYLON.Vector2 = new BABYLON.Vector2(0, 1);
   transition: number = 0.05;
   registeredChildren: any = {};
+  defaultVisibility: number = 1;
 
   constructor(mesh: any, skeleton: any, options?: any) {
     this.mesh = mesh;
@@ -57,6 +58,7 @@ export class Animator {
         this.registeredChildren[childId].skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
       }
       this.skeleton.beginAnimation(this.actual.animation, this.actual.loop, 1);
+      this.visibility(this.mesh.visibility);
     }
   }
 
@@ -80,6 +82,10 @@ export class Animator {
     for (let childId in this.registeredChildren) {
       this.registeredChildren[childId].visibility = value;
     }
+  }
+
+  resetVisibility() {
+    this.visibility(this.defaultVisibility);
   }
 
   rotate(direction) {

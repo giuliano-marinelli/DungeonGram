@@ -48,6 +48,7 @@ export class GameRoom extends Room<State> {
 
     this.onMessage('*', (client, type, data) => {
       console.log('GameRoom-', this.roomId, '-: user', this.clientUserObj[client.sessionId].username, 'send command "' + type + '" =>', data);
+      data.roomRef = this;
       this.state.world?.execCommand(this.clientUser[client.sessionId], type, data);
     });
 

@@ -30,7 +30,7 @@ export class Schema {
           } else
             this[change.field] = change.value;
         } else {
-          if (subschemas[change.field].datatype == Object) {
+          if (subschemas[change.field]?.datatype == Object) {
             if (change.value && !change.value.destroy) {
               if (!this[change.field] || this[change.field].destroy) {
                 var itemParameters = { _parentSchema: this, _referenceAttr: change.field };
@@ -48,7 +48,7 @@ export class Schema {
               // this[change.field].destroy = true;
               this[change.field] = null;
             }
-          } else if (subschemas[change.field].datatype == Array) {
+          } else if (subschemas[change.field]?.datatype == Array) {
             if (!Array.isArray(change.value)) {
               if (!this[change.field]) {
                 this[change.field] = [];

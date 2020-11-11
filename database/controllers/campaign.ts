@@ -43,14 +43,6 @@ class CampaignCtrl extends BaseCtrl {
             }
           },
           {
-            $lookup: {
-              from: "maps",
-              localField: "openedMap",
-              foreignField: "_id",
-              as: "openedMap_info"
-            }
-          },
-          {
             $match: {
               $or: [
                 { owner: resu.user._id },
@@ -84,14 +76,6 @@ class CampaignCtrl extends BaseCtrl {
               localField: "maps",
               foreignField: "_id",
               as: "maps_info"
-            }
-          },
-          {
-            $lookup: {
-              from: "maps",
-              localField: "openedMap",
-              foreignField: "_id",
-              as: "openedMap_info"
             }
           },
           {
@@ -158,7 +142,7 @@ class CampaignCtrl extends BaseCtrl {
             from: "users",
             localField: "players",
             foreignField: "_id",
-            as: "players_info"
+            as: "players_info",
           }
         },
         {
@@ -166,15 +150,7 @@ class CampaignCtrl extends BaseCtrl {
             from: "maps",
             localField: "maps",
             foreignField: "_id",
-            as: "maps_info"
-          }
-        },
-        {
-          $lookup: {
-            from: "maps",
-            localField: "openedMap",
-            foreignField: "_id",
-            as: "openedMap_info"
+            as: "maps_info",
           }
         },
         {

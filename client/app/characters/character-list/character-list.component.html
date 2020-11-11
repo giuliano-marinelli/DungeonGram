@@ -47,9 +47,9 @@
 
 <ng-template #characterCard let-character='character'>
   <div class="card h-100">
-    <img src="assets/images/characters/default-preview.jpg" class="card-img-top character-img"
-      alt="{{character.title}}">
-    <div class="card-body">
+    <img src="{{character.portrait}}" onerror="this.src='assets/images/characters/default-preview.jpg'"
+      class="card-img-top character-img" alt="{{character.title}}">
+    <div class="card-body character-card-body">
       <h5 class="card-title"><i *ngIf="character.private" title="This character is private"
           data-toggle-tooltip="tooltip" data-placement="top"
           class="fa fa-user-secret">&nbsp;</i>{{character.name}}<br />

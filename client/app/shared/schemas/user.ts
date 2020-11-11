@@ -12,11 +12,17 @@ export class User extends Schema {
   rule?: Rule;
   figureDrawer?: Figure;
   selectedCharacter?: string;
+  addingModeCharacter?: string;
+  addingModeModel?: string;
+  //global actions registered
+  actions: any = {};
 
   constructor(schema, parameters) {
     super(parameters);
 
     this.id = parameters.id;
+
+    this.initActions();
 
     this.synchronizeSchema(schema, {
       rule: {
@@ -71,9 +77,49 @@ export class User extends Schema {
             if (change.value && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.value]?.initVisionLight();
             this.parameters.world.updateLights();
             this.parameters.world.updateShadows();
+            if (this.id == this.parameters.token) this.parameters.controller.updateSetting('selectedCharacter', this.selectedCharacter);
+            break;
+          case 'addingModeCharacter':
+            if (this.id == this.parameters.token) {
+              this.parameters.controller.updateSetting('addingMode', this.addingModeCharacter != null && this.addingModeCharacter != '');
+              if (this.addingModeCharacter) {
+                this.parameters.controller.toggleAction('dragCharacter', true);
+                this.parameters.canvas.addEventListener("pointermove", this.actions.addingModeActionDrag, false);
+                this.parameters.canvas.addEventListener("pointerup", this.actions.addingModeActionAddOrCancel, false);
+              } else {
+                this.parameters.canvas.removeEventListener("pointermove", this.actions.addingModeActionDrag, false);
+                this.parameters.canvas.removeEventListener("pointerup", this.actions.addingModeActionAddOrCancel, false);
+                setTimeout(() => {
+                  this.parameters.controller.toggleAction('dragCharacter', false);
+                }, 10);
+              }
+            }
+            break;
+          case 'addingModeModel':
+            if (this.id == this.parameters.token) this.parameters.controller.updateSetting('addingModeModel', this.addingModeModel);
             break;
         }
       });
     }
+  }
+
+  initActions() {
+    this.actions.addingModeActionDrag = (e) => {
+      var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+      if (pick?.pickedPoint) {
+        this.parameters.controller.send('game', 'character', { id: this.addingModeCharacter, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+      }
+    };
+
+    this.actions.addingModeActionAddOrCancel = (e) => {
+      if (e.button == 0) {
+        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+        if (pick?.pickedPoint) {
+          this.parameters.controller.send('game', 'character', { x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'add' });
+        }
+      } else if (e.button == 2) {
+        this.parameters.controller.send('game', 'character', { action: 'addingModeOff' });
+      }
+    };
   }
 }

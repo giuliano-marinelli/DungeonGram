@@ -23,7 +23,9 @@ const mapSchema = new mongoose.Schema({
         x: Number,
         y: Number
       },
+      name: String,
       visionRange: Number,
+      group: String,
       model: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Character'
@@ -36,8 +38,9 @@ const mapSchema = new mongoose.Schema({
     image: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Asset'
-    }
+    },
   },
+  imageUrl: String,
   private: Boolean
 });
 

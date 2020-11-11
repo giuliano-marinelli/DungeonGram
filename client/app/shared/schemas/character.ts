@@ -19,6 +19,10 @@ export class Character extends Schema {
   visionRange?: number;
   wears?: Wear[];
   height?: number;
+  addingMode?: boolean;
+  name?: string;
+  group?: string;
+  portrait?: string;
   //game objects
   mesh?: any;
   wearsMeshes?: any = {};
@@ -94,17 +98,7 @@ export class Character extends Schema {
           this.animator?.rotate(this.direction);
           break;
         case 'beignDragged':
-          if (this.beignDragged) {
-            this.animator?.play('Float');
-            if (this.collider) this.collider.isDragged = true;
-            BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
-              10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-          } else {
-            this.animator?.play('Idle');
-            if (this.collider) this.collider.isDragged = false;
-            BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
-              10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-          }
+          this.initBeignDragged();
           break;
         case 'visionRange':
           if (this.visionLight) this.visionLight.range = this.visionRange;
@@ -120,6 +114,15 @@ export class Character extends Schema {
             this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
           if (this.isCollidingPhysics && !this.beignDragged)
             this.animator?.play('Idle');
+          break;
+        case 'wears':
+          this.doWears();
+          break;
+        case 'height':
+          if (this.mesh) this.mesh.scaling.y = this.height;
+          break;
+        case 'addingMode':
+          this.initAddingMode();
           break;
       }
     });
@@ -223,23 +226,34 @@ export class Character extends Schema {
 
         this.initVisionLight();
 
+        this.initAddingMode();
+
+        this.initBeignDragged();
+
         this.update();
       });
     }
   }
 
   doWears() {
-    for (let wearId in this.wears) {
-      if (this.wears[wearId].category != "skin") {
-        BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
-          this.wearsMeshes[wearId] = meshes[0];
-          var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
-          material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
-          this.wearsMeshes[wearId].material = material;
-          this.animator.parent(this.wearsMeshes[wearId]);
-        });
-      } else {
-        this.mesh.material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
+    if (this.mesh && this.animator) {
+      for (let wearId in this.wears) {
+        if (this.wears[wearId].category != "skin") {
+          if (this.wearsMeshes[wearId]) {
+            this.animator.unparent(this.wearsMeshes[wearId]);
+            this.wearsMeshes[wearId].dispose();
+          }
+
+          BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
+            this.wearsMeshes[wearId] = meshes[0];
+            var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
+            material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
+            this.wearsMeshes[wearId].material = material;
+            this.animator.parent(this.wearsMeshes[wearId]);
+          });
+        } else if (this.mesh.material) {
+          this.mesh.material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
+        }
       }
     }
   }
@@ -265,6 +279,29 @@ export class Character extends Schema {
     } else if (this.visionLight) {
       this.visionLight.dispose();
       this.visionLight = null;
+    }
+  }
+
+  initAddingMode() {
+    if (this.addingMode) {
+      if (this.animator) {
+        this.animator.defaultVisibility = 0.5;
+        this.animator.resetVisibility();
+      }
+    }
+  }
+
+  initBeignDragged() {
+    if (this.beignDragged) {
+      this.animator?.play('Float');
+      if (this.collider) this.collider.isDragged = true;
+      BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
+        10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    } else {
+      this.animator?.play('Idle');
+      if (this.collider) this.collider.isDragged = false;
+      BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
+        10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     }
   }
 

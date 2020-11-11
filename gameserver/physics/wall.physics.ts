@@ -26,9 +26,9 @@ export class WallPhysics extends EntityPhysics {
     super.updateGrid(newGrid);
     this.tiles = Utils.BresenhamLine(this.from.x, this.from.y, this.to.x, this.to.y);
     // var tiles = Utils.BresenhamLine2(this.from, this.to);
-    console.log('GameRoom[Physics]: wall bresenham line from', this.from, 'to', this.to, ' = ', this.tiles);
+    // console.log('GameRoom[Physics]: wall bresenham line from', this.from, 'to', this.to, ' = ', this.tiles);
     this.tiles.forEach((tile) => {
-      console.log('setWalkable', tile);
+      // console.log('setWalkable', tile);
       this.grid.setWalkableAt(Math.ceil(tile.x), Math.ceil(tile.y), false);
     });
   }

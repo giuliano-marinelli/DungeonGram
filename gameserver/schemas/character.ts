@@ -27,6 +27,14 @@ export class Character extends Schema {
   wears = new MapSchema<Wear>();
   @type("number")
   height = 1;
+  @type("boolean")
+  addingMode = false;
+  @type("string")
+  name;
+  @type("string")
+  group;
+  @type("string")
+  portrait;
   //internal attributes
   movementAcum = 0;
   collide = false;
@@ -71,11 +79,14 @@ export class Character extends Schema {
     this.dbId = characterId;
     this.db = await CharacterDB.findOne({ _id: characterId });
 
-    this.db.wears.forEach((wear) => {
-      this.wears[Utils.uuidv4()] = new Wear(wear.category, wear.subcategory, wear.name, wear.color);
-    });
+    if (this.db) {
+      this.db.wears.forEach((wear) => {
+        this.wears[Utils.uuidv4()] = new Wear(wear.category, wear.subcategory, wear.name, wear.color);
+      });
 
-    this.height = this.db.height;
+      this.height = this.db.height;
+      this.portrait = this.db.portrait;
+    }
   }
 
   update(deltaTime: number) {

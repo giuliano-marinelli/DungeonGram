@@ -8,6 +8,7 @@ export class TileMap extends Schema {
   //schema
   width?: number;
   height?: number;
+  imageUrl?: string;
   // tiles?: Tile[];
   //game objects
   ground?: any;
@@ -53,6 +54,14 @@ export class TileMap extends Schema {
   }
 
   update(changes) {
+    changes?.forEach((change) => {
+      switch (change.field) {
+        case 'imageUrl':
+          this.updateTerrainImage();
+          break;
+      }
+    });
+
     this.parameters.controller.updateSetting('gridWidth', this.width);
     this.parameters.controller.updateSetting('gridHeight', this.height);
     this.initGround();
@@ -202,8 +211,9 @@ export class TileMap extends Schema {
       // var texture = new BABYLON.Texture('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ff727761-d6b1-4548-916b-3b9033c9149d/ddbvz3t-02a6fb39-0481-46c3-96c2-7eeea043447f.jpg/v1/fill/w_1920,h_1920,q_75,strp/empty_dungeon_map_by_zatnikotel_ddbvz3t-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD0xOTIwIiwicGF0aCI6IlwvZlwvZmY3Mjc3NjEtZDZiMS00NTQ4LTkxNmItM2I5MDMzYzkxNDlkXC9kZGJ2ejN0LTAyYTZmYjM5LTA0ODEtNDZjMy05NmMyLTdlZWVhMDQzNDQ3Zi5qcGciLCJ3aWR0aCI6Ijw9MTkyMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.cLV4Dlz3BMU8z6D7uGnV6HsL37wNFxNLYJOATxYmUDY',
       // var texture = new BABYLON.Texture('https://i.imgur.com/bc3ECkA.jpg',
       // var texture = new BABYLON.Texture('../uploads/414828b4b8adbd332c9d5d6043ab5809.jpg',
-      var texture = new BABYLON.Texture('assets/images/game/default_terrain.png',
-        this.parameters.scene);
+      var texture = new BABYLON.Texture('assets/images/game/default_terrain.png', this.parameters.scene);
+      if (this.imageUrl)
+        texture = new BABYLON.Texture(this.imageUrl, this.parameters.scene);
       material.diffuseTexture = texture;
 
       // material = new BABYLON.StandardMaterial("terrain", this.parameters.scene);
@@ -222,6 +232,15 @@ export class TileMap extends Schema {
 
       //update lights casted on it
       this.parameters.world.updateLights();
+    }
+  }
+
+  updateTerrainImage() {
+    if (this.terrain?.material) {
+      var texture = new BABYLON.Texture('assets/images/game/default_terrain.png', this.parameters.scene);
+      if (this.imageUrl)
+        texture = new BABYLON.Texture(this.imageUrl, this.parameters.scene);
+      this.terrain.material.diffuseTexture = texture;
     }
   }
 

@@ -41,6 +41,19 @@
           </div>
         </div>
       </div>
+      <div class="mb-3">
+        <label for="imageUrl">Image URL<small class="text-muted">*</small></label>
+        <input class="form-control" type="text" name="imageUrl" formControlName="imageUrl"
+          placeholder="http://example.com/mymapimage.png" [ngClass]="setValid('imageUrl')" autocomplete="off">
+        <div class="invalid-feedback">
+          <div *ngIf="imageUrl.errors && imageUrl.errors.required">
+            Image URL is required
+          </div>
+          <div *ngIf="imageUrl.errors && (imageUrl.errors.minlength || imageUrl.errors.maxlength)">
+            Image  URL must be as maximum 10000 characters long
+          </div>
+        </div>
+      </div>
       <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
         <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can use it)</small></label>

@@ -33,6 +33,10 @@ export class MapComponent implements OnInit {
     Validators.minLength(0),
     Validators.maxLength(150)
   ]);
+  imageUrl = new FormControl('', [
+    Validators.minLength(0),
+    Validators.maxLength(10000)
+  ]);
   private = new FormControl(false, []);
   walls = new FormControl([], []);
   characters = new FormControl([], []);
@@ -55,6 +59,7 @@ export class MapComponent implements OnInit {
       walls: this.walls,
       characters: this.characters,
       tilemap: this.tilemap,
+      imageUrl: this.imageUrl,
       private: this.private
     });
     if (this.map) this.getMap(); else this.isLoading = false

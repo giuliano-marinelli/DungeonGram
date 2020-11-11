@@ -7,39 +7,51 @@
 
 .character-img {
   width: 100%;
-  height: 150px;
+  height: 100%;
   object-fit: cover;
+  object-position: top;
   overflow: hidden;
+}
+
+.character-card-body {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  opacity: 0.8;
 }
 
 .character-container {
   border-radius: 0px !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
   border-bottom: 0px;
 }
 
+.character-container .card-body {
+  background-color: #212529 !important;
+}
+
 .character-container.own .card {
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .character-container.own .card-body {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .character-container.own > .card-body {
   background-color: #2d2424 !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .character-container.own > .card-header {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .character-btn {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .character-btn:hover {
@@ -48,7 +60,7 @@
 
 .character-btn-alt {
   background-color: #2d2424 !important;
-  border-color:  #3d3131 !important;
+  border-color: #3d3131 !important;
 }
 
 .character-btn-alt:hover {

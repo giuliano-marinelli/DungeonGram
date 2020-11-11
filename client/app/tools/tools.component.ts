@@ -1,14 +1,18 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Controller } from '../shared/controller/controller';
-import { CampaignService } from 'client/app/services/campaign.service';
-import { Campaign } from 'client/app/shared/models/campaign.model';
-import { Map } from 'client/app/shared/models/map.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { MapComponent } from '../maps/map/map.component';
+import { Controller } from '../shared/controller/controller';
+import { Campaign } from 'client/app/shared/models/campaign.model';
+import { CampaignService } from 'client/app/services/campaign.service';
+import { Map } from 'client/app/shared/models/map.model';
 import { MapService } from '../services/map.service';
+import { MapComponent } from '../maps/map/map.component';
+import { Character } from 'client/app/shared/models/character.model';
+import { CharacterService } from 'client/app/services/character.service';
+import { CharacterComponent } from '../characters/character/character.component';
 
 declare var $;
 declare var iziToast;
+declare var Object;
 
 @Component({
   selector: 'app-tools',
@@ -25,14 +29,26 @@ export class ToolsComponent implements OnInit {
   campaign: Campaign;
   isLoadingCampaign = true;
 
+  ownCharacters: Character[] = [];
+  publicCharacters: Character[] = [];
+  isLoadingOwnCharacters = true;
+  isLoadingPublicCharacters = true;
+
+  openedMap: Map;
+  isLoadingOpenedMap = true;
+
+  ObjectValues = Object.values; //for get values of object
+
   constructor(
     private campaignService: CampaignService,
     private mapService: MapService,
+    private characterService: CharacterService,
     private modalService: NgbModal
   ) { }
 
   ngOnInit(): void {
-    if (this.campaignId) this.getCampaign(); else this.isLoadingCampaign = false
+    if (this.campaignId) this.getCampaign(); else this.isLoadingCampaign = false;
+    this.getCharacters();
 
     this.tools = {
       walls: {
@@ -110,21 +126,55 @@ export class ToolsComponent implements OnInit {
         actions: {
           open: (map) => {
             this.controller.send('game', 'map', { map: map._id, action: 'open' });
-            // this.tools.maps.options.openedMap = this.tools.maps.options.openedMap != map._id ? map._id : null;
           },
           close: () => {
             this.controller.send('game', 'map', { action: 'close' });
-            // this.tools.maps.options.openedMap = null;
           },
           discard: () => {
             this.controller.send('game', 'map', { action: 'discard' });
-            // this.tools.maps.options.openedMap = null;
           },
+          updateTilemap: () => {
+            console.log('update tilemap is called');
+            this.controller.send('game', 'map', { action: 'updateTilemap' });
+          },
+          update: () => {
+            this.controller.send('game', 'map', { action: 'update' });
+          }
+        }
+      },
+      characters: {
+        name: "characters", label: "Characters", image: 'assets/images/tools/characters.png', dropdown: true,
+        options: {
+          charactersOnMap: this.controller.initSetting("charactersOnMap", null, () => {
+            setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
+          }),
+          addingMode: this.controller.initSetting("addingMode", false),
+          selectedCharacter: this.controller.initSetting("selectedCharacter", null),
+          addingModeModel: this.controller.initSetting("addingModeModel", null)
+        },
+        actions: {
+          addingMode: (character) => {
+            this.controller.send('game', 'character', { model: character._id, action: 'addingModeOn' });
+          },
+          select: (character) => {
+            this.controller.send('game', 'character', { id: character.id, action: 'select' });
+          },
+          update: () => {
+            this.controller.send('game', 'character', { action: 'update' });
+          }
         }
       }
     };
 
-    this.orderedTools = [this.tools.maps, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
+    this.orderedTools = [this.tools.maps, this.tools.characters, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
+
+    this.controller.recieve('game', 'mapUpdate', (message) => {
+      this.getCampaign();
+    });
+
+    this.controller.recieve('game', 'characterUpdate', (message) => {
+      this.getCharacters();
+    });
 
     setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
   }
@@ -144,20 +194,138 @@ export class ToolsComponent implements OnInit {
   }
 
   getCampaign(): void {
+    console.log('getting campaign');
+    this.isLoadingCampaign = true;
+
     this.campaignService.getCampaignById(this.campaignId).subscribe(
       data => {
         this.campaign = data;
+        setTimeout(() => {
+          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+          $('.tooltip').tooltip('hide');
+        });
+      },
+      error => console.log(error),
+      () => {
+        if (this.campaign != null) {
+          this.isLoadingCampaign = false;
+          this.getOpenedMap();
+        }
+
+        this.tools.maps.actions.updateTilemap();
+      }
+    );
+  }
+
+  getCharacters(): void {
+    console.log('getting characters');
+    this.isLoadingOwnCharacters = true;
+    this.isLoadingPublicCharacters = true;
+
+    this.characterService.getCharacters(true).subscribe(
+      data => {
+        this.ownCharacters = data;
+        setTimeout(() => {
+          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+          $('.tooltip').tooltip('hide');
+        });
+      },
+      error => console.log(error),
+      () => this.isLoadingOwnCharacters = false
+    );
+    this.characterService.getCharacters().subscribe(
+      data => {
+        this.publicCharacters = data;
         setTimeout(() => {
           $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
           $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
         });
       },
       error => console.log(error),
-      () => {
-        if (this.campaign != null)
-          this.isLoadingCampaign = false;
-      }
+      () => this.isLoadingPublicCharacters = false
     );
+  }
+
+  openCharacter(character?) {
+    var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
+    if (character) modalRef.componentInstance.character = character;
+    modalRef.componentInstance.getCharacters.subscribe(() => {
+      this.getCharacters();
+      this.tools.characters.actions.update();
+    });
+  }
+
+  deleteCharacter(character: Character): void {
+    var self = this;
+    iziToast.question({
+      timeout: false,
+      close: false,
+      overlay: true,
+      displayMode: 'replace',
+      zindex: 1051,
+      color: 'red',
+      icon: 'fa fa-trash',
+      message: 'Are you sure to delete character <b>' + character.name + '</b>?',
+      position: 'topCenter',
+      buttons: [
+        ['<button>Cancel</button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }, true],
+        ['<button><b>Proceed</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          self.characterService.deleteCharacter(character).subscribe(
+            data => iziToast.success({ message: 'Character deleted successfully.' }),
+            error => console.log(error),
+            () => {
+              self.getCharacters();
+              self.tools.characters.actions.update();
+            }
+          );
+        }]
+      ]
+    });
+  }
+
+  onImageError($event, defaultImage?) {
+    if (defaultImage) {
+      this.imageExists(defaultImage, (exists) => {
+        if (exists)
+          $event.target.src = defaultImage;
+        else
+          $event.target.src = "assets/images/campaigns/default.jpg";
+      });
+    } else {
+      $event.target.src = "assets/images/campaigns/default.jpg";
+    }
+  }
+
+  imageExists(url, callback) {
+    var img = new Image();
+    img.onload = function () { callback(true); };
+    img.onerror = function () { callback(false); };
+    img.src = url;
+  }
+
+  getOpenedMap(): void {
+    console.log('getting opened map');
+    this.isLoadingOpenedMap = true;
+
+    if (this.campaign?.openedMap) {
+      this.mapService.getMap(this.campaign.maps_info.find((m: any) => { return m._id == this.campaign.openedMap })).subscribe(
+        data => {
+          this.openedMap = data;
+          setTimeout(() => {
+            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+            $('.tooltip').tooltip('hide');
+          });
+        },
+        error => console.log(error),
+        () => this.isLoadingOpenedMap = false
+      );
+    } else {
+      this.openedMap = null;
+      this.isLoadingOpenedMap = false;
+    }
   }
 
   openMap(map?) {
@@ -167,6 +335,7 @@ export class ToolsComponent implements OnInit {
       modalRef.componentInstance.campaign = this.campaign;
       modalRef.componentInstance.getMaps.subscribe(() => {
         this.getCampaign();
+        this.tools.maps.actions.update();
       });
     }
   }
@@ -194,7 +363,9 @@ export class ToolsComponent implements OnInit {
             error => console.log(error),
             () => {
               self.getCampaign();
-              self.tools.maps.actions.discard();
+              self.tools.maps.actions.update();
+              if (self.tools.maps.options.openedMap.value == map._id)
+                self.tools.maps.actions.discard();
             }
           );
         }]

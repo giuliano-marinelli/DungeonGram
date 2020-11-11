@@ -189,11 +189,12 @@ export class CharacterComponent implements OnInit {
     );
   }
 
-  saveCharacter(): void {
+  async saveCharacter() {
     this.characterForm.markAllAsTouched();
     if (this.characterForm.valid) {
       var characterValue = this.characterForm.value;
       characterValue.wears = this.getSelectedWears();
+      characterValue.portrait = await this.getPortrait();
       if (!this.character) {
         this.characterService.addCharacter(characterValue).subscribe(
           res => {
@@ -230,12 +231,14 @@ export class CharacterComponent implements OnInit {
 
     for (var wearCategory in this.scenario.wearsSelected) {
       for (var wearSubcategory in this.scenario.wearsSelected[wearCategory]) {
-        wearsValue.push({
-          category: wearCategory,
-          subcategory: wearSubcategory,
-          name: this.scenario.wearsSelected[wearCategory][wearSubcategory].name,
-          color: this.scenario.wearsSelected[wearCategory][wearSubcategory].material.diffuseColor.toHexString().toLowerCase()
-        });
+        if (this.scenario.wearsSelected[wearCategory][wearSubcategory]) {
+          wearsValue.push({
+            category: wearCategory,
+            subcategory: wearSubcategory,
+            name: this.scenario.wearsSelected[wearCategory][wearSubcategory].name,
+            color: this.scenario.wearsSelected[wearCategory][wearSubcategory].material.diffuseColor.toHexString().toLowerCase()
+          });
+        }
       }
     }
 
@@ -252,12 +255,19 @@ export class CharacterComponent implements OnInit {
     }
   }
 
+  getPortrait() {
+    return new Promise(resolve => {
+      BABYLON.Tools.CreateScreenshotUsingRenderTarget(this.engine, this.scenario.photoCamera, 400, (data) => resolve(data));
+    });
+  }
+
 }
 
 
 export class Scenario {
   parameters?: any;
   camera?: any;
+  photoCamera?: any;
   lights?: any = {};
   ground?: any;
   character?: any;
@@ -293,6 +303,9 @@ export class Scenario {
       else
         this.camera._target = new BABYLON.Vector3(0, 0.75, 0);
     });
+
+    this.photoCamera = new BABYLON.ArcRotateCamera("PhotoCamera", 0, 0, 0, new BABYLON.Vector3(0, 0.75, 0), this.parameters.scene);
+    this.photoCamera.setPosition(new BABYLON.Vector3(0, 1.5, 5));
   }
 
   initLights() {
@@ -395,6 +408,7 @@ export class Scenario {
       this.wears[category][subcategory][anotherWear].visibility = 0;
       this.character?.animator?.unparent(this.wears[category][subcategory][anotherWear]);
     }
+    this.wearsSelected[category][subcategory] = null;
     if (!this.wears[category][subcategory][wear] && this.parameters.wears[category][subcategory].find((w) => { return w == wear })) {
       this.importWear(category, subcategory, wear, () => {
         this.equipWear(category, subcategory, wear, color);

@@ -7,4 +7,5 @@ export class Map {
   characters?: object[];
   tilemap?: object;
   private?: boolean;
+  imageUrl?: string;
 }

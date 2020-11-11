@@ -52,22 +52,23 @@ export class World extends Schema {
     );
   }
 
-  // update(changes) {
-  //   console.log("worldChanges", changes);
-  //   changes?.forEach((change) => {
-  //     switch (change.field) {
-  //       case 'map':
-  //         console.log("worldMapDestroy", change.value?.destroy);
-  //         break;
-  //     }
-  //   });
-  // }
+  update(changes) {
+    changes?.forEach((change) => {
+      switch (change.field) {
+        case 'map':
+          this.parameters.controller.updateSetting('charactersOnMap', this.map?.characters);
+          break;
+      }
+    });
+  }
 
   initCamera() {
     //creates, angles, distances and targets the camera
     this.camera = new BABYLON.ArcRotateCamera("mainCamera", -1, 1, 30, new BABYLON.Vector3(3, 0, 3), this.parameters.scene);
     this.camera.wheelPrecision = 40;
     this.camera.setPosition(new BABYLON.Vector3(20, 20, -15));
+    this.camera.panningAxis = new BABYLON.Vector3(1, 0, 1);
+    this.camera.panningSensibility = 200;
     this.camera.attachControl(this.parameters.canvas, true);
 
     //detach left click from camera control
@@ -182,8 +183,8 @@ export class World extends Schema {
     if (selectedCharacter && this.map?.characters[selectedCharacter]?.mesh) {
       setTimeout(() => {
         if (this.map) {
-          this.map.characters[selectedCharacter].animator.visibility(1);
-          // this.characters[selectedCharacter]?.visionRays.forEach(visionRay => {
+          this.map.characters[selectedCharacter].animator.resetVisibility();
+          // this.map.characters[selectedCharacter].visionRays.forEach(visionRay => {
           //   visionRay?.dispose();
           // });
           this.map.characters[selectedCharacter].collider.isCollible = false;
@@ -196,7 +197,7 @@ export class World extends Schema {
           }
           this.map.characters[selectedCharacter].collider.isCollible = true;
           // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
-          //   if (characterMesh) characterMesh.animator.visibility(1);
+          //   if (characterMesh) characterMesh.animator.resetVisibility();
           // });
         }
       }, this.map.characters[selectedCharacter].movementCooldown);
@@ -206,7 +207,7 @@ export class World extends Schema {
           for (let character in this.map.characters) {
             if (this.map.characters[character].mesh) {
               this.map.characters[character].collider.isPickable = true;
-              this.map.characters[character].animator.visibility(1);
+              this.map.characters[character].animator.resetVisibility();
             }
           }
         }
@@ -215,21 +216,23 @@ export class World extends Schema {
   }
 
   _updateCharacterVisibility(character, selectedCharacter) {
-    if (this.map.characters[character] && this.map.characters[character].mesh && character != selectedCharacter) {
+    if (this.map.characters[character] && this.map.characters[character].mesh &&
+      character != selectedCharacter &&
+      (!this.map.characters[character].addingMode || this.users[this.parameters.token]?.addingModeCharacter != character)) {
       this.map.characters[character].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.map.characters[selectedCharacter].mesh.position.x, this.map.characters[character].mesh.position.y + 1.65, this.map.characters[selectedCharacter].mesh.position.z);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.map.characters[character].mesh.position.x, this.map.characters[character].mesh.position.y + 1.65, this.map.characters[character].mesh.position.z).subtract(origin));
+      var origin = new BABYLON.Vector3(this.map.characters[selectedCharacter].mesh.position.x, this.map.characters[selectedCharacter].mesh.position.y + 1.65 * this.map.characters[selectedCharacter].height, this.map.characters[selectedCharacter].mesh.position.z);
+      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.map.characters[character].mesh.position.x, this.map.characters[character].mesh.position.y + 1.65 * this.map.characters[character].height, this.map.characters[character].mesh.position.z).subtract(origin));
       var ray = new BABYLON.Ray(
         origin,
         target,
         this.map.characters[selectedCharacter].visionRange - 1
       );
-      // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
+      // this.map.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
         return mesh.isCollible && (!mesh.isCharacter || mesh.name == this.map.characters[character].id)
       })?.pickedMesh;
       if (pickedMesh && this.map.characters[character].id == pickedMesh.name)
-        this.map.characters[character].animator.visibility(1);
+        this.map.characters[character].animator.resetVisibility();
       else {
         this.map.characters[character].animator.visibility(0);
         this.map.characters[character].collider.isPickable = false;

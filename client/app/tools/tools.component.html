@@ -11,7 +11,8 @@
         <img src="{{tool.image}}">
       </button>
 
-      <div *ngIf="tool.dropdown" class="dropdown-menu" [style.width]="tool.name == 'maps' ? '226px' : '200px'">
+      <div *ngIf="tool.dropdown" class="dropdown-menu"
+        [style.width]="tool.name == 'maps' ? '230px' : (tool.name == 'characters' ? '400px' : '200px')">
         <div [ngSwitch]="tool.name">
           <h5>{{tool.label}}</h5>
 
@@ -25,10 +26,11 @@
               <div *ngIf="!isLoadingCampaign" class="row row-cols-2">
                 <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
                   <div class="card h-100">
-                    <img src="assets/images/campaigns/default.jpg" class="card-img-top"
+                    <img src="{{map['imageUrl']}}" class="card-img-top map-img"
+                      onerror="this.src='assets/images/game/default_terrain.png'"
                       attr.data-original-title="<b>{{map['name']}}</b><br />{{map['description']}}"
                       data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-maps-container">
-                    <div class="card-body p-0">
+                    <div class="card-body p-0 map-btn">
                       <!-- <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private"
                           data-toggle-tooltip="tooltip" data-placement="top"
                           class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />
@@ -62,7 +64,7 @@
                   <div class="card" style="height: 20px;">
                     <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
                       style="width: 100%; height: 100%; font-size: 10px;" title="Add Map" data-toggle-tooltip="tooltip"
-                      data-placement="bottom">
+                      data-container="#tool-maps-container" data-placement="bottom">
                       <i class="fa fa-plus"></i>
                     </button>
                   </div>
@@ -70,6 +72,121 @@
 
               </div>
 
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'characters'" id="tool-characters-container">
+            <div class="row">
+              <div class="col-6">
+                <div id="characters-list">
+                  <h6>Own</h6>
+
+                  <div *ngIf="isLoadingOwnCharacters">
+                    <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
+                  </div>
+
+                  <div *ngIf="!isLoadingOwnCharacters" class="row row-cols-2">
+                    <div *ngFor="let character of ownCharacters" class="col mb-2 p">
+                      <div class="card h-100">
+                        <img src="{{character['portrait']}}"
+                          class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
+                          onerror="this.src='assets/images/characters/default-preview.jpg'"
+                          attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
+                          data-toggle-tooltip="tooltip" data-placement="right"
+                          data-container="#tool-characters-container" (click)="tool.actions.addingMode(character)">
+                        <div class="card-body p-0 character-btn">
+                          <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openCharacter(character)"
+                              title="Edit" data-toggle-tooltip="tooltip" data-placement="top"
+                              data-container="#tool-characters-container" data-trigger="hover">
+                              <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" (click)="deleteCharacter(character)" title="Delete"
+                              data-toggle-tooltip="tooltip" data-placement="top"
+                              data-container="#tool-characters-container" data-trigger="hover">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 mb-2">
+                      <div class="card" style="height: 20px;">
+                        <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
+                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Character"
+                          data-toggle-tooltip="tooltip" data-container="#tool-characters-container"
+                          data-placement="bottom">
+                          <i class="fa fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div id="characters-list-public">
+                  <h6>Public</h6>
+
+                  <div *ngIf="isLoadingPublicCharacters">
+                    <app-loading [condition]="isLoadingPublicCharacters"></app-loading>
+                  </div>
+
+                  <p *ngIf="publicCharacters.length <= 0">
+                    <small class="text-muted">There are no public characters created yet</small>
+                  </p>
+
+                  <div *ngIf="!isLoadingPublicCharacters" class="row row-cols-2">
+                    <div *ngFor="let character of publicCharacters" class="col mb-2 p">
+                      <div class="card h-100">
+                        <img src="{{character['portrait']}}"
+                          class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
+                          onerror="this.src='assets/images/characters/default-preview.jpg'"
+                          attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
+                          data-toggle-tooltip="tooltip" data-placement="right"
+                          data-container="#tool-characters-container" (click)="tool.actions.addingMode(character)">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div id="characters-list-onmap">
+                  <h6>On Map</h6>
+
+                  <div *ngIf="isLoadingOpenedMap">
+                    <app-loading [condition]="isLoadingCampaign"></app-loading>
+                  </div>
+
+                  <p *ngIf="!isLoadingOpenedMap && !tool.options.charactersOnMap?.value">
+                    <small class="text-muted">There is no loaded map</small>
+                  </p>
+
+                  <p
+                    *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value && ObjectValues(tool.options.charactersOnMap?.value).length <= 0">
+                    <small class="text-muted">There are no characters on map</small>
+                  </p>
+
+                  <div *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value" class="row row-cols-2">
+                    <div
+                      *ngFor="let character of ObjectValues(tool.options.charactersOnMap.value) | filter:{ addingMode: false }"
+                      class="col mb-2 p">
+                      <div class="card h-100">
+                        <img src="{{character.portrait}}"
+                          class="card-img-top character-img {{tool.options.selectedCharacter?.value == character.id ? 'selected': ''}}"
+                          onerror="this.src='assets/images/characters/default-preview.jpg'"
+                          attr.data-original-title="<b>{{character.name}}</b><br />[{{character.group}}]"
+                          data-toggle-tooltip="tooltip" data-placement="right"
+                          data-container="#tool-characters-container" (click)="tool.actions.select(character)">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
 

@@ -123,7 +123,106 @@ class MapCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
 
-      const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
+      var docs = await this.model.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner_info"
+          }
+        },
+        { $unwind: "$owner_info" },
+        // $lookup USING $group
+        { $unwind: "$characters" },
+        {
+          $lookup: {
+            from: "characters",
+            as: "characters.model_info",
+            localField: "characters.model",
+            foreignField: "_id"
+          }
+        },
+        {
+          $unwind: {
+            path: "$characters.model_info",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $group: {
+            _id: "$_id",
+            owner: { "$first": "$owner" },
+            owner_info: { "$first": "$owner_info" },
+            name: { "$first": "$name" },
+            description: { "$first": "$description" },
+            walls: { "$first": "$walls" },
+            characters: { "$push": "$characters" },
+            tilemap: { "$first": "$tilemap" },
+            private: { "$first": "$private" },
+            imageUrl: { "$first": "$imageUrl" }
+          }
+        },
+        // $lookup USING pipeline (not get characters that don't match model)
+        // {
+        //   $lookup: {
+        //     from: "characters",
+        //     as: "characters",
+        //     let: { characters: "$characters" },
+        //     pipeline: [
+        //       {
+        //         $match: {
+        //           $expr: { $in: ["$_id", "$$characters.model"] }
+        //         }
+        //       },
+        //       {
+        //         $addFields: {
+        //           docs: {
+        //             $filter: {
+        //               input: "$$characters",
+        //               cond: {
+        //                 $eq: ["$$this.model", "$_id"]
+        //               }
+        //             }
+        //           }
+        //         }
+        //       },
+        //       { $unwind: "$docs" },
+        //       {
+        //         $replaceRoot: {
+        //           newRoot: {
+        //             $mergeObjects: [
+        //               "$docs",
+        //               {
+        //                 model_info: {
+        //                   $arrayToObject: {
+        //                     $filter: {
+        //                       input: { $objectToArray: "$$ROOT" },
+        //                       cond: { $ne: ["$$this.k", "docs"] }
+        //                     }
+        //                   }
+        //                 }
+        //               }
+        //             ]
+        //           }
+        //         }
+        //       }
+        //     ]
+        //   }
+        // },
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(req.params.id),
+            $or: [
+              { owner: resu.user._id },
+              { private: false }
+            ]
+          }
+        }
+      ]);
+
+      const obj = docs[0];
+      // const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
       res.status(200).json(obj);
     } catch (err) {
       return res.status(500).json({ error: err.message });
