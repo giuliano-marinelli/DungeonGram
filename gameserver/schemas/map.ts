@@ -7,6 +7,7 @@ import { WorldPhysics } from '../physics/world.physics';
 
 import { default as MapDB } from '../../database/models/map';
 import { default as CharacterDB } from '../../database/models/character';
+import { Point } from './point';
 
 export class Map extends Schema {
   @type("string")
@@ -65,21 +66,23 @@ export class Map extends Schema {
   async addCharacter(character) {
     if (!character._id) character._id = Utils.uuidv4();
     if (!character.position) character.position = { x: 0, y: 0 };
+    if (!character.direction) character.direction = { x: 1, y: 0 };
     if (!character.visionRange) character.visionRange = 10;
     if (!character.group) character.group = 'Ungrouped';
     if (!character.name) {
       var modelObj = await CharacterDB.findOne({ _id: character.model });
       if (modelObj) {
-        const countExistentModels = Object.values(this.characters).filter((c) => c.name == modelObj.name).length;
-        character.name = modelObj.name + ' ' + (countExistentModels + 1);
+        const countExistentModels = Object.values(this.characters).filter((c) => c.name.startsWith(modelObj.name)).length;
+        character.name = modelObj.name + ' ' + (countExistentModels);
       } else {
         character.name = 'Unnamed';
       }
     }
 
     this.characters[character._id] = new Character();
-    this.characters[character._id].x = character.position?.x;
-    this.characters[character._id].y = character.position?.y;
+    this.characters[character._id].x = character.position.x;
+    this.characters[character._id].y = character.position.y;
+    this.characters[character._id].direction = new Point(character.direction.x, character.direction.y);
     this.characters[character._id].visionRange = character.visionRange;
     this.characters[character._id].group = character.group;
     this.characters[character._id].name = character.name;
@@ -113,6 +116,10 @@ export class Map extends Schema {
           position: {
             x: this.characters[characterId].x,
             y: this.characters[characterId].y
+          },
+          direction: {
+            x: this.characters[characterId].direction.x,
+            y: this.characters[characterId].direction.y
           },
           name: this.characters[characterId].name,
           group: this.characters[characterId].group,

@@ -146,7 +146,10 @@ export class ToolsComponent implements OnInit {
         name: "characters", label: "Characters", image: 'assets/images/tools/characters.png', dropdown: true,
         options: {
           charactersOnMap: this.controller.initSetting("charactersOnMap", null, () => {
-            setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
+            setTimeout(() => {
+              $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+              $('.tooltip').tooltip('hide');
+            });
           }),
           addingMode: this.controller.initSetting("addingMode", false),
           selectedCharacter: this.controller.initSetting("selectedCharacter", null),
@@ -158,6 +161,9 @@ export class ToolsComponent implements OnInit {
           },
           select: (character) => {
             this.controller.send('game', 'character', { id: character.id, action: 'select' });
+          },
+          remove: (character) => {
+            this.controller.send('game', 'character', { id: character.id, action: 'remove' });
           },
           update: () => {
             this.controller.send('game', 'character', { action: 'update' });

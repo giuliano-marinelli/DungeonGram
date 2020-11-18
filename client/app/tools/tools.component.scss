@@ -1,3 +1,11 @@
+#tools {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
 .tool-btn-container {
   margin-bottom: 5px;
 }
@@ -74,6 +82,17 @@
   margin: 2px;
 }
 
+.maps {
+  overflow: auto;
+  max-height: 400px;
+  width: 245px;
+  margin-bottom: 10px;
+}
+
+.maps-add {
+  width: 245px;
+}
+
 .character-img {
   width: 100%;
   height: 80px;
@@ -92,6 +111,7 @@
 .character-btn {
   position: absolute;
   bottom: 0px;
+  right: 0px;
   opacity: 0.9;
 }
 
@@ -101,7 +121,32 @@
   height: 25px;
   font-size: 10px;
   margin: 5px;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+.characters-own {
+  overflow: auto;
+  max-height: 200px;
+  width: 210px;
+  margin-bottom: 10px;
+}
+
+.characters-public {
+  overflow: auto;
+  max-height: 200px;
+  width: 210px;
+  margin-bottom: 10px;
+}
+
+.characters-onmap {
+  overflow: auto;
+  max-height: 465px;
+  width: 210px;
+  margin-bottom: 10px;
+}
+
+.characters-add {
+  width: 210px;
 }
 
 /* HIDE RADIO */

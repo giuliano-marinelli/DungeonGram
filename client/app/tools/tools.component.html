@@ -12,7 +12,7 @@
       </button>
 
       <div *ngIf="tool.dropdown" class="dropdown-menu"
-        [style.width]="tool.name == 'maps' ? '230px' : (tool.name == 'characters' ? '400px' : '200px')">
+        [style.width]="tool.name == 'maps' ? '250px' : (tool.name == 'characters' ? '450px' : '200px')">
         <div [ngSwitch]="tool.name">
           <h5>{{tool.label}}</h5>
 
@@ -23,13 +23,14 @@
                 <app-loading [condition]="isLoadingCampaign"></app-loading>
               </div>
 
-              <div *ngIf="!isLoadingCampaign" class="row row-cols-2">
+              <div *ngIf="!isLoadingCampaign" class="row row-cols-2 maps">
                 <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
                   <div class="card h-100">
                     <img src="{{map['imageUrl']}}" class="card-img-top map-img"
                       onerror="this.src='assets/images/game/default_terrain.png'"
                       attr.data-original-title="<b>{{map['name']}}</b><br />{{map['description']}}"
-                      data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-maps-container">
+                      data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-maps-container"
+                      data-boundary="viewport">
                     <div class="card-body p-0 map-btn">
                       <!-- <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private"
                           data-toggle-tooltip="tooltip" data-placement="top"
@@ -42,24 +43,26 @@
                         <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
                           attr.data-original-title="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
                           data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                          data-trigger="hover">
+                          data-boundary="viewport" data-trigger="hover">
                           <i class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
                         </button>
                         <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" title="Edit"
                           data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                          data-trigger="hover">
+                          data-boundary="viewport" data-trigger="hover">
                           <i class="fa fa-pencil"></i>
                         </button>
                         <button class="btn btn-sm btn-danger" (click)="deleteMap(map)" title="Delete"
                           data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                          data-trigger="hover">
+                          data-boundary="viewport" data-trigger="hover">
                           <i class="fa fa-trash"></i>
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
+              <div class="row row-cols-2 maps-add">
                 <div class="col-12 mb-2">
                   <div class="card" style="height: 20px;">
                     <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
@@ -69,7 +72,6 @@
                     </button>
                   </div>
                 </div>
-
               </div>
 
             </div>
@@ -85,7 +87,7 @@
                     <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
                   </div>
 
-                  <div *ngIf="!isLoadingOwnCharacters" class="row row-cols-2">
+                  <div *ngIf="!isLoadingOwnCharacters" class="row row-cols-2 characters-own">
                     <div *ngFor="let character of ownCharacters" class="col mb-2 p">
                       <div class="card h-100">
                         <img src="{{character['portrait']}}"
@@ -93,35 +95,37 @@
                           onerror="this.src='assets/images/characters/default-preview.jpg'"
                           attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
                           data-toggle-tooltip="tooltip" data-placement="right"
-                          data-container="#tool-characters-container" (click)="tool.actions.addingMode(character)">
+                          data-container="#tool-characters-container" data-boundary="viewport"
+                          (click)="tool.actions.addingMode(character)">
                         <div class="card-body p-0 character-btn">
                           <div class="btn-group" role="group">
                             <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openCharacter(character)"
                               title="Edit" data-toggle-tooltip="tooltip" data-placement="top"
-                              data-container="#tool-characters-container" data-trigger="hover">
+                              data-container="#tool-characters-container" data-boundary="viewport" data-trigger="hover">
                               <i class="fa fa-pencil"></i>
                             </button>
                             <button class="btn btn-sm btn-danger" (click)="deleteCharacter(character)" title="Delete"
                               data-toggle-tooltip="tooltip" data-placement="top"
-                              data-container="#tool-characters-container" data-trigger="hover">
+                              data-container="#tool-characters-container" data-boundary="viewport" data-trigger="hover">
                               <i class="fa fa-trash"></i>
                             </button>
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
 
+                  <div class="row row-cols-2 characters-add">
                     <div class="col-12 mb-2">
                       <div class="card" style="height: 20px;">
                         <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
                           style="width: 100%; height: 100%; font-size: 10px;" title="Add Character"
                           data-toggle-tooltip="tooltip" data-container="#tool-characters-container"
-                          data-placement="bottom">
+                          data-boundary="viewport" data-placement="bottom">
                           <i class="fa fa-plus"></i>
                         </button>
                       </div>
                     </div>
-
                   </div>
 
                 </div>
@@ -137,7 +141,7 @@
                     <small class="text-muted">There are no public characters created yet</small>
                   </p>
 
-                  <div *ngIf="!isLoadingPublicCharacters" class="row row-cols-2">
+                  <div *ngIf="!isLoadingPublicCharacters" class="row row-cols-2 characters-public">
                     <div *ngFor="let character of publicCharacters" class="col mb-2 p">
                       <div class="card h-100">
                         <img src="{{character['portrait']}}"
@@ -145,7 +149,8 @@
                           onerror="this.src='assets/images/characters/default-preview.jpg'"
                           attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
                           data-toggle-tooltip="tooltip" data-placement="right"
-                          data-container="#tool-characters-container" (click)="tool.actions.addingMode(character)">
+                          data-container="#tool-characters-container" data-boundary="viewport"
+                          (click)="tool.actions.addingMode(character)">
                       </div>
                     </div>
                   </div>
@@ -170,7 +175,8 @@
                     <small class="text-muted">There are no characters on map</small>
                   </p>
 
-                  <div *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value" class="row row-cols-2">
+                  <div *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value"
+                    class="row row-cols-2 characters-onmap">
                     <div
                       *ngFor="let character of ObjectValues(tool.options.charactersOnMap.value) | filter:{ addingMode: false }"
                       class="col mb-2 p">
@@ -180,7 +186,17 @@
                           onerror="this.src='assets/images/characters/default-preview.jpg'"
                           attr.data-original-title="<b>{{character.name}}</b><br />[{{character.group}}]"
                           data-toggle-tooltip="tooltip" data-placement="right"
-                          data-container="#tool-characters-container" (click)="tool.actions.select(character)">
+                          data-container="#tool-characters-container" data-boundary="viewport"
+                          (click)="tool.actions.select(character)">
+                        <div class="card-body p-0 character-btn">
+                          <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)" title="Remove"
+                              data-toggle-tooltip="tooltip" data-placement="top"
+                              data-container="#tool-characters-container" data-boundary="viewport" data-trigger="hover">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

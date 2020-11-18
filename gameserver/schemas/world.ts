@@ -130,6 +130,13 @@ export class World extends Schema {
         },
         validate: (data: any) => { return this.map != null && data.x != null && typeof data.x === "number" && data.y != null && typeof data.y === "number" }
       },
+      remove: {
+        do: (client: string, data: any) => {
+          //remove character
+          delete this.map.characters[data.id]
+        },
+        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+      },
       update: {
         do: (client: string, data: any) => {
           data.roomRef.broadcast('characterUpdate');
@@ -160,6 +167,14 @@ export class World extends Schema {
         validate: (data: any) => {
           return this.map != null && data.x != null && data.y != null && data.size != null &&
             typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string"
+        }
+      },
+      cancel: {
+        do: (client: string, data: any) => {
+          this.command.wall.state.wallFirstPoint = null;
+        },
+        validate: (data: any) => {
+          return this.map != null;
         }
       },
       remove: {

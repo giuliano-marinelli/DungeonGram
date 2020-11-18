@@ -31,8 +31,8 @@ export class CharacterPhysics extends EntityPhysics {
     });
     var path = finder.findPath(Math.ceil((this.body.position.x + 0.5) * 2), Math.ceil((this.body.position.y + 0.5) * 2), Math.ceil((point.x + 0.5) * 2), Math.ceil((point.y + 0.5) * 2), gridForPath);
     var normalizedPath = []
-    path.forEach((point) => {
-      normalizedPath.push({ x: (point[0] / 2) - 0.5, y: (point[1] / 2) - 0.5 });
+    path.forEach((pathPoint) => {
+      normalizedPath.push({ x: (pathPoint[0] / 2) - 0.5, y: (pathPoint[1] / 2) - 0.5 });
     })
     return normalizedPath;
   }

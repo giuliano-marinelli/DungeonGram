@@ -23,9 +23,13 @@ const mapSchema = new mongoose.Schema({
         x: Number,
         y: Number
       },
+      direction: {
+        x: Number,
+        y: Number
+      },
       name: String,
-      visionRange: Number,
       group: String,
+      visionRange: Number,
       model: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Character'
