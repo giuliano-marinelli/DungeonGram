@@ -12,7 +12,6 @@ declare var iziToast;
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements AfterViewChecked {
-
   constructor(
     public router: Router,
     public auth: AuthService,

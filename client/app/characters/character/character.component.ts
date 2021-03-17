@@ -9,6 +9,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CharacterService } from 'client/app/services/character.service';
 import { Character } from 'client/app/shared/models/character.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { GlobalComponent } from '../../shared/global/global.component';
 
 declare var $;
 declare var iziToast;
@@ -51,39 +52,7 @@ export class CharacterComponent implements OnInit {
 
   //editor
   scenario?: any;
-  wearsAvailable: any = {
-    arms: {
-      biceps: [],
-      elbows: [],
-      forearms: [],
-      hands: ["mittens"],
-      shoulders: []
-    },
-    head: {
-      beard: ["big.mostacho.beard", "chinless.beard", "disheveled.beard", "full.beard", "long.beard"],
-      ears: ["human.ears", "half.elf.ears", "elf.ears"],
-      eyebrows: [],
-      hair: ["mohicano"],
-      helmet: [],
-      scars: []
-    },
-    legs: {
-      knees: ["metal.kneepads"],
-      feet: ["leather.boots"]
-    },
-    torso: {
-      accessory: [],
-      back: [],
-      chest: ["padded.armor.chest", "breastplate"],
-      hips: ["padded.armor.hips"]
-    },
-    skin: {
-      color: []
-    },
-    info: {
-      character: []
-    }
-  };
+  wearsAvailable?: any = JSON.parse(JSON.stringify(GlobalComponent.wearsAvailable));
 
   constructor(
     private formBuilder: FormBuilder,
@@ -260,7 +229,6 @@ export class CharacterComponent implements OnInit {
       BABYLON.Tools.CreateScreenshotUsingRenderTarget(this.engine, this.scenario.photoCamera, 400, (data) => resolve(data));
     });
   }
-
 }
 
 

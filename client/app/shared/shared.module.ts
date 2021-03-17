@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
+//Global
+import { GlobalComponent } from './global/global.component';
 // Components
 import { ToastComponent } from './toast/toast.component';
 import { LoadingComponent } from './loading/loading.component';
@@ -23,12 +25,14 @@ import { FilterPipe } from './pipes/filter.pipe';
     ReactiveFormsModule,
     HttpClientModule,
     // Shared Components
+    GlobalComponent,
     ToastComponent,
     LoadingComponent,
     // Shared Pipes
     FilterPipe
   ],
   declarations: [
+    GlobalComponent,
     ToastComponent,
     LoadingComponent,
     LeaveGuardWarningComponent,

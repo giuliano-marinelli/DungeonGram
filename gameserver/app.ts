@@ -12,7 +12,7 @@ import { GameRoom } from "./rooms/game";
 import * as dotenv from 'dotenv';
 import setMongo from '../database/mongo';
 
-const port = Number(process.env.PORT || 3001) + Number(process.env.NODE_APP_INSTANCE || 0);
+const port = 3001;//Number(process.env.PORT || 3001) + Number(process.env.NODE_APP_INSTANCE || 0);
 const app = express();
 dotenv.config();
 

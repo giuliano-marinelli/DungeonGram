@@ -14,7 +14,9 @@
     "preonlyserver": "concurrently -n \"server(build)\" -c \"yellow\" \"tsc -p server\"",
     "onlyserver": "concurrently -n \"mongodb,client,server,server\" -c \"green,blue,yellow,yellow\" \"mongod\" \"ng build --watch\" \"tsc -w -p server \" \"nodemon dist/server/app.js\"",
     "preonlygameserver": "concurrently -n \"gameserver(build)\" -c \"magenta\" \"tsc -p gameserver\"",
-    "onlygameserver": "concurrently -n \"mongodb,client,gameserver,gameserver\" -c \"green,blue,magenta,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p gameserver \" \"nodemon dist/gameserver/app.js\""
+    "onlygameserver": "concurrently -n \"mongodb,client,gameserver,gameserver\" -c \"green,blue,magenta,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p gameserver \" \"nodemon dist/gameserver/app.js\"",
+    "bgserver": "pm2 start dist/server/app.js",
+    "bggameserver": "pm2 start dist/gameserver/app.js"
   },
   "private": true,
   "dependencies": {

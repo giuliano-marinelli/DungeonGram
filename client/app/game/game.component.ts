@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Controller } from '../shared/controller/controller';
+import { GlobalComponent } from '../shared/global/global.component';
 
 //game main schema
 import { World } from '../shared/schemas/world';
@@ -18,6 +19,8 @@ export class GameComponent implements OnInit {
   canvas: HTMLCanvasElement;
   engine: any;
   scene: any;
+  assetsManager: any;
+  assets: any = {};
 
   //game
   gameRoom: any;
@@ -46,6 +49,7 @@ export class GameComponent implements OnInit {
       this.engine = new BABYLON.Engine(this.canvas, true);
       this.scene = new BABYLON.Scene(this.engine);
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
+      this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
       this.controller = new Controller();
 
@@ -76,20 +80,52 @@ export class GameComponent implements OnInit {
   initGame() {
     console.log("Joined Game");
     this.gameRoom.onStateChange.once(() => {
-      //create the root schema object
-      this.world = new World(this.gameRoom.state.world, {
-        scene: this.scene,
-        room: this.gameRoom,
-        canvas: this.canvas,
-        controller: this.controller,
-        token: this.auth.currentUser._id
-      });
+      //after the assetsManager finish to load all meshes
+      this.assetsManager.onFinish = (tasks) => {
+        //create the root schema object
+        this.world = new World(this.gameRoom.state.world, {
+          scene: this.scene,
+          room: this.gameRoom,
+          canvas: this.canvas,
+          controller: this.controller,
+          token: this.auth.currentUser._id,
+          assets: this.assets
+        });
 
-      //register a render loop to repeatedly render the scene
-      this.engine.runRenderLoop(() => {
-        this.scene.render();
-      });
+        //register a render loop to repeatedly render the scene
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+        });
+      }
+
+      //add the task for each mesh to the assetsManager
+      this.assetsTasks();
+
+      //call the loading of meshes
+      this.assetsManager.load();
     });
+  }
+
+  assetsTasks() {
+    //add base mesh for characters
+    this.assetsManager.addMeshTask("base task", "", "assets/meshes/base/", "base.babylon").onSuccess = (task) => {
+      task.loadedMeshes[0].setEnabled(false);
+      this.assets.base = task.loadedMeshes[0];
+    };
+
+    //add each wear mesh for characters
+    for (let category in GlobalComponent.wearsAvailable) {
+      for (let subcategory in GlobalComponent.wearsAvailable[category]) {
+        GlobalComponent.wearsAvailable[category][subcategory].forEach((wear) => {
+          this.assetsManager.addMeshTask(wear + " task", "", "assets/meshes/wear/" + category + "/" + subcategory + "/", wear + ".babylon").onSuccess = (task) => {
+            task.loadedMeshes[0].setEnabled(false);
+            if (!this.assets[category]) this.assets[category] = {};
+            if (!this.assets[category][subcategory]) this.assets[category][subcategory] = {};
+            this.assets[category][subcategory][wear] = task.loadedMeshes[0];
+          };
+        });
+      }
+    }
   }
 
   //DESUSED

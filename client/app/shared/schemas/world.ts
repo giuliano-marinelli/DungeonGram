@@ -33,6 +33,7 @@ export class World extends Schema {
               room: parameters.room,
               token: parameters.token,
               controller: parameters.controller,
+              assets: parameters.assets,
               id: key
             }
           }
@@ -44,7 +45,8 @@ export class World extends Schema {
               scene: parameters.scene,
               room: parameters.room,
               token: parameters.token,
-              controller: parameters.controller
+              controller: parameters.controller,
+              assets: parameters.assets
             }
           }
         }
@@ -107,6 +109,19 @@ export class World extends Schema {
     // box.material = new BABYLON.SkyMaterial('sky', this.parameters.scene);
     // box.material.inclination = -0.35;
     this.parameters.scene.clearColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+
+    // //init character light
+    // this.lights.characterLight = new BABYLON.PointLight("characterLight", new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
+    // this.lights.characterLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+    // this.lights.characterLight.specular = new BABYLON.Color3(0, 0, 0);
+    // this.lights.characterLight.shadowMinZ = 0.1;
+    // this.lights.characterLight.range = 0;
+    // this.lights.characterLight.intensity = 0;
+
+    // //add shadow generator for the character light
+    // new BABYLON.ShadowGenerator(1024, this.lights.characterLight);
+    // this.lights.characterLight._shadowGenerator.useBlurExponentialShadowMap = true;
+    // this.lights.characterLight._shadowGenerator.transparencyShadow = true;
   }
 
   updateLights() {

@@ -88,8 +88,8 @@ export class Animator {
     this.visibility(this.defaultVisibility);
   }
 
-  rotate(direction) {
-    if (direction.x != 0 || direction.y != 0) {
+  rotate(direction?) {
+    if (direction != null && (direction?.x != 0 || direction?.y != 0)) {
       var vectorDirection = new BABYLON.Vector2(direction.y, direction.x);
       // console.log(this.lastDirection, vectorDirection, this.mesh?.rotation.y, this.mesh?.rotation.y + BABYLON.Angle.BetweenTwoPoints(this.lastDirection, vectorDirection).radians());
       // BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",

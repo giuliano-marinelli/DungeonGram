@@ -33,6 +33,7 @@ export class Map extends Schema {
               room: parameters.room,
               token: parameters.token,
               controller: parameters.controller,
+              assets: parameters.assets,
               id: key
             }
           }
@@ -46,6 +47,7 @@ export class Map extends Schema {
               room: parameters.room,
               token: parameters.token,
               controller: parameters.controller,
+              assets: parameters.assets,
               id: key
             }
           }
@@ -58,7 +60,8 @@ export class Map extends Schema {
               scene: parameters.scene,
               room: parameters.room,
               token: parameters.token,
-              controller: parameters.controller
+              controller: parameters.controller,
+              assets: parameters.assets
             }
           }
         }

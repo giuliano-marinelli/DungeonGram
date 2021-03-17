@@ -142,8 +142,12 @@ export class Character extends Schema {
 
   doMesh() {
     if (!this.mesh) {
-      BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
-        this.mesh = meshes[0];
+      setTimeout(() => {
+        //  BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
+        // this.mesh = meshes[0];
+        this.mesh = this.parameters.assets.base.clone();
+        this.mesh.skeleton = this.parameters.assets.base.skeleton.clone();
+        this.mesh.setEnabled(true);
         this.mesh.name = this.id;
 
         //scaling mesh by height
@@ -246,8 +250,10 @@ export class Character extends Schema {
             this.wearsMeshes[wearId].dispose();
           }
 
-          BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
-            this.wearsMeshes[wearId] = meshes[0];
+          setTimeout(() => {
+            // BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
+            // this.wearsMeshes[wearId] = meshes[0];
+            this.wearsMeshes[wearId] = this.parameters.assets[this.wears[wearId].category][this.wears[wearId].subcategory][this.wears[wearId].name].clone();
             var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
             material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
             this.wearsMeshes[wearId].material = material;
@@ -263,6 +269,12 @@ export class Character extends Schema {
   initVisionLight() {
     //add vision light
     if (this.id == this.parameters.world.users[this.parameters.token].selectedCharacter) {
+      // if (!this.visionLight && this.mesh && this.parameters.world.lights.characterLight) {
+      //   this.visionLight = this.parameters.world.lights.characterLight;
+      //   this.visionLight.range = this.visionRange;
+      //   this.visionLight.parent = this.mesh;
+      //   this.visionLight.intensity = 100;
+      // }
       if (!this.visionLight && this.mesh) {
         this.visionLight = new BABYLON.PointLight("characterLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
         this.visionLight.range = this.visionRange;
@@ -280,6 +292,7 @@ export class Character extends Schema {
       }
     } else if (this.visionLight) {
       this.visionLight.dispose();
+      // this.visionLight.intensity = 0;
       this.visionLight = null;
     }
   }
