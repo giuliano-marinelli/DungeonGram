@@ -82,96 +82,49 @@ export class World extends Schema {
     this.lights.baseLight?.dispose();
     this.lights.secondLight?.dispose();
     this.lights.fogLight?.dispose();
+    this.lights.characterLight?.dispose();
 
-    //init lights
+    //init base light for global lighting characters
     this.lights.baseLight = new BABYLON.DirectionalLight("baseLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
     this.lights.baseLight.position = new BABYLON.Vector3(50, 100, 50);
     this.lights.baseLight.intensity = 1;
     this.lights.baseLight.specular = new BABYLON.Color3(0, 0, 0);
 
+    //init shadow generator for base light to generate shadows of characters on terrainShadows
+    new BABYLON.ShadowGenerator(4096, this.lights.baseLight);
+    this.lights.baseLight._shadowGenerator.useBlurExponentialShadowMap = true;
+    this.lights.baseLight._shadowGenerator.darkness = 0.5;
+
+    //init second light for global lighting characters from behind
     this.lights.secondLight = new BABYLON.DirectionalLight("secondLight", new BABYLON.Vector3(1, -2, 1), this.parameters.scene);
     this.lights.secondLight.position = new BABYLON.Vector3(-50, 100, -50);
     this.lights.secondLight.intensity = 1;
     this.lights.secondLight.specular = new BABYLON.Color3(0, 0, 0);
 
+    //init fog light for lighting the terrain based on fog visibility
     this.lights.fogLight = new BABYLON.DirectionalLight("fogLight", new BABYLON.Vector3(-1, -2, -1), this.parameters.scene);
     this.lights.fogLight.position = new BABYLON.Vector3(50, 100, 50);
     this.lights.fogLight.intensity = 0;
     this.lights.fogLight.specular = new BABYLON.Color3(0, 0, 0);
 
-    //init shadow generator for base light
-    new BABYLON.ShadowGenerator(4096, this.lights.baseLight);
-    this.lights.baseLight._shadowGenerator.useBlurExponentialShadowMap = true;
-    this.lights.baseLight._shadowGenerator.darkness = 0.5;
+    //init character light for lighting the terrain respectively to character vision
+    this.lights.characterLight = new BABYLON.PointLight("characterLight", new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
+    this.lights.characterLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+    this.lights.characterLight.specular = new BABYLON.Color3(0, 0, 0);
+    this.lights.characterLight.shadowMinZ = 0.1;
+    this.lights.characterLight.range = 0;
+    this.lights.characterLight.intensity = 0;
+
+    //init shadow generator for the character light to generate shadows of walls on the terrain
+    new BABYLON.ShadowGenerator(1024, this.lights.characterLight);
+    this.lights.characterLight._shadowGenerator.useBlurExponentialShadowMap = true;
+    this.lights.characterLight._shadowGenerator.transparencyShadow = true;
 
     //init skybox
     // var box = BABYLON.Mesh.CreateBox('SkyBox', 1000, this.parameters.scene, false, BABYLON.Mesh.BACKSIDE);
     // box.material = new BABYLON.SkyMaterial('sky', this.parameters.scene);
     // box.material.inclination = -0.35;
     this.parameters.scene.clearColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-
-    // //init character light
-    // this.lights.characterLight = new BABYLON.PointLight("characterLight", new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
-    // this.lights.characterLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
-    // this.lights.characterLight.specular = new BABYLON.Color3(0, 0, 0);
-    // this.lights.characterLight.shadowMinZ = 0.1;
-    // this.lights.characterLight.range = 0;
-    // this.lights.characterLight.intensity = 0;
-
-    // //add shadow generator for the character light
-    // new BABYLON.ShadowGenerator(1024, this.lights.characterLight);
-    // this.lights.characterLight._shadowGenerator.useBlurExponentialShadowMap = true;
-    // this.lights.characterLight._shadowGenerator.transparencyShadow = true;
-  }
-
-  updateLights() {
-    setTimeout(() => {
-      if (this.lights.characterLight && this.map?.tilemap?.terrain && !this.lights.characterLight.setted) {
-        this.lights.characterLight.includedOnlyMeshes.push(this.map.tilemap.terrain);
-        this.lights.characterLight.setted = true;
-      }
-
-      if (this.lights.baseLight && this.map?.tilemap?.terrain && !this.lights.baseLight.setted) {
-        this.lights.baseLight.excludedMeshes.push(this.map.tilemap.terrain);
-        this.lights.baseLight.setted = true;
-
-        this.lights.fogLight.includedOnlyMeshes.push(this.map.tilemap.terrain);
-      }
-
-      if (this.lights.secondLight && this.map?.tilemap?.terrain && !this.lights.secondLight.setted) {
-        this.lights.secondLight.excludedMeshes.push(this.map.tilemap.terrain);
-        this.lights.secondLight.setted = true;
-
-        this.lights.fogLight.includedOnlyMeshes.push(this.map.tilemap.terrain);
-      }
-      this.updateFogOfWar();
-    });
-  }
-
-  updateShadows() {
-    setTimeout(() => {
-      try {
-        for (let wall in this.map.walls) {
-          if (this.map.walls[wall].size != 'collider')
-            this.lights.characterLight._shadowGenerator.addShadowCaster(this.map.walls[wall].mesh);
-        }
-        for (let character in this.map.characters) {
-          this.lights.baseLight._shadowGenerator.addShadowCaster(this.map.characters[character].mesh);
-        }
-      } catch (err) { }
-    });
-  }
-
-  updateWalls() {
-    setTimeout(() => {
-      if (this.map) {
-        var user = this.users[this.parameters.token];
-        for (let wall in this.map?.walls) {
-          this.map.walls[wall].mesh.isPickable = user.wallsPickable;
-          this.map.walls[wall].mesh.visibility = user.wallsVisibility;
-        }
-      }
-    });
   }
 
   updateFogOfWar() {
@@ -193,6 +146,22 @@ export class World extends Schema {
     });
   }
 
+  updateWallsVisibility() {
+    setTimeout(() => {
+      if (this.map) {
+        for (let wall in this.map?.walls) {
+          this.updateWallVisibility(this.map.walls[wall]);
+        }
+      }
+    });
+  }
+
+  updateWallVisibility(wall?) {
+    var user = this.users[this.parameters.token];
+    wall.mesh.isPickable = user.wallsPickable;
+    wall.mesh.visibility = user.wallsVisibility;
+  }
+
   updateCharactersVisibility(character?) {
     var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
     if (selectedCharacter && this.map?.characters[selectedCharacter]?.mesh) {
@@ -205,10 +174,10 @@ export class World extends Schema {
           this.map.characters[selectedCharacter].collider.isCollible = false;
           if (!character || character == selectedCharacter) {
             for (let character in this.map.characters) {
-              this._updateCharacterVisibility(character, selectedCharacter)
+              this.updateCharacterVisibility(character, selectedCharacter)
             }
           } else {
-            this._updateCharacterVisibility(character, selectedCharacter)
+            this.updateCharacterVisibility(character, selectedCharacter)
           }
           this.map.characters[selectedCharacter].collider.isCollible = true;
           // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
@@ -230,7 +199,7 @@ export class World extends Schema {
     }
   }
 
-  _updateCharacterVisibility(character, selectedCharacter) {
+  updateCharacterVisibility(character, selectedCharacter) {
     if (this.map.characters[character] && this.map.characters[character].mesh &&
       character != selectedCharacter &&
       (!this.map.characters[character].addingMode || this.users[this.parameters.token]?.addingModeCharacter != character)) {

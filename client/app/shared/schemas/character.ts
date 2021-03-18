@@ -135,6 +135,7 @@ export class Character extends Schema {
 
   remove() {
     super.remove();
+    this.detachVisionLight()
     this.mesh.dispose();
     this.collider.dispose();
     this.colliderPhysics.dispose();
@@ -224,11 +225,8 @@ export class Character extends Schema {
           }
         }));
 
-        //cast shadows
-        // this.parameters.shadowGenerators.baseLight.addShadowCaster(this.mesh);
-
-        this.parameters.world.updateLights();
-        this.parameters.world.updateShadows();
+        //cast shadows with base light
+        this.parameters.world.lights.baseLight._shadowGenerator.addShadowCaster(this.mesh);
 
         this.initVisionLight();
 
@@ -269,30 +267,21 @@ export class Character extends Schema {
   initVisionLight() {
     //add vision light
     if (this.id == this.parameters.world.users[this.parameters.token].selectedCharacter) {
-      // if (!this.visionLight && this.mesh && this.parameters.world.lights.characterLight) {
-      //   this.visionLight = this.parameters.world.lights.characterLight;
-      //   this.visionLight.range = this.visionRange;
-      //   this.visionLight.parent = this.mesh;
-      //   this.visionLight.intensity = 100;
-      // }
-      if (!this.visionLight && this.mesh) {
-        this.visionLight = new BABYLON.PointLight("characterLight" + this.id, new BABYLON.Vector3(0, 2, 0), this.parameters.scene);
+      if (!this.visionLight && this.mesh && this.parameters.world.lights.characterLight) {
+        this.visionLight = this.parameters.world.lights.characterLight;
         this.visionLight.range = this.visionRange;
         this.visionLight.parent = this.mesh;
-        this.visionLight.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
-        this.visionLight.specular = new BABYLON.Color3(0, 0, 0);
-        this.visionLight.shadowMinZ = 0.1;
         this.visionLight.intensity = 100;
-        this.parameters.world.lights.characterLight = this.visionLight;
-
-        //add shadow generator for the vision light
-        new BABYLON.ShadowGenerator(1024, this.visionLight);
-        this.visionLight._shadowGenerator.useBlurExponentialShadowMap = true;
-        this.visionLight._shadowGenerator.transparencyShadow = true;
       }
-    } else if (this.visionLight) {
-      this.visionLight.dispose();
-      // this.visionLight.intensity = 0;
+    } else {
+      this.detachVisionLight();
+    }
+  }
+
+  detachVisionLight() {
+    if (this.visionLight) {
+      this.visionLight.intensity = 0;
+      this.visionLight.parent = null;
       this.visionLight = null;
     }
   }
@@ -320,6 +309,7 @@ export class Character extends Schema {
     }
   }
 
+  //for testing purposes
   doVisionRays() {
     if (this.id == this.parameters.token) {
       this.visionRays.forEach(visionRay => {

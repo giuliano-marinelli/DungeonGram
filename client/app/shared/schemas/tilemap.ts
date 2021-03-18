@@ -252,8 +252,11 @@ export class TileMap extends Schema {
 
       this.terrainShadows.receiveShadows = true;
 
-      //update lights casted on it
-      this.parameters.world.updateLights();
+      //update global lights to exclude or include only: terrain and terrainShadows
+      this.parameters.world.lights.baseLight.excludedMeshes.push(this.terrain);
+      this.parameters.world.lights.secondLight.excludedMeshes.push(this.terrain);
+      this.parameters.world.lights.fogLight.includedOnlyMeshes.push(this.terrain);
+      this.parameters.world.lights.characterLight.includedOnlyMeshes.push(this.terrain);
     }
   }
 

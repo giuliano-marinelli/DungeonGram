@@ -86,9 +86,11 @@ export class Wall extends Schema {
         this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
     }));
 
+    //cast shadows with character light (if it's not an only collider wall)
+    if (this.size != 'collider')
+      this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh);
     this.parameters.world.updateCharactersVisibility();
-    this.parameters.world.updateShadows();
-    this.parameters.world.updateWalls();
+    this.parameters.world.updateWallVisibility(this);
   }
 
   remove() {

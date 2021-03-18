@@ -57,11 +57,11 @@ export class User extends Schema {
       changes?.forEach((change) => {
         switch (change.field) {
           case 'wallsVisibility':
-            this.parameters.world.updateWalls();
+            this.parameters.world.updateWallsVisibility();
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('wallsVisibility', this.wallsVisibility);
             break;
           case 'wallsPickable':
-            this.parameters.world.updateWalls();
+            this.parameters.world.updateWallsVisibility();
             break;
           case 'fogOfWarVisibility':
             this.parameters.world.updateFogOfWar();
@@ -75,8 +75,6 @@ export class User extends Schema {
             this.parameters.world.updateCharactersVisibility();
             if (change.previousValue && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.previousValue]?.initVisionLight();
             if (change.value && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.value]?.initVisionLight();
-            this.parameters.world.updateLights();
-            this.parameters.world.updateShadows();
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('selectedCharacter', this.selectedCharacter);
             break;
           case 'addingModeCharacter':

@@ -67,8 +67,6 @@ export class Map extends Schema {
         }
       }
     );
-
-    this.parameters.world.initGlobalLights();
   }
 
   update(changes) {
