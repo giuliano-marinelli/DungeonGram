@@ -5,7 +5,7 @@ export class Animator {
   mesh: any;
   skeleton: any;
   actual: any = { animation: null, loop: true };
-  rotationSpeed: number = 2;
+  rotationSpeed: number = 3;
   lastDirection: BABYLON.Vector2 = new BABYLON.Vector2(0, 1);
   transition: number = 0.05;
   registeredChildren: any = {};

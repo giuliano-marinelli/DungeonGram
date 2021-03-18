@@ -132,9 +132,19 @@ class MapCtrl extends BaseCtrl {
             as: "owner_info"
           }
         },
-        { $unwind: "$owner_info" },
+        {
+          $unwind: {
+            path: "$owner_info",
+            preserveNullAndEmptyArrays: true
+          }
+        },
         // $lookup USING $group
-        { $unwind: "$characters" },
+        {
+          $unwind: {
+            path: "$characters",
+            preserveNullAndEmptyArrays: true
+          }
+        },
         {
           $lookup: {
             from: "characters",
