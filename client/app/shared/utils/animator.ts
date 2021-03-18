@@ -5,7 +5,7 @@ export class Animator {
   mesh: any;
   skeleton: any;
   actual: any = { animation: null, loop: true };
-  rotationSpeed: number = 3;
+  rotationSpeed: number = 2;
   lastDirection: BABYLON.Vector2 = new BABYLON.Vector2(0, 1);
   transition: number = 0.05;
   registeredChildren: any = {};
@@ -111,7 +111,7 @@ export class Animator {
 
       //radians = degrees * Math.PI /180
       BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
-        this.rotationSpeed, 1, this.mesh?.rotation.y, adjustedAngleDegrees * Math.PI / 180,
+        this.rotationSpeed, 1, lastAngleDegrees * Math.PI / 180, adjustedAngleDegrees * Math.PI / 180,
         BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
           this.mesh.rotation.y = newAngleDegrees * Math.PI / 180;
         }
