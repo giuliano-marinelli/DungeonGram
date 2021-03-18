@@ -65,7 +65,7 @@ export class Path extends Schema {
       this.meshTo.material = material;
 
       //positioning mesh
-      this.meshTo.position.y = 0;
+      this.meshTo.position.y = 0.1;
       this.meshTo.position.x = this.to.x;
       this.meshTo.position.z = this.to.y;
     }
@@ -102,8 +102,8 @@ export class Path extends Schema {
         // this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
         // this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
         if (i > 0) {
-          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
-          var target = new BABYLON.Vector3(point.x, 0, point.y);
+          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0.1, this.points[i - 1].y);
+          var target = new BABYLON.Vector3(point.x, 0.1, point.y);
           var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
           var ray = new BABYLON.Ray(
             origin,

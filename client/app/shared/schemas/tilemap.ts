@@ -84,8 +84,8 @@ export class TileMap extends Schema {
     //grid material
     this.gridMaterial = new GridMaterial("gridMaterial", this.parameters.scene);
     this.gridMaterial.mainColor = BABYLON.Color3.Black();
-    this.gridMaterial.lineColor = BABYLON.Color3.White();
-    this.gridMaterial.opacity = 0.5;
+    this.gridMaterial.lineColor = BABYLON.Color3.Black();
+    this.gridMaterial.opacity = 0.75;
     this.gridMaterial.gridRatio = 1;
     this.gridMaterial.minorUnitVisibility = 1;
     this.gridMaterial.majorUnitFrequency = 0;

@@ -91,14 +91,33 @@ export class Animator {
   rotate(direction?) {
     if (direction != null && (direction?.x != 0 || direction?.y != 0)) {
       var vectorDirection = new BABYLON.Vector2(direction.y, direction.x);
-      // console.log(this.lastDirection, vectorDirection, this.mesh?.rotation.y, this.mesh?.rotation.y + BABYLON.Angle.BetweenTwoPoints(this.lastDirection, vectorDirection).radians());
-      // BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
-      //   this.rotationSpeed, 1, this.mesh?.rotation.y, BABYLON.Angle.BetweenTwoPoints(this.lastDirection, vectorDirection).radians(),
-      //   BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
-      //     this.mesh.rotation.y = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).radians();
-      //   });
 
-      this.mesh.rotation.y = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).radians();
+      //angle of the last direction
+      var lastAngleDegrees = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), this.lastDirection).degrees();
+      //angle of the new direction
+      var newAngleDegrees = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).degrees();
+      //adjust the new angle to save the angles that cross the 0/360 part of the circle (for the animation to use the short angle)
+      var adjustedAngleDegrees = newAngleDegrees;
+      if (Math.abs(lastAngleDegrees - newAngleDegrees) > 180) {
+        adjustedAngleDegrees = Math.abs(newAngleDegrees - 360) < newAngleDegrees ? newAngleDegrees - 360 : newAngleDegrees + 360;
+      }
+
+      // console.log('directions\n',
+      //   'last direction: ' + this.lastDirection, 'new direction: ' + vectorDirection);
+      // console.log('radians\n',
+      //   'last rotation: ' + lastAngleDegrees * Math.PI / 180, 'new rotation: ' + newAngleDegrees * Math.PI / 180, 'adjusted rotation: ' + adjustedAngleDegrees * Math.PI / 180);
+      console.log('degrees\n',
+        'last rotation: ' + lastAngleDegrees, 'new rotation: ' + newAngleDegrees, 'adjusted rotation: ' + adjustedAngleDegrees);
+
+      //radians = degrees * Math.PI /180
+      BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",
+        this.rotationSpeed, 1, this.mesh?.rotation.y, adjustedAngleDegrees * Math.PI / 180,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
+          this.mesh.rotation.y = newAngleDegrees * Math.PI / 180;
+        }
+      );
+
+      // this.mesh.rotation.y = BABYLON.Angle.BetweenTwoPoints(BABYLON.Vector2.Zero(), vectorDirection).radians();
 
       this.lastDirection = vectorDirection;
     }
