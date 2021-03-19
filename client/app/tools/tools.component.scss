@@ -127,6 +127,7 @@
 .characters-own {
   overflow: auto;
   max-height: 200px;
+  min-height: 200px;
   width: 210px;
   margin-bottom: 10px;
 }
@@ -134,13 +135,14 @@
 .characters-public {
   overflow: auto;
   max-height: 200px;
+  min-height: 200px;
   width: 210px;
   margin-bottom: 10px;
 }
 
 .characters-onmap {
   overflow: auto;
-  max-height: 465px;
+  max-height: 550px;
   width: 210px;
   margin-bottom: 10px;
 }

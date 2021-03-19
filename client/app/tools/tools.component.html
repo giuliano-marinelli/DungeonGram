@@ -83,13 +83,30 @@
                 <div id="characters-list">
                   <h6>Own</h6>
 
+                  <div class="row row-cols-2 characters-add">
+                    <div class="col-12 mb-2">
+                      <div class="card" style="height: 20px;">
+                        <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
+                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Character"
+                          data-toggle-tooltip="tooltip" data-container="#tool-characters-container"
+                          data-boundary="viewport" data-placement="top">
+                          <i class="fa fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <div *ngIf="isLoadingOwnCharacters">
                     <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
                   </div>
 
+                  <p *ngIf="ownCharacters.length <= 0">
+                    <small class="text-muted">You have not created characters yet</small>
+                  </p>
+
                   <div *ngIf="!isLoadingOwnCharacters" class="row row-cols-2 characters-own">
                     <div *ngFor="let character of ownCharacters" class="col mb-2 p">
-                      <div class="card h-100">
+                      <div class="card">
                         <img src="{{character['portrait']}}"
                           class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
                           onerror="this.src='assets/images/characters/default-preview.jpg'"
@@ -115,18 +132,11 @@
                     </div>
                   </div>
 
-                  <div class="row row-cols-2 characters-add">
-                    <div class="col-12 mb-2">
-                      <div class="card" style="height: 20px;">
-                        <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
-                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Character"
-                          data-toggle-tooltip="tooltip" data-container="#tool-characters-container"
-                          data-boundary="viewport" data-placement="bottom">
-                          <i class="fa fa-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <ngb-pagination *ngIf="countOwnCharacters > 0" class="d-flex justify-content-center" size="sm"
+                    [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pageOwnCharacters"
+                    [pageSize]="pageSizeOwnCharacters" [collectionSize]="countOwnCharacters"
+                    (pageChange)="setPageCharacters(true, pageOwnCharacters)">
+                  </ngb-pagination>
 
                 </div>
 
@@ -143,7 +153,7 @@
 
                   <div *ngIf="!isLoadingPublicCharacters" class="row row-cols-2 characters-public">
                     <div *ngFor="let character of publicCharacters" class="col mb-2 p">
-                      <div class="card h-100">
+                      <div class="card">
                         <img src="{{character['portrait']}}"
                           class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
                           onerror="this.src='assets/images/characters/default-preview.jpg'"
@@ -154,6 +164,12 @@
                       </div>
                     </div>
                   </div>
+
+                  <ngb-pagination *ngIf="countPublicCharacters > 0" class="d-flex justify-content-center" size="sm"
+                    [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pagePublicCharacters"
+                    [pageSize]="pageSizePublicCharacters" [collectionSize]="countPublicCharacters"
+                    (pageChange)="setPageCharacters(false, pagePublicCharacters)">
+                  </ngb-pagination>
 
                 </div>
               </div>
@@ -190,8 +206,8 @@
                           (click)="tool.actions.select(character)">
                         <div class="card-body p-0 character-btn">
                           <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)" title="Remove"
-                              data-toggle-tooltip="tooltip" data-placement="top"
+                            <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)"
+                              title="Remove" data-toggle-tooltip="tooltip" data-placement="top"
                               data-container="#tool-characters-container" data-boundary="viewport" data-trigger="hover">
                               <i class="fa fa-trash"></i>
                             </button>
