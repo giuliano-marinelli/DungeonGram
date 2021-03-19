@@ -74,9 +74,9 @@ export class User extends Schema {
             break;
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();
-            if (change.previousValue && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.previousValue]?.initVisionLight();
+            if (change.previousValue && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.previousValue]?.initSelection();
             if (change.value && this.parameters.world.map?.characters) {
-              this.parameters.world.map?.characters[change.value]?.initVisionLight();
+              this.parameters.world.map?.characters[change.value]?.initSelection();
               this.parameters.world.camera?.focusOnMesh(this.parameters.world.map?.characters[change.value].mesh);
             }
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('selectedCharacter', this.selectedCharacter);

@@ -76,6 +76,11 @@ export class World extends Schema {
     this.camera.upperBetaLimit = 1.3
     //for limit how much the camera can rotate to top
     this.camera.lowerBetaLimit = 0.75
+    //for limit how much the camera zoom in
+    this.camera.lowerRadiusLimit = 8
+    //for limit how much the camera zoom out
+    this.camera.upperRadiusLimit = 150
+
 
     //detach left click from camera control
     this.camera.inputs.attached.pointers.buttons[0] = null;
@@ -86,10 +91,10 @@ export class World extends Schema {
         'target', 3, 1, this.camera.target, mesh.position.clone(),
         BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       BABYLON.Animation.CreateAndStartAnimation('betaCamera', this.camera,
-        'beta', 3, 1, this.camera.beta, 0.75,
+        'beta', 3, 1, this.camera.beta, this.camera.beta,
         BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       BABYLON.Animation.CreateAndStartAnimation('radiusCamera', this.camera,
-        'radius', 3, 1, this.camera.radius, 30,
+        'radius', 3, 1, this.camera.radius, this.camera.radius > 50 ? 30 : this.camera.radius,
         BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       BABYLON.Animation.CreateAndStartAnimation('alphaCamera', this.camera,
         'alpha', 3, 1, this.camera.alpha, this.camera.alpha,
@@ -139,6 +144,10 @@ export class World extends Schema {
     new BABYLON.ShadowGenerator(1024, this.lights.characterLight);
     this.lights.characterLight._shadowGenerator.useBlurExponentialShadowMap = true;
     this.lights.characterLight._shadowGenerator.transparencyShadow = true;
+
+    //init highlight layer for character selection
+    this.lights.highlightCharacter = new BABYLON.HighlightLayer("highlightCharacter", this.parameters.scene);
+    this.lights.highlightCharacter.innerGlow = false;
 
     //init skybox
     // var box = BABYLON.Mesh.CreateBox('SkyBox', 1000, this.parameters.scene, false, BABYLON.Mesh.BACKSIDE);

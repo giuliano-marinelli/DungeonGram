@@ -46,7 +46,7 @@ export class GameComponent implements OnInit {
     if (this.campaign && this.access == null) {
       this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-      this.engine = new BABYLON.Engine(this.canvas, true);
+      this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
       this.scene = new BABYLON.Scene(this.engine);
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
       this.assetsManager = new BABYLON.AssetsManager(this.scene);

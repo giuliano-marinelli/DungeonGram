@@ -26,6 +26,7 @@ export class Character extends Schema {
   //game objects
   mesh?: any;
   wearsMeshes?: any = {};
+  selectionMesh?: any;
   collider?: any;
   animator?: any;
   visionLight?: any;
@@ -129,16 +130,17 @@ export class Character extends Schema {
 
     if (this.parameters.world.users[this.parameters.token].selectedCharacter != null) {
       this.parameters.world.updateCharactersVisibility(this.id);
-      this.initVisionLight();
+      this.initSelection();
     }
   }
 
   remove() {
     super.remove();
-    this.detachVisionLight()
+    this.detachSelection()
     this.mesh.dispose();
     this.collider.dispose();
     this.colliderPhysics.dispose();
+    this.selectionMesh.dispose();
   }
 
   doMesh() {
@@ -175,13 +177,27 @@ export class Character extends Schema {
 
         //set collider phyics mesh
         this.colliderPhysics = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 0.9, depth: 0.9 }, this.parameters.scene);
-        this.colliderPhysics.name = this.id + "physics";
+        this.colliderPhysics.name = this.id + "-physics";
         this.colliderPhysics.position.y = 0.95;
         this.colliderPhysics.position.x = this.xPhysics;
         this.colliderPhysics.position.z = this.yPhysics;
         this.colliderPhysics.visibility = 0;
         this.colliderPhysics.isPickable = false;
         this.colliderPhysics.material = new BABYLON.StandardMaterial("colliderPhysicsMaterial", this.parameters.scene);
+
+        //set selection mesh
+        this.selectionMesh = BABYLON.MeshBuilder.CreateCylinder('', { height: 0.05, diameter: 1.75 }, this.parameters.scene);
+        this.selectionMesh.parent = this.mesh;
+        this.selectionMesh.name = this.id + "-selection";
+        this.selectionMesh.position.y = 0;
+        this.selectionMesh.visibility = 0;
+        this.selectionMesh.isPickable = false;
+        var selectionMeshMaterial = new BABYLON.StandardMaterial("wall", this.parameters.scene);
+        selectionMeshMaterial.diffuseTexture = new BABYLON.Texture("assets/images/game/selection_circle.png", this.parameters.scene);
+        selectionMeshMaterial.diffuseTexture.hasAlpha = true;
+        selectionMeshMaterial.useAlphaFromDiffuseTexture = true;
+        selectionMeshMaterial.alpha = 0.5;
+        this.selectionMesh.material = selectionMeshMaterial;
 
         //create the animator to manage the transition between animations
         this.animator = new Animator(this.mesh, this.mesh.skeleton, { actual: 'Idle' });
@@ -228,7 +244,7 @@ export class Character extends Schema {
         //cast shadows with base light
         this.parameters.world.lights.baseLight._shadowGenerator.addShadowCaster(this.mesh);
 
-        this.initVisionLight();
+        this.initSelection();
 
         this.initAddingMode();
 
@@ -264,25 +280,37 @@ export class Character extends Schema {
     }
   }
 
-  initVisionLight() {
+  initSelection() {
     //add vision light
     if (this.id == this.parameters.world.users[this.parameters.token].selectedCharacter) {
       if (!this.visionLight && this.mesh && this.parameters.world.lights.characterLight) {
+        //attach character light to this mesh
         this.visionLight = this.parameters.world.lights.characterLight;
         this.visionLight.range = this.visionRange;
         this.visionLight.parent = this.mesh;
         this.visionLight.intensity = 100;
+        //show selection mesh
+        // this.selectionMesh.intensity = 1;
+        this.selectionMesh.visibility = 1;
+        // this.parameters.world.lights.highlightCharacter.addMesh(this.selectionMesh, BABYLON.Color3.Black(), true);
+        // this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
       }
     } else {
-      this.detachVisionLight();
+      this.detachSelection();
     }
   }
 
-  detachVisionLight() {
+  detachSelection() {
     if (this.visionLight) {
+      //dettach character light to this mesh
       this.visionLight.intensity = 0;
       this.visionLight.parent = null;
       this.visionLight = null;
+      //hide selection mesh
+      // this.selectionMesh.intensity = 0;
+      this.selectionMesh.visibility = 0;
+      // this.parameters.world.lights.highlightCharacter.removeMesh(this.selectionMesh);
+      // this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
     }
   }
 
@@ -301,11 +329,15 @@ export class Character extends Schema {
       if (this.collider) this.collider.isDragged = true;
       BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
         10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      BABYLON.Animation.CreateAndStartAnimation("moveYSelection", this.selectionMesh, "position.y",
+        10, 1, this.selectionMesh?.position.y, -0.45, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     } else {
       this.animator?.play('Idle');
       if (this.collider) this.collider.isDragged = false;
       BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
         10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      BABYLON.Animation.CreateAndStartAnimation("moveYSelection", this.selectionMesh, "position.y",
+        10, 1, this.selectionMesh?.position.y, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     }
   }
 

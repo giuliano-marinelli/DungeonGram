@@ -389,8 +389,9 @@ export class World extends Schema {
         } else {
           this.command[type][data?.action].do(client, data);
         }
-      } else
+      } else {
         throw new Error('inexistent action "' + data?.action + '" for command "' + type + '"');
+      }
     } catch (err) {
       delete data.roomRef;
       console.warn('GameRoom: client', client, 'send action that produce an error:', err.message, '... data:', data);
