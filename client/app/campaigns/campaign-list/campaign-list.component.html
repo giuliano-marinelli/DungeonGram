@@ -21,6 +21,9 @@
         <ng-container [ngTemplateOutlet]="campaignCard" [ngTemplateOutletContext]="{campaign: campaign}"></ng-container>
       </div>
     </div>
+    <ngb-pagination *ngIf="countOwnCampaigns > 0" class="d-flex justify-content-end" [(page)]="pageOwnCampaigns"
+      [pageSize]="pageSizeOwnCampaigns" [collectionSize]="countOwnCampaigns"
+      (pageChange)="setPage(true, pageOwnCampaigns)"></ngb-pagination>
   </div>
 </div>
 
@@ -39,6 +42,9 @@
         <ng-container [ngTemplateOutlet]="campaignCard" [ngTemplateOutletContext]="{campaign: campaign}"></ng-container>
       </div>
     </div>
+    <ngb-pagination *ngIf="countPublicCampaigns > 0" class="d-flex justify-content-end" [(page)]="pagePublicCampaigns"
+      [pageSize]="pageSizePublicCampaigns" [collectionSize]="countPublicCampaigns"
+      (pageChange)="setPage(false, pagePublicCampaigns)"></ngb-pagination>
   </div>
 </div>
 

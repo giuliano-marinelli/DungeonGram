@@ -9,12 +9,14 @@ export class CampaignService {
 
   constructor(private http: HttpClient) { }
 
-  getCampaigns(own?): Observable<Campaign[]> {
-    return this.http.get<Campaign[]>('/api/campaigns', { params: { ...own ? { own: own } : {} } });
+  getCampaigns(own?, page?, count?): Observable<Campaign[]> {
+    return this.http.get<Campaign[]>('/api/campaigns',
+      { params: { ...own ? { own: own } : {}, ...page ? { page: page } : {}, ...count ? { count: count } : {} } }
+    );
   }
 
-  countCampaigns(): Observable<number> {
-    return this.http.get<number>('/api/campaigns/count');
+  countCampaigns(own?): Observable<number> {
+    return this.http.get<number>('/api/campaigns/count', { params: { ...own ? { own: own } : {} } });
   }
 
   addCampaign(campaign: Campaign): Observable<Campaign> {

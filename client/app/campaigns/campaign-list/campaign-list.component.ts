@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
 import { CampaignService } from '../../services/campaign.service';
@@ -16,6 +16,13 @@ declare var iziToast;
 })
 export class CampaignListComponent implements OnInit {
 
+  pageOwnCampaigns: number = 1;
+  pagePublicCampaigns: number = 1;
+  pageSizeOwnCampaigns: number = 10;
+  pageSizePublicCampaigns: number = 10;
+  countOwnCampaigns: number = 0;
+  countPublicCampaigns: number = 0;
+
   ownCampaigns: Campaign[] = [];
   publicCampaigns: Campaign[] = [];
   isLoadingOwn = true;
@@ -28,31 +35,47 @@ export class CampaignListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getCampaigns();
+    this.countCampaigns();
+    this.getCampaigns(true);
+    this.getCampaigns(false);
   }
 
-  getCampaigns(): void {
-    this.campaignService.getCampaigns(true).subscribe(
-      data => {
-        this.ownCampaigns = data;
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
-      },
-      error => console.log(error),
-      () => this.isLoadingOwn = false
+  countCampaigns(): void {
+    this.campaignService.countCampaigns(true).subscribe(
+      data => this.countOwnCampaigns = data,
+      error => console.log(error)
     );
-    this.campaignService.getCampaigns().subscribe(
+    this.campaignService.countCampaigns(false).subscribe(
+      data => this.countPublicCampaigns = data,
+      error => console.log(error)
+    );
+  }
+
+  setPage(own, page): void {
+    if (own) this.pageOwnCampaigns = page;
+    else this.pagePublicCampaigns = page;
+
+    this.countCampaigns();
+    this.getCampaigns(own);
+  }
+
+  getCampaigns(own): void {
+    this.campaignService.getCampaigns(
+      own, own ? this.pageOwnCampaigns : this.pagePublicCampaigns, own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns
+    ).subscribe(
       data => {
-        this.publicCampaigns = data;
+        if (own) this.ownCampaigns = data
+        else this.publicCampaigns = data
         setTimeout(() => {
           $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
           $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
         });
       },
       error => console.log(error),
-      () => this.isLoadingPublic = false
+      () => {
+        if (own) this.isLoadingOwn = false
+        else this.isLoadingPublic = false
+      }
     );
   }
 
@@ -77,7 +100,11 @@ export class CampaignListComponent implements OnInit {
           self.campaignService.deleteCampaign(campaign).subscribe(
             data => iziToast.success({ message: 'Campaign deleted successfully.' }),
             error => console.log(error),
-            () => self.getCampaigns()
+            () => {
+              self.countCampaigns();
+              self.getCampaigns(true);
+              self.getCampaigns(false)
+            }
           );
         }]
       ]
@@ -88,7 +115,9 @@ export class CampaignListComponent implements OnInit {
     var modalRef = this.modalService.open(CampaignComponent);
     if (campaign) modalRef.componentInstance.campaign = campaign;
     modalRef.componentInstance.getCampaigns.subscribe(() => {
-      this.getCampaigns();
+      this.countCampaigns();
+      this.getCampaigns(true);
+      this.getCampaigns(false);
     });
   }
 

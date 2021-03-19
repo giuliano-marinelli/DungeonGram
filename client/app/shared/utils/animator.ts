@@ -106,8 +106,8 @@ export class Animator {
       //   'last direction: ' + this.lastDirection, 'new direction: ' + vectorDirection);
       // console.log('radians\n',
       //   'last rotation: ' + lastAngleDegrees * Math.PI / 180, 'new rotation: ' + newAngleDegrees * Math.PI / 180, 'adjusted rotation: ' + adjustedAngleDegrees * Math.PI / 180);
-      console.log('degrees\n',
-        'last rotation: ' + lastAngleDegrees, 'new rotation: ' + newAngleDegrees, 'adjusted rotation: ' + adjustedAngleDegrees);
+      // console.log('degrees\n',
+      //   'last rotation: ' + lastAngleDegrees, 'new rotation: ' + newAngleDegrees, 'adjusted rotation: ' + adjustedAngleDegrees);
 
       //radians = degrees * Math.PI /180
       BABYLON.Animation.CreateAndStartAnimation("rotate", this.mesh, "rotation.y",

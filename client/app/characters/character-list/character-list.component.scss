@@ -49,6 +49,24 @@
   border-color: #1b1616 !important;
 }
 
+::ng-deep .character-container.own .page-link {
+  background-color: #211a1a !important;
+  border-color: #1b1616 !important;
+}
+
+::ng-deep .character-container.own .page-link:hover {
+  background-color: #292020 !important;
+}
+
+::ng-deep .character-container.own .page-item.active .page-link {
+  background-color: #2d2424 !important;
+  border-color: #3d3131 !important;
+}
+
+::ng-deep .character-container.own .page-item.active .page-link:hover {
+  background-color: #292020 !important;
+}
+
 .character-btn {
   background-color: #211a1a !important;
   border-color: #1b1616 !important;

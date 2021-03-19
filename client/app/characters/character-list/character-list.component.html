@@ -23,6 +23,9 @@
         </ng-container>
       </div>
     </div>
+    <ngb-pagination *ngIf="countOwnCharacters > 0" class="d-flex justify-content-end" [(page)]="pageOwnCharacters"
+      [pageSize]="pageSizeOwnCharacters" [collectionSize]="countOwnCharacters"
+      (pageChange)="setPage(true, pageOwnCharacters)"></ngb-pagination>
   </div>
 </div>
 
@@ -42,6 +45,9 @@
         </ng-container>
       </div>
     </div>
+    <ngb-pagination *ngIf="countPublicCharacters > 0" class="d-flex justify-content-end" [(page)]="pagePublicCharacters"
+      [pageSize]="pageSizePublicCharacters" [collectionSize]="countPublicCharacters"
+      (pageChange)="setPage(false, pagePublicCharacters)"></ngb-pagination>
   </div>
 </div>
 

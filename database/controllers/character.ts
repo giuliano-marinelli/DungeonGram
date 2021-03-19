@@ -10,6 +10,8 @@ class CharacterCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
+      const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
 
       var docs;
       if (req.query.own) {
@@ -26,12 +28,10 @@ class CharacterCtrl extends BaseCtrl {
           { $unwind: "$owner_info" },
           {
             $match: {
-              $or: [
-                { owner: resu.user._id }
-              ]
+              owner: resu.user._id
             }
           }
-        ]);
+        ]).skip(skip).limit(limit);
       } else {
         docs = await this.model.aggregate([
           {
@@ -49,7 +49,13 @@ class CharacterCtrl extends BaseCtrl {
               private: false
             }
           }
-        ]);
+        ]).skip(skip).limit(limit)
+        // .skip((req.query.page - 1) * req.query.count)
+        //   .limit(req.query.count);
+        // if (req.query.page && req.query.count) {
+        //   docs
+
+        // }
       }
       res.status(200).json(docs);
     } catch (err) {
@@ -63,7 +69,17 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
 
-      const count = await this.model.count({ $or: [{ owner: resu?.user?._id }, { private: false }] });
+      var count;
+      if (req.query.own) {
+        count = await this.model.count({
+          owner: resu.user._id
+        });
+      } else {
+        count = await this.model.count({
+          owner: { $ne: resu?.user?._id },
+          private: false
+        });
+      }
       res.status(200).json(count);
     } catch (err) {
       return res.status(400).json({ error: err.message });

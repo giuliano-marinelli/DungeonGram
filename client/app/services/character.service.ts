@@ -9,12 +9,14 @@ export class CharacterService {
 
   constructor(private http: HttpClient) { }
 
-  getCharacters(own?): Observable<Character[]> {
-    return this.http.get<Character[]>('/api/characters', { params: { ...own ? { own: own } : {} } });
+  getCharacters(own?, page?, count?): Observable<Character[]> {
+    return this.http.get<Character[]>('/api/characters',
+      { params: { ...own ? { own: own } : {}, ...page ? { page: page } : {}, ...count ? { count: count } : {} } }
+    );
   }
 
-  countCharacters(): Observable<number> {
-    return this.http.get<number>('/api/characters/count');
+  countCharacters(own?): Observable<number> {
+    return this.http.get<number>('/api/characters/count', { params: { ...own ? { own: own } : {} } });
   }
 
   addCharacter(character: Character): Observable<Character> {

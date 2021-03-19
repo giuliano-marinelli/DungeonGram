@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
 import { CharacterService } from '../../services/character.service';
@@ -16,10 +16,17 @@ declare var iziToast;
 })
 export class CharacterListComponent implements OnInit {
 
+  pageOwnCharacters: number = 1;
+  pagePublicCharacters: number = 1;
+  pageSizeOwnCharacters: number = 10;
+  pageSizePublicCharacters: number = 10;
+  countOwnCharacters: number = 0;
+  countPublicCharacters: number = 0;
+
   ownCharacters: Character[] = [];
   publicCharacters: Character[] = [];
-  isLoadingOwn = true;
-  isLoadingPublic = true;
+  isLoadingOwn: boolean = true;
+  isLoadingPublic: boolean = true;
 
   constructor(
     public auth: AuthService,
@@ -28,31 +35,47 @@ export class CharacterListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getCharacters();
+    this.countCharacters();
+    this.getCharacters(true);
+    this.getCharacters(false);
   }
 
-  getCharacters(): void {
-    this.characterService.getCharacters(true).subscribe(
-      data => {
-        this.ownCharacters = data;
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
-      },
-      error => console.log(error),
-      () => this.isLoadingOwn = false
+  countCharacters(): void {
+    this.characterService.countCharacters(true).subscribe(
+      data => this.countOwnCharacters = data,
+      error => console.log(error)
     );
-    this.characterService.getCharacters().subscribe(
+    this.characterService.countCharacters(false).subscribe(
+      data => this.countPublicCharacters = data,
+      error => console.log(error)
+    );
+  }
+
+  setPage(own, page): void {
+    if (own) this.pageOwnCharacters = page;
+    else this.pagePublicCharacters = page;
+
+    this.countCharacters();
+    this.getCharacters(own);
+  }
+
+  getCharacters(own): void {
+    this.characterService.getCharacters(
+      own, own ? this.pageOwnCharacters : this.pagePublicCharacters, own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+    ).subscribe(
       data => {
-        this.publicCharacters = data;
+        if (own) this.ownCharacters = data
+        else this.publicCharacters = data
         setTimeout(() => {
           $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
           $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
         });
       },
       error => console.log(error),
-      () => this.isLoadingPublic = false
+      () => {
+        if (own) this.isLoadingOwn = false
+        else this.isLoadingPublic = false
+      }
     );
   }
 
@@ -77,7 +100,11 @@ export class CharacterListComponent implements OnInit {
           self.characterService.deleteCharacter(character).subscribe(
             data => iziToast.success({ message: 'Character deleted successfully.' }),
             error => console.log(error),
-            () => self.getCharacters()
+            () => {
+              self.countCharacters();
+              self.getCharacters(true);
+              self.getCharacters(false)
+            }
           );
         }]
       ]
@@ -88,7 +115,9 @@ export class CharacterListComponent implements OnInit {
     var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
     if (character) modalRef.componentInstance.character = character;
     modalRef.componentInstance.getCharacters.subscribe(() => {
-      this.getCharacters();
+      this.countCharacters();
+      this.getCharacters(true);
+      this.getCharacters(false);
     });
   }
 
