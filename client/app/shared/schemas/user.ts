@@ -1,3 +1,4 @@
+import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
 import { Rule } from './rule';
 import { Figure } from './figure';
@@ -74,8 +75,12 @@ export class User extends Schema {
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();
             if (change.previousValue && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.previousValue]?.initVisionLight();
-            if (change.value && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.value]?.initVisionLight();
+            if (change.value && this.parameters.world.map?.characters) {
+              this.parameters.world.map?.characters[change.value]?.initVisionLight();
+              this.parameters.world.camera?.focusOnMesh(this.parameters.world.map?.characters[change.value].mesh);
+            }
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('selectedCharacter', this.selectedCharacter);
+
             break;
           case 'addingModeCharacter':
             if (this.id == this.parameters.token) {

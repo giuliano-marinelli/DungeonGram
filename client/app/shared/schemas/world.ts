@@ -66,15 +66,35 @@ export class World extends Schema {
 
   initCamera() {
     //creates, angles, distances and targets the camera
-    this.camera = new BABYLON.ArcRotateCamera("mainCamera", -1, 1, 30, new BABYLON.Vector3(3, 0, 3), this.parameters.scene);
+    this.camera = new BABYLON.ArcRotateCamera("mainCamera", -1, 0.75, 30, new BABYLON.Vector3(3, 0, 3), this.parameters.scene);
     this.camera.wheelPrecision = 40;
     this.camera.setPosition(new BABYLON.Vector3(20, 20, -15));
     this.camera.panningAxis = new BABYLON.Vector3(1, 0, 1);
     this.camera.panningSensibility = 200;
     this.camera.attachControl(this.parameters.canvas, true);
+    //for limit how much the camera can rotate to bottom
+    this.camera.upperBetaLimit = 1.3
+    //for limit how much the camera can rotate to top
+    this.camera.lowerBetaLimit = 0.75
 
     //detach left click from camera control
     this.camera.inputs.attached.pointers.buttons[0] = null;
+
+    //custom function added to the camera to focus a passed mesh
+    this.camera.focusOnMesh = (mesh) => {
+      BABYLON.Animation.CreateAndStartAnimation('targetCamera', this.camera,
+        'target', 3, 1, this.camera.target, mesh.position.clone(),
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      BABYLON.Animation.CreateAndStartAnimation('betaCamera', this.camera,
+        'beta', 3, 1, this.camera.beta, 0.75,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      BABYLON.Animation.CreateAndStartAnimation('radiusCamera', this.camera,
+        'radius', 3, 1, this.camera.radius, 30,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      BABYLON.Animation.CreateAndStartAnimation('alphaCamera', this.camera,
+        'alpha', 3, 1, this.camera.alpha, this.camera.alpha,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    }
   }
 
   initGlobalLights() {
