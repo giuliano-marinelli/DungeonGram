@@ -49,7 +49,7 @@
 </div>
 
 <ng-template #campaignCard let-campaign='campaign'>
-  <div class="card h-100">
+  <div class="card h-100 {{getInvitation(campaign) && getInvitation(campaign).accepted == null ? 'invitation' : ''}}">
     <img src="assets/images/campaigns/default.jpg" class="card-img-top campaign-img" alt="{{campaign.title}}">
     <div class="card-body">
       <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private" data-toggle-tooltip="tooltip"
@@ -60,8 +60,13 @@
         data-placement="right">{{campaign.description}}</p>
       <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
         <button class="btn btn-sm btn-primary" routerLink="/game/{{campaign._id}}"
-          [hidden]="auth.currentUser._id != campaign.owner && !campaign.players.includes(auth.currentUser._id)">
+          [hidden]="auth.currentUser._id != campaign.owner && !getInvitation(campaign)?.accepted">
           <i class="fa fa-play"></i> Play
+        </button>
+        <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openInvite(campaign)"
+          [hidden]="auth.currentUser._id != campaign.owner" title="Invite Players" data-toggle-tooltip="tooltip"
+          data-placement="top">
+          <i class="fa fa-user-plus"></i>
         </button>
         <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openCampaign(campaign)"
           [hidden]="auth.currentUser._id != campaign.owner" title="Edit" data-toggle-tooltip="tooltip"
@@ -72,6 +77,15 @@
           [hidden]="auth.currentUser._id != campaign.owner" title="Delete" data-toggle-tooltip="tooltip"
           data-placement="top">
           <i class="fa fa-trash"></i>
+        </button>
+
+        <button class="btn btn-sm btn-success ml-2" (click)="acceptInvitation(campaign)"
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
+          <i class="fa fa-check"></i> Accept
+        </button>
+        <button class="btn btn-sm btn-danger ml-2" (click)="deniedInvitation(campaign)"
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
+          <i class="fa fa-times"></i> Denied
         </button>
       </p>
     </div>

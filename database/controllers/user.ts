@@ -5,14 +5,52 @@ import BaseCtrl from './base';
 class UserCtrl extends BaseCtrl {
   model = User;
 
-  //get all (if logged user is admin)
+  //get all (with searching)
   getAll = async (req, res) => {
     try {
       const resu = await User.findByAuthorization(req);
-      if (resu.status != 200 || resu?.user?.role != 'admin') throw new Error('unauthorized');
+      // if (resu.status != 200 || resu?.user?.role != 'admin') throw new Error('unauthorized'); //(if logged user is admin)
+      if (resu.status != 200) throw new Error('unauthorized');
+      const search = req.query.search;
+      const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
+      const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
 
-      const docs = await this.model.find({});
+      var docs;
+      if (search) {
+        docs = await this.model.find({
+          $or: [
+            { username: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } }
+          ]
+        }).skip(skip).limit(limit);;
+      } else {
+        docs = await this.model.find({}).skip(skip).limit(limit);;
+      }
       res.status(200).json(docs);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  //count all (with searching)
+  count = async (req, res) => {
+    try {
+      const resu = await User.findByAuthorization(req);
+      // if (resu.status != 200) throw new Error('unauthorized');
+      const search = req.query.search;
+
+      var count;
+      if (search) {
+        count = await this.model.count({
+          $or: [
+            { username: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } }
+          ]
+        });
+      } else {
+        count = await this.model.count({});
+      }
+      res.status(200).json(count);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

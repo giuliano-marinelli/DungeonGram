@@ -12,11 +12,12 @@ class CampaignCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
       const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
       const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
 
       var docs;
-      if (req.query.own) {
+      if (own == true) {
         if (resu.status != 200) throw new Error('unauthorized');
         docs = await this.model.aggregate([
           {
@@ -30,14 +31,6 @@ class CampaignCtrl extends BaseCtrl {
           { $unwind: "$owner_info" },
           {
             $lookup: {
-              from: "users",
-              localField: "players",
-              foreignField: "_id",
-              as: "players_info"
-            }
-          },
-          {
-            $lookup: {
               from: "maps",
               localField: "maps",
               foreignField: "_id",
@@ -45,14 +38,24 @@ class CampaignCtrl extends BaseCtrl {
             }
           },
           {
+            $lookup: {
+              from: "invitations",
+              localField: "_id",
+              foreignField: "campaign",
+              as: "invitations"
+            }
+          },
+          {
             $match: {
               $or: [
                 { owner: resu.user._id },
-                { players: { $in: [resu.user._id] } }
+                // { players: { $in: [resu.user._id] } },
+                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
+                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
               ]
             }
           }
-        ]).skip(skip).limit(limit);;
+        ]).skip(skip).limit(limit);
       } else {
         docs = await this.model.aggregate([
           {
@@ -66,14 +69,6 @@ class CampaignCtrl extends BaseCtrl {
           { $unwind: "$owner_info" },
           {
             $lookup: {
-              from: "users",
-              localField: "players",
-              foreignField: "_id",
-              as: "players_info"
-            }
-          },
-          {
-            $lookup: {
               from: "maps",
               localField: "maps",
               foreignField: "_id",
@@ -81,12 +76,25 @@ class CampaignCtrl extends BaseCtrl {
             }
           },
           {
+            $lookup: {
+              from: "invitations",
+              localField: "_id",
+              foreignField: "campaign",
+              as: "invitations"
+            }
+          },
+          {
             $match: {
               owner: { $ne: resu?.user?._id },
+              // players: { $nin: [resu?.user?._id] },
+              $or: [
+                { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
+                { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+              ],
               private: false
             }
           }
-        ]).skip(skip).limit(limit);;
+        ]).skip(skip).limit(limit);
       }
       res.status(200).json(docs);
     } catch (err) {
@@ -99,22 +107,62 @@ class CampaignCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
 
       var count;
-      if (req.query.own) {
-        count = await this.model.count({
-          $or: [
-            { owner: resu.user._id },
-            { players: { $in: [resu.user._id] } }
-          ]
-        });
+      if (own) {
+        if (resu.status != 200) throw new Error('unauthorized');
+        count = await this.model.aggregate([
+          {
+            $lookup: {
+              from: "invitations",
+              localField: "_id",
+              foreignField: "campaign",
+              as: "invitations"
+            }
+          },
+          {
+            $match: {
+              $or: [
+                { owner: resu.user._id },
+                // { players: { $in: [resu.user._id] } },
+                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
+                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
+              ]
+            }
+          },
+          {
+            $count: "count"
+          }
+        ]);
       } else {
-        count = await this.model.count({
-          owner: { $ne: resu?.user?._id },
-          private: false
-        });
+        count = await this.model.aggregate([
+          {
+            $lookup: {
+              from: "invitations",
+              localField: "_id",
+              foreignField: "campaign",
+              as: "invitations"
+            }
+          },
+          {
+            $match: {
+              owner: { $ne: resu?.user?._id },
+              // players: { $nin: [resu?.user?._id] },
+              $or: [
+                { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
+                { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+              ],
+              private: false
+            }
+          },
+          {
+            $count: "count"
+          }
+        ]);
       }
-      res.status(200).json(count);
+      console.log(count);
+      res.status(200).json(count[0].count);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -154,14 +202,6 @@ class CampaignCtrl extends BaseCtrl {
         { $unwind: "$owner_info" },
         {
           $lookup: {
-            from: "users",
-            localField: "players",
-            foreignField: "_id",
-            as: "players_info",
-          }
-        },
-        {
-          $lookup: {
             from: "maps",
             localField: "maps",
             foreignField: "_id",
@@ -169,11 +209,20 @@ class CampaignCtrl extends BaseCtrl {
           }
         },
         {
+          $lookup: {
+            from: "invitations",
+            localField: "_id",
+            foreignField: "campaign",
+            as: "invitations"
+          }
+        },
+        {
           $match: {
             _id: mongoose.Types.ObjectId(req.params.id),
             $or: [
-              { owner: resu.user._id },
-              { players: { $in: [resu.user._id] } },
+              { owner: resu?.user?._id },
+              { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: true } } },
+              { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: null } } },
               { private: false }
             ]
           }

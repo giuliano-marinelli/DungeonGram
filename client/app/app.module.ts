@@ -24,6 +24,7 @@ import { UserService } from './services/user.service';
 import { CampaignService } from './services/campaign.service';
 import { CharacterService } from './services/character.service';
 import { MapService } from './services/map.service';
+import { InvitationService } from './services/invitation.service';
 import { AssetService } from './services/asset.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
@@ -47,6 +48,7 @@ import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.c
 import { CampaignComponent } from './campaigns/campaign/campaign.component';
 import { CharacterListComponent } from './characters/character-list/character-list.component';
 import { MapComponent } from './maps/map/map.component';
+import { InviteComponent } from './players/invite/invite.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +68,8 @@ import { MapComponent } from './maps/map/map.component';
     CharacterComponent,
     CampaignListComponent,
     CampaignComponent,
-    MapComponent
+    MapComponent,
+    InviteComponent
   ],
   imports: [
     AppRoutingModule,
@@ -101,6 +104,7 @@ import { MapComponent } from './maps/map/map.component';
     CampaignService,
     CharacterService,
     MapService,
+    InvitationService,
     AssetService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

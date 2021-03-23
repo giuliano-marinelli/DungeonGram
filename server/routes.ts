@@ -5,6 +5,7 @@ import CampaignCtrl from '../database/controllers/campaign';
 import CharacterCtrl from '../database/controllers/character';
 import MapCtrl from '../database/controllers/map';
 import AssetCtrl from '../database/controllers/asset';
+import InvitationCtrl from '../database/controllers/invitation';
 
 function setRoutes(app): void {
   const router = express.Router();
@@ -13,6 +14,7 @@ function setRoutes(app): void {
   const characterCtrl = new CharacterCtrl();
   const mapCtrl = new MapCtrl();
   const assetCtrl = new AssetCtrl();
+  const invitationCtrl = new InvitationCtrl();
 
   // Users
   router.route('/login').post(userCtrl.login);
@@ -46,6 +48,14 @@ function setRoutes(app): void {
   router.route('/map/:id').get(mapCtrl.get);
   router.route('/map/:id').put(mapCtrl.update);
   router.route('/map/:id').delete(mapCtrl.delete);
+
+  // invitations
+  router.route('/invitations').get(invitationCtrl.getAll);
+  router.route('/invitations/count').get(invitationCtrl.count);
+  router.route('/invitation').post(invitationCtrl.insert);
+  router.route('/invitation/:id').get(invitationCtrl.get);
+  router.route('/invitation/:id').put(invitationCtrl.update);
+  router.route('/invitation/:id').delete(invitationCtrl.delete);
 
   //assets
   router.route('/assets').get(assetCtrl.getAll);

@@ -23,6 +23,10 @@
                 <app-loading [condition]="isLoadingCampaign"></app-loading>
               </div>
 
+              <p *ngIf="!campaign || campaign.maps_info.length <= 0">
+                <small class="text-muted">You have not created maps yet</small>
+              </p>
+
               <div *ngIf="!isLoadingCampaign" class="row row-cols-2 maps">
                 <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
                   <div class="card h-100">

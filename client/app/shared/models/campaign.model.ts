@@ -5,8 +5,8 @@ export class Campaign {
   owner_info?: object;
   title?: string;
   description?: string;
-  players?: string[];
-  players_info?: object[];
+  // players?: string[];
+  // players_info?: object[];
   private?: boolean;
   maps?: string[];
   maps_info?: object[];

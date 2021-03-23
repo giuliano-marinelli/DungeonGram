@@ -19,7 +19,7 @@ export class WorldPhysics {
     var uniqueId = type + id;
     this.entities[uniqueId] = new this.types[type](uniqueId, type, this.grid, parameters);
     World.add(this.engine.world, [this.entities[uniqueId].body]);
-    console.log('GameRoom[Physics]: added entity', type, uniqueId);
+    // console.log('GameRoom[Physics]: added entity', type, uniqueId);
     return this.entities[uniqueId];
   }
 
@@ -30,7 +30,7 @@ export class WorldPhysics {
     delete this.entities[uniqueId];
     if (!wasWalkable)
       this.updateGrid();
-    console.log('GameRoom[Physics]: removed entity', type, uniqueId);
+    // console.log('GameRoom[Physics]: removed entity', type, uniqueId);
   }
 
   constructor() {

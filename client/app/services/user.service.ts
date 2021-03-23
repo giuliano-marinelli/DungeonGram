@@ -17,12 +17,12 @@ export class UserService {
     return this.http.post('/api/login', credentials);
   }
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>('/api/users');
+  getUsers(params?): Observable<User[]> {
+    return this.http.get<User[]>('/api/users', { params: params });
   }
 
-  countUsers(): Observable<number> {
-    return this.http.get<number>('/api/users/count');
+  countUsers(params?): Observable<number> {
+    return this.http.get<number>('/api/users/count', { params: params });
   }
 
   addUser(user: User): Observable<User> {

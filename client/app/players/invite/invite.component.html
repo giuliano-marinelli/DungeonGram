@@ -1,0 +1,111 @@
+<div class="modal-content" *ngIf="auth.loggedIn">
+  <form [formGroup]="inviteForm" autocomplete="off">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="fa fa-fw fa-user-plus"></i> Invite Players</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-6">
+          <input formControlName="searchPlayers" type="text" class="form-control mb-3" placeholder="Search..."
+            (keyup)="getPlayers()">
+          <div class="card">
+            <div class="card-body">
+              <app-loading [condition]="isLoadingPlayers"></app-loading>
+              <p class="card-text text-center" *ngIf="_countPlayers <= 0">Cannot find any player</p>
+              <div class="row row-cols-1 row-cols-lg-2" *ngIf="!isLoadingPlayers">
+                <div *ngFor="let player of players" class="col mb-1">
+                  <ng-container [ngTemplateOutlet]="playerCard" [ngTemplateOutletContext]="{player: player}">
+                  </ng-container>
+                </div>
+              </div>
+              <ngb-pagination *ngIf="_countPlayers > 0" class="d-flex justify-content-end" [(page)]="pagePlayers"
+                size="sm" [pageSize]="pageSizePlayers" [collectionSize]="_countPlayers"
+                (pageChange)="setPage(pagePlayers)">
+              </ngb-pagination>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card mb-3 h-100">
+            <div class="card-body">
+              <h5 class="card-title text-center mb-4">Campaign Players</h5>
+              <app-loading [condition]="isLoadingCampaign"></app-loading>
+              <p class="card-text text-center" *ngIf="invitations.length <= 0">You have not invited players yet</p>
+              <div class="row row-cols-1 row-cols-lg-2" *ngIf="!isLoadingCampaign">
+                <div *ngFor="let invitation of invitations" class="col mb-1">
+                  <ng-container [ngTemplateOutlet]="playerCard"
+                    [ngTemplateOutletContext]="{player: invitation.recipient_info}">
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
+        (click)="activeModal.dismiss('Close click')">Close</button>
+    </div>
+  </form>
+</div>
+
+<ng-template #playerCard let-player='player'>
+  <div class="card mb-1 {{ campaign.owner == player._id ? 'bg-secondary' : '' }}
+    {{ getInvitation(player) && getInvitation(player).accepted == null ? 'bg-primary' : '' }}
+    {{ getInvitation(player) && getInvitation(player).accepted == true ? 'bg-success' : '' }}
+    {{ getInvitation(player) && getInvitation(player).accepted == false ? 'bg-danger' : '' }}"
+    style="max-width: 540px;">
+    <div class="row no-gutters">
+      <div class="col-md-4">
+        <img src="{{player['avatar']}}" class="card-img" style="height: 100%; object-fit: cover;"
+          onerror="this.src='assets/images/characters/default-preview.jpg'">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body p-1 text-center">
+          <h5 class="card-title text-truncate" style="font-size: 12px; height: 30px;"
+            attr.data-original-title="<b>{{player['username']}}</b><br />{{player['email']}}"
+            data-toggle-tooltip="tooltip" data-placement="right">
+            {{player['username']}} <br />
+            <small *ngIf="campaign.owner == player._id">owner</small>
+            <small *ngIf="getInvitation(player) && getInvitation(player).accepted == null">pending</small>
+            <small *ngIf="getInvitation(player) && getInvitation(player).accepted == true">accepted</small>
+            <small *ngIf="getInvitation(player) && getInvitation(player).accepted == false">rejected</small>
+          </h5>
+          <p class="card-text text-right" style="bottom: 0.5rem; right: 0.5rem; min-height: 30px;">
+            <span *ngIf="campaign.owner != player._id">
+              <button *ngIf="!getInvitation(player)" class="btn btn-sm btn-dark ml-2" (click)="sendInvitation(player)"
+                [hidden]="auth.currentUser._id != campaign.owner" title="Invite" data-toggle-tooltip="tooltip"
+                data-placement="top">
+                <i class="fa fa-fw fa-envelope"></i>
+              </button>
+              <button *ngIf="getInvitation(player) && getInvitation(player).accepted == false"
+                class="btn btn-sm btn-dark ml-2" (click)="sendInvitation(player)"
+                [hidden]="auth.currentUser._id != campaign.owner" title="Invite Again" data-toggle-tooltip="tooltip"
+                data-placement="top">
+                <i class="fa fa-fw fa-envelope"></i>
+              </button>
+              <button *ngIf="getInvitation(player) && getInvitation(player).accepted == null"
+                class="btn btn-sm btn-danger ml-2" (click)="cancelInvitation(player)"
+                [hidden]="auth.currentUser._id != campaign.owner" title="Cancel Invitation"
+                data-toggle-tooltip="tooltip" data-placement="top">
+                <i class="fa fa-fw fa-times"></i>
+              </button>
+              <button *ngIf="getInvitation(player) && getInvitation(player).accepted != null"
+                class="btn btn-sm btn-danger ml-2" (click)="cancelInvitation(player)"
+                [hidden]="auth.currentUser._id != campaign.owner" title="Remove" data-toggle-tooltip="tooltip"
+                data-placement="top">
+                <i class="fa fa-fw fa-trash"></i>
+              </button>
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

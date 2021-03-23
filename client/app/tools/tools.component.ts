@@ -235,17 +235,17 @@ export class ToolsComponent implements OnInit {
   }
 
   countCharacters(): void {
-    this.characterService.countCharacters(true).subscribe(
+    this.characterService.countCharacters({ own: true }).subscribe(
       data => this.countOwnCharacters = data,
       error => console.log(error)
     );
-    this.characterService.countCharacters(false).subscribe(
+    this.characterService.countCharacters({ own: false }).subscribe(
       data => this.countPublicCharacters = data,
       error => console.log(error)
     );
   }
 
-  setPageCharacters(own, page): void {
+  setPageCharacters(own: boolean, page: number): void {
     if (own) this.pageOwnCharacters = page;
     else this.pagePublicCharacters = page;
 
@@ -253,9 +253,13 @@ export class ToolsComponent implements OnInit {
     this.getCharacters(own);
   }
 
-  getCharacters(own): void {
+  getCharacters(own: boolean): void {
     this.characterService.getCharacters(
-      own, own ? this.pageOwnCharacters : this.pagePublicCharacters, own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+      {
+        own: own,
+        page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
+        count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+      }
     ).subscribe(
       data => {
         if (own) this.ownCharacters = data

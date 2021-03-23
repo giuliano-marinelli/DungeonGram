@@ -5,6 +5,9 @@ import { AuthService } from '../../services/auth.service';
 import { CampaignService } from '../../services/campaign.service';
 import { Campaign } from '../../shared/models/campaign.model';
 import { CampaignComponent } from '../campaign/campaign.component';
+import { InvitationService } from 'client/app/services/invitation.service';
+import { Invitation } from 'client/app/shared/models/invitation.model';
+import { InviteComponent } from '../../players/invite/invite.component';
 
 declare var $;
 declare var iziToast;
@@ -31,37 +34,40 @@ export class CampaignListComponent implements OnInit {
   constructor(
     public auth: AuthService,
     private campaignService: CampaignService,
+    private invitationService: InvitationService,
     private modalService: NgbModal
   ) { }
 
   ngOnInit(): void {
-    this.countCampaigns();
     this.getCampaigns(true);
     this.getCampaigns(false);
   }
 
-  countCampaigns(): void {
-    this.campaignService.countCampaigns(true).subscribe(
-      data => this.countOwnCampaigns = data,
-      error => console.log(error)
-    );
-    this.campaignService.countCampaigns(false).subscribe(
-      data => this.countPublicCampaigns = data,
+  countCampaigns(own: boolean): void {
+    this.campaignService.countCampaigns({ own: own }).subscribe(
+      data => {
+        if (own) this.countOwnCampaigns = data
+        else this.countPublicCampaigns = data
+      },
       error => console.log(error)
     );
   }
 
-  setPage(own, page): void {
+  setPage(own: boolean, page: number): void {
     if (own) this.pageOwnCampaigns = page;
     else this.pagePublicCampaigns = page;
 
-    this.countCampaigns();
     this.getCampaigns(own);
   }
 
-  getCampaigns(own): void {
+  getCampaigns(own: boolean): void {
+    this.countCampaigns(own);
     this.campaignService.getCampaigns(
-      own, own ? this.pageOwnCampaigns : this.pagePublicCampaigns, own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns
+      {
+        own: own,
+        page: own ? this.pageOwnCampaigns : this.pagePublicCampaigns,
+        count: own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns
+      }
     ).subscribe(
       data => {
         if (own) this.ownCampaigns = data
@@ -101,7 +107,6 @@ export class CampaignListComponent implements OnInit {
             data => iziToast.success({ message: 'Campaign deleted successfully.' }),
             error => console.log(error),
             () => {
-              self.countCampaigns();
               self.getCampaigns(true);
               self.getCampaigns(false)
             }
@@ -111,14 +116,53 @@ export class CampaignListComponent implements OnInit {
     });
   }
 
-  openCampaign(campaign?) {
+  openCampaign(campaign?: Campaign): void {
     var modalRef = this.modalService.open(CampaignComponent);
     if (campaign) modalRef.componentInstance.campaign = campaign;
     modalRef.componentInstance.getCampaigns.subscribe(() => {
-      this.countCampaigns();
       this.getCampaigns(true);
       this.getCampaigns(false);
     });
   }
 
+  openInvite(campaign?: Campaign): void {
+    var modalRef = this.modalService.open(InviteComponent, { size: 'lg' });
+    if (campaign) modalRef.componentInstance.campaign = campaign;
+    modalRef.componentInstance.getCampaigns.subscribe(() => {
+      this.getCampaigns(true);
+      this.getCampaigns(false);
+    });
+  }
+
+  acceptInvitation(campaign: Campaign): void {
+    var invitation = this.getInvitation(campaign);
+    invitation.accepted = true;
+    this.invitationService.editInvitation(invitation).subscribe(
+      res => {
+        iziToast.success({ message: 'Invitation accepted' });
+        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+        this.getCampaigns(true);
+        this.getCampaigns(false);
+      },
+      error => iziToast.error({ message: 'There was an error, invitation can\'t be accepted.' })
+    );
+  }
+
+  deniedInvitation(campaign: Campaign): void {
+    var invitation = this.getInvitation(campaign);
+    invitation.accepted = false;
+    this.invitationService.editInvitation(invitation).subscribe(
+      res => {
+        iziToast.success({ message: 'Invitation accepted' });
+        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+        this.getCampaigns(true);
+        this.getCampaigns(false);
+      },
+      error => iziToast.error({ message: 'There was an error, invitation can\'t be accepted.' })
+    );
+  }
+
+  getInvitation(campaign: Campaign): Invitation {
+    return campaign["invitations"]?.find(invitation => invitation.recipient == this.auth.currentUser._id)
+  }
 }

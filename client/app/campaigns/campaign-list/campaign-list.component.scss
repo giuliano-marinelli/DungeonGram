@@ -14,27 +14,31 @@
 
 .campaign-container {
   border-radius: 0px !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
   border-bottom: 0px;
 }
 
 .campaign-container.own .card {
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .campaign-container.own .card-body {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
+}
+
+.campaign-container.own .card.invitation .card-body {
+  background-color: #332f28 !important;
 }
 
 .campaign-container.own > .card-body {
   background-color: #2d2424 !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .campaign-container.own > .card-header {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 ::ng-deep .campaign-container.own .page-link {
@@ -57,7 +61,7 @@
 
 .campaign-btn {
   background-color: #211a1a !important;
-  border-color:  #1b1616 !important;
+  border-color: #1b1616 !important;
 }
 
 .campaign-btn:hover {
@@ -66,7 +70,7 @@
 
 .campaign-btn-alt {
   background-color: #2d2424 !important;
-  border-color:  #3d3131 !important;
+  border-color: #3d3131 !important;
 }
 
 .campaign-btn-alt:hover {

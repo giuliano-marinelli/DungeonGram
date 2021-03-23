@@ -4,13 +4,13 @@ const campaignSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   title: String,
   description: String,
-  players: {
-    type: "array",
-    contains: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  },
+  // players: {
+  //   type: "array",
+  //   contains: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User'
+  //   }
+  // },
   private: Boolean,
   maps: {
     type: "array",

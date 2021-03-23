@@ -35,33 +35,35 @@ export class CharacterListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.countCharacters();
     this.getCharacters(true);
     this.getCharacters(false);
   }
 
-  countCharacters(): void {
-    this.characterService.countCharacters(true).subscribe(
-      data => this.countOwnCharacters = data,
-      error => console.log(error)
-    );
-    this.characterService.countCharacters(false).subscribe(
-      data => this.countPublicCharacters = data,
+  countCharacters(own: boolean): void {
+    this.characterService.countCharacters({ own: own }).subscribe(
+      data => {
+        if (own) this.countOwnCharacters = data
+        else this.countPublicCharacters = data
+      },
       error => console.log(error)
     );
   }
 
-  setPage(own, page): void {
+  setPage(own: boolean, page: number): void {
     if (own) this.pageOwnCharacters = page;
     else this.pagePublicCharacters = page;
 
-    this.countCharacters();
     this.getCharacters(own);
   }
 
-  getCharacters(own): void {
+  getCharacters(own: boolean): void {
+    this.countCharacters(own);
     this.characterService.getCharacters(
-      own, own ? this.pageOwnCharacters : this.pagePublicCharacters, own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+      {
+        own: own,
+        page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
+        count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+      }
     ).subscribe(
       data => {
         if (own) this.ownCharacters = data
@@ -101,7 +103,6 @@ export class CharacterListComponent implements OnInit {
             data => iziToast.success({ message: 'Character deleted successfully.' }),
             error => console.log(error),
             () => {
-              self.countCharacters();
               self.getCharacters(true);
               self.getCharacters(false)
             }
@@ -115,7 +116,6 @@ export class CharacterListComponent implements OnInit {
     var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
     if (character) modalRef.componentInstance.character = character;
     modalRef.componentInstance.getCharacters.subscribe(() => {
-      this.countCharacters();
       this.getCharacters(true);
       this.getCharacters(false);
     });

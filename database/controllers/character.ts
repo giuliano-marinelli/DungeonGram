@@ -10,11 +10,12 @@ class CharacterCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
       const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
       const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
 
       var docs;
-      if (req.query.own) {
+      if (own) {
         if (resu.status != 200) throw new Error('unauthorized');
         docs = await this.model.aggregate([
           {
@@ -49,7 +50,7 @@ class CharacterCtrl extends BaseCtrl {
               private: false
             }
           }
-        ]).skip(skip).limit(limit)
+        ]).skip(skip).limit(limit);
         // .skip((req.query.page - 1) * req.query.count)
         //   .limit(req.query.count);
         // if (req.query.page && req.query.count) {
@@ -68,9 +69,11 @@ class CharacterCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
 
       var count;
-      if (req.query.own) {
+      if (own) {
+        if (resu.status != 200) throw new Error('unauthorized');
         count = await this.model.count({
           owner: resu.user._id
         });

@@ -27,6 +27,8 @@ import { default as CampaignDB } from '../../database/models/campaign';
 //serializer
 import * as serialijse from "serialijse";
 
+import mongoose from 'mongoose';
+
 export class State extends Schema {
   @type(World)
   world = new World();
@@ -59,13 +61,39 @@ export class GameRoom extends Room<State> {
     // console.log("auth", options);
     if (options && options.campaign && options.token) {
       const resu = await UserDB.findByAuthorization(options.token);
-      const campaign = await CampaignDB.findOne({
-        _id: options.campaign,
-        $or: [
-          { owner: resu.user._id },
-          { players: { $in: [resu.user._id] } }
-        ]
-      });
+
+      //old way with players array (that was deprecated)
+      // const campaign = await CampaignDB.findOne({
+      //   _id: options.campaign,
+      //   $or: [
+      //     { owner: resu.user._id },
+      //     { players: { $in: [resu.user._id] } }
+      //   ]
+      // });
+
+      //new way using the invitations
+      //(check if user has an accepted invitation on this campaign or if is the owner)
+      const campaigns = await CampaignDB.aggregate([
+        {
+          $lookup: {
+            from: "invitations",
+            localField: "_id",
+            foreignField: "campaign",
+            as: "invitations"
+          }
+        },
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(options.campaign),
+            $or: [
+              { owner: resu.user._id },
+              { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } }
+            ]
+          }
+        }
+      ]);
+      const campaign = campaigns[0];
+
       // console.log("resu", resu);
       // console.log("campaign", campaign);
 
