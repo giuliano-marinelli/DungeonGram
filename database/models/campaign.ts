@@ -31,7 +31,8 @@ const campaignSchema = new mongoose.Schema({
       },
       settings: Object,
     }
-  ]
+  ],
+  settings: Object
 });
 
 //omit the __v and state when returning a campaign

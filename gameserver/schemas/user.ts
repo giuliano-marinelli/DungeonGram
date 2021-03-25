@@ -21,10 +21,12 @@ export class User extends Schema {
   addingModeCharacter: string;
   @type("string")
   addingModeModel: string;
+  @type("boolean")
+  isDM: boolean;
 
-  constructor(wallsVisibility: number = 0.5, wallsPickable: boolean = false,
+  constructor(wallsVisibility: number = 0, wallsPickable: boolean = false,
     fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,
-    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedCharacter?: string) {
+    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedCharacter?: string, isDM: boolean = false) {
     super();
     this.wallsVisibility = wallsVisibility;
     this.wallsPickable = wallsPickable;
@@ -33,5 +35,6 @@ export class User extends Schema {
     this.rule = rule;
     this.figureDrawer = figureDrawer;
     this.selectedCharacter = selectedCharacter;
+    this.isDM = isDM;
   }
 }

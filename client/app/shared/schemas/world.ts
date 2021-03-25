@@ -11,6 +11,7 @@ export class World extends Schema {
   campaignId?: string;
   users?: User[];
   map?: Map;
+  fogOfWarVisibilityPlayers?: number;
   //game objects
   camera?: any;
   lights?: any = {};
@@ -59,6 +60,10 @@ export class World extends Schema {
       switch (change.field) {
         case 'map':
           this.parameters.controller.updateSetting('charactersOnMap', this.map?.characters);
+          break;
+        case 'fogOfWarVisibilityPlayers':
+          this.updateFogOfWar();
+          this.parameters.controller.updateSetting('fogOfWarVisibilityPlayers', this.fogOfWarVisibilityPlayers);
           break;
       }
     });
@@ -159,7 +164,9 @@ export class World extends Schema {
   updateFogOfWar() {
     setTimeout(() => {
       var user = this.users[this.parameters.token];
-      this.lights.fogLight.intensity = user.fogOfWarVisibility;
+      this.lights.fogLight.intensity = user.isDM
+        ? user.fogOfWarVisibility
+        : (user.fogOfWarVisibility <= this.fogOfWarVisibilityPlayers ? this.fogOfWarVisibilityPlayers : user.fogOfWarVisibility);
     });
   }
 

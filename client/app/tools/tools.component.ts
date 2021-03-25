@@ -38,11 +38,11 @@ export class ToolsComponent implements OnInit {
 
   ownCharacters: Character[] = [];
   publicCharacters: Character[] = [];
-  isLoadingOwnCharacters = true;
-  isLoadingPublicCharacters = true;
+  isLoadingOwnCharacters: boolean = true;
+  isLoadingPublicCharacters: boolean = true;
 
   openedMap: Map;
-  isLoadingOpenedMap = true;
+  isLoadingOpenedMap: boolean = true;
 
   ObjectValues = Object.values; //for get values of object
 
@@ -55,11 +55,15 @@ export class ToolsComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.campaignId) this.getCampaign(); else this.isLoadingCampaign = false;
-    this.countCharacters();
     this.getCharacters(true);
     this.getCharacters(false);
 
     this.tools = {
+      users: {
+        options: {
+          isDM: this.controller.initSetting("isDM", false)
+        }
+      },
       walls: {
         name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: true,
         options: {
@@ -122,9 +126,11 @@ export class ToolsComponent implements OnInit {
         name: 'fogOfWar', label: 'Fog of War', image: 'assets/images/tools/fogOfWar.png', dropdown: true,
         options: {
           fogOfWarVisibility: this.controller.initSetting("fogOfWarVisibility", 0),
+          fogOfWarVisibilityPlayers: this.controller.initSetting("fogOfWarVisibilityPlayers", 0),
         },
         actions: {
           visibility: (visibility) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibility.value), action: 'visibility' }) },
+          visibilityPlayers: (visibilityPlayers) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibilityPlayers.value), action: 'visibilityPlayers' }) },
         }
       },
       maps: {
@@ -188,7 +194,6 @@ export class ToolsComponent implements OnInit {
     });
 
     this.controller.recieve('game', 'characterUpdate', (message) => {
-      this.countCharacters();
       this.getCharacters(true);
       this.getCharacters(false);
     });
@@ -234,13 +239,12 @@ export class ToolsComponent implements OnInit {
     );
   }
 
-  countCharacters(): void {
-    this.characterService.countCharacters({ own: true }).subscribe(
-      data => this.countOwnCharacters = data,
-      error => console.log(error)
-    );
-    this.characterService.countCharacters({ own: false }).subscribe(
-      data => this.countPublicCharacters = data,
+  countCharacters(own: boolean): void {
+    this.characterService.countCharacters({ own: own }).subscribe(
+      data => {
+        if (own) this.countOwnCharacters = data
+        else this.countPublicCharacters = data
+      },
       error => console.log(error)
     );
   }
@@ -249,11 +253,11 @@ export class ToolsComponent implements OnInit {
     if (own) this.pageOwnCharacters = page;
     else this.pagePublicCharacters = page;
 
-    this.countCharacters();
     this.getCharacters(own);
   }
 
   getCharacters(own: boolean): void {
+    this.countCharacters(own);
     this.characterService.getCharacters(
       {
         own: own,
@@ -281,7 +285,6 @@ export class ToolsComponent implements OnInit {
     var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
     if (character) modalRef.componentInstance.character = character;
     modalRef.componentInstance.getCharacters.subscribe(() => {
-      this.countCharacters();
       this.getCharacters(true);
       this.getCharacters(false);
       this.tools.characters.actions.update();
@@ -310,7 +313,6 @@ export class ToolsComponent implements OnInit {
             data => iziToast.success({ message: 'Character deleted successfully.' }),
             error => console.log(error),
             () => {
-              self.countCharacters();
               self.getCharacters(true);
               self.getCharacters(false);
               self.tools.characters.actions.update();

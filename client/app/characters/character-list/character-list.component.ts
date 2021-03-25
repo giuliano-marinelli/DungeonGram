@@ -49,7 +49,7 @@ export class CharacterListComponent implements OnInit {
     );
   }
 
-  setPage(own: boolean, page: number): void {
+  setPageCharacters(own: boolean, page: number): void {
     if (own) this.pageOwnCharacters = page;
     else this.pagePublicCharacters = page;
 

@@ -17,6 +17,8 @@ export class World extends Schema {
   users = new MapSchema<User>();
   @type(Map)
   map: Map;
+  @type("number")
+  fogOfWarVisibilityPlayers: number;
 
   loadTimer: number = 0;
 
@@ -28,11 +30,13 @@ export class World extends Schema {
             const campaign = await CampaignDB.findOne({ _id: this.campaignId });
             var campaignUser = campaign.users.find((u) => u.ref == client);
             this.users[client] = new User();
+            this.users[client].isDM = client == campaign.owner; //set as DM to the owner
             if (campaignUser) {
               this.users[client].wallsVisibility = campaignUser.settings.wallsVisibility;
               this.users[client].fogOfWarVisibility = campaignUser.settings.fogOfWarVisibility;
               this.users[client].tilemapShowGrid = campaignUser.settings.tilemapShowGrid;
               this.users[client].selectedCharacter = campaignUser.settings.selectedCharacter;
+              this.users[client].isDM = campaignUser.settings.isDM || client == campaign.owner;
             }
           }
 
@@ -59,7 +63,7 @@ export class World extends Schema {
             data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
             this.map.characters[this.users[client].selectedCharacter].move({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return this.map != null && data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return this.map != null && data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       drag: {
         do: (client: string, data: any) => {
@@ -68,21 +72,21 @@ export class World extends Schema {
             this.map.characters[data.id].drag(point);
           }
         },
-        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
       drop: {
         do: (client: string, data: any) => {
           if (!this.users[client].addingModeCharacter)
             this.map.characters[data.id].drop(data.snapToGrid);
         },
-        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
       select: {
         do: (client: string, data: any) => {
           if (!this.users[client].addingModeCharacter)
             this.users[client].selectedCharacter = this.users[client].selectedCharacter != data.id ? data.id : null;
         },
-        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
       },
       addingModeOn: {
         do: async (client: string, data: any) => {
@@ -105,7 +109,9 @@ export class World extends Schema {
               this.execCommand(client, 'character', data);
           }
         },
-        validate: (data: any) => { return this.map != null && data.model != null && typeof data.model === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.model != null && typeof data.model === "string" && this.users[client].isDM
+        }
       },
       addingModeOff: {
         do: (client: string, data: any) => {
@@ -116,7 +122,7 @@ export class World extends Schema {
           this.users[client].addingModeCharacter = null;
           this.users[client].addingModeModel = null;
         },
-        validate: (data: any) => { return this.map != null }
+        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
       },
       add: {
         do: (client: string, data: any) => {
@@ -128,14 +134,18 @@ export class World extends Schema {
             });
           }
         },
-        validate: (data: any) => { return this.map != null && data.x != null && typeof data.x === "number" && data.y != null && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.x != null && typeof data.x === "number" && data.y != null && typeof data.y === "number" && this.users[client].isDM
+        }
       },
       remove: {
         do: (client: string, data: any) => {
           //remove character
           delete this.map.characters[data.id]
         },
-        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+        }
       },
       update: {
         do: (client: string, data: any) => {
@@ -149,7 +159,9 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.command.wall.state.wallFirstPoint = { x: data.x, y: data.y };
         },
-        validate: (data: any) => { return this.map != null && data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isDM
+        }
       },
       end: {
         do: (client: string, data: any) => {
@@ -164,17 +176,17 @@ export class World extends Schema {
           }
           this.command.wall.state.wallFirstPoint = null;
         },
-        validate: (data: any) => {
+        validate: (client: string, data: any) => {
           return this.map != null && data.x != null && data.y != null && data.size != null &&
-            typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string"
+            typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string" && this.users[client].isDM
         }
       },
       cancel: {
         do: (client: string, data: any) => {
           this.command.wall.state.wallFirstPoint = null;
         },
-        validate: (data: any) => {
-          return this.map != null;
+        validate: (client: string, data: any) => {
+          return this.map != null && this.users[client].isDM;
         }
       },
       remove: {
@@ -182,19 +194,25 @@ export class World extends Schema {
           delete this.map.walls[data.id];
           this.map.worldPhysics.removeEntity(data.id, 'wall'); //remove physics wall
         },
-        validate: (data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+        }
       },
       visibility: {
         do: (client: string, data: any) => {
           this.users[client].wallsVisibility = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "number" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "number" && this.users[client].isDM
+        }
       },
       pickable: {
         do: (client: string, data: any) => {
           this.users[client].wallsPickable = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "boolean" && this.users[client].isDM
+        }
       }
     },
     tilemap: {
@@ -206,13 +224,16 @@ export class World extends Schema {
             this.map.worldPhysics.setGrid({ width: data.width, height: data.height });
           }
         },
-        validate: (data: any) => { return this.map != null && data.width != null && data.height != null && typeof data.width === "number" && typeof data.height === "number" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.width != null && data.height != null &&
+            typeof data.width === "number" && typeof data.height === "number" && this.users[client].isDM
+        }
       },
       show: {
         do: (client: string, data: any) => {
           this.users[client].tilemapShowGrid = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
       },
     },
     rule: {
@@ -220,19 +241,19 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].rule.start({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       move: {
         do: (client: string, data: any) => {
           this.users[client].rule.move({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       add: {
         do: (client: string, data: any) => {
           this.users[client].rule.add({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       end: {
         do: (client: string, data: any) => {
@@ -243,13 +264,13 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].rule.shared = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
       },
       normalizeUnit: {
         do: (client: string, data: any) => {
           this.users[client].rule.normalizeUnit = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
       }
     },
     figure: {
@@ -257,13 +278,13 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.start({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       move: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.move({ x: data.x, y: data.y });
         },
-        validate: (data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
       },
       end: {
         do: (client: string, data: any) => {
@@ -274,13 +295,13 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.shared = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
       },
       type: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.type = data.value;
         },
-        validate: (data: any) => {
+        validate: (client: string, data: any) => {
           return data.value != null &&
             (data.value == 'triangle' || data.value == 'circle' || data.value == 'square')
         }
@@ -289,7 +310,7 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.normalizeUnit = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
       }
     },
     fogOfWar: {
@@ -297,7 +318,17 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].fogOfWarVisibility = data.value;
         },
-        validate: (data: any) => { return data.value != null && typeof data.value === "number" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "number" && this.users[client].isDM
+        }
+      },
+      visibilityPlayers: {
+        do: (client: string, data: any) => {
+          this.fogOfWarVisibilityPlayers = data.value;
+        },
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "number" && this.users[client].isDM
+        }
       }
     },
     map: {
@@ -320,7 +351,7 @@ export class World extends Schema {
           }
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (data: any) => { return data.map != null && typeof data.map === "string" }
+        validate: (client: string, data: any) => { return data.map != null && typeof data.map === "string" && this.users[client].isDM }
       },
       close: {
         do: async (client: string, data: any) => {
@@ -330,7 +361,7 @@ export class World extends Schema {
           await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (data: any) => { return this.map != null }
+        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
       },
       discard: {
         do: async (client: string, data: any) => {
@@ -339,13 +370,13 @@ export class World extends Schema {
           await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (data: any) => { return this.map != null }
+        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
       },
       updateTilemap: {
         do: async (client: string, data: any) => {
           this.map.updateTilemap();
         },
-        validate: (data: any) => { return this.map != null }
+        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
       },
       update: {
         do: (client: string, data: any) => {
@@ -372,6 +403,9 @@ export class World extends Schema {
 
     if (campaign.openedMap)
       this.command.map.open.do(null, { map: campaign.openedMap });
+
+    this.fogOfWarVisibilityPlayers = campaign.settings?.fogOfWarVisibilityPlayers != null
+      ? campaign.settings?.fogOfWarVisibilityPlayers : 0;
   }
 
   execCommand(client?: string, type?: string | number, data?: any) {
@@ -382,7 +416,7 @@ export class World extends Schema {
         && this.command[type][data?.action]
         && this.command[type][data?.action].do) {
         if (this.command[type][data?.action].validate) {
-          if (this.command[type][data?.action].validate(data))
+          if (this.command[type][data?.action].validate(client, data))
             this.command[type][data?.action].do(client, data);
           else
             throw new Error('invalid action params for command "' + type + '"');
@@ -430,11 +464,15 @@ export class World extends Schema {
           wallsVisibility: this.users[userId].wallsVisibility,
           fogOfWarVisibility: this.users[userId].fogOfWarVisibility,
           tilemapShowGrid: this.users[userId].tilemapShowGrid,
-          selectedCharacter: this.users[userId].selectedCharacter
+          selectedCharacter: this.users[userId].selectedCharacter,
+          isDM: this.users[userId].isDM
         }
       });
     }
     campaign.users = usersOnCampaign;
+    campaign.settings = {
+      fogOfWarVisibilityPlayers: this.fogOfWarVisibilityPlayers
+    }
 
     await CampaignDB.findOneAndUpdate({ _id: campaign._id }, campaign);
 

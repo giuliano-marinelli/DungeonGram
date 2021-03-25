@@ -15,6 +15,7 @@ export class User extends Schema {
   selectedCharacter?: string;
   addingModeCharacter?: string;
   addingModeModel?: string;
+  isDM?: boolean;
   //global actions registered
   actions: any = {};
 
@@ -71,6 +72,9 @@ export class User extends Schema {
           case 'tilemapShowGrid':
             this.parameters.world.updateTilemap();
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('tilemapShowGrid', this.tilemapShowGrid);
+            break;
+          case 'isDM':
+            if (this.id == this.parameters.token) this.parameters.controller.updateSetting('isDM', this.isDM);
             break;
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();
