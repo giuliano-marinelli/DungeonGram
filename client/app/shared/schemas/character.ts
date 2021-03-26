@@ -214,7 +214,7 @@ export class Character extends Schema {
         // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
         this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
           if (e.sourceEvent.button == 0 && e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
-            console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this._schema);
+            console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
             this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
           }
         }));

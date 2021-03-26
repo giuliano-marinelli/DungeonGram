@@ -168,6 +168,7 @@ export class ToolsComponent implements OnInit {
           }),
           addingMode: this.controller.initSetting("addingMode", false),
           selectedCharacter: this.controller.initSetting("selectedCharacter", null),
+          selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null),
           addingModeModel: this.controller.initSetting("addingModeModel", null)
         },
         actions: {

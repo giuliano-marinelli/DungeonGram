@@ -72,21 +72,27 @@ export class World extends Schema {
             this.map.characters[data.id].drag(point);
           }
         },
-        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+        }
       },
       drop: {
         do: (client: string, data: any) => {
           if (!this.users[client].addingModeCharacter)
             this.map.characters[data.id].drop(data.snapToGrid);
         },
-        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+        }
       },
       select: {
         do: (client: string, data: any) => {
           if (!this.users[client].addingModeCharacter)
             this.users[client].selectedCharacter = this.users[client].selectedCharacter != data.id ? data.id : null;
         },
-        validate: (client: string, data: any) => { return this.map != null && data.id != null && typeof data.id === "string" }
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+        }
       },
       addingModeOn: {
         do: async (client: string, data: any) => {

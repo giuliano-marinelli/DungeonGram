@@ -226,8 +226,13 @@ export class World extends Schema {
         if (this.map) {
           for (let character in this.map.characters) {
             if (this.map.characters[character].mesh) {
-              this.map.characters[character].collider.isPickable = true;
-              this.map.characters[character].animator.resetVisibility();
+              if (this.users[this.parameters.token]?.isDM) {
+                this.map.characters[character].collider.isPickable = true;
+                this.map.characters[character].animator.resetVisibility();
+              } else {
+                this.map.characters[character].collider.isPickable = false;
+                this.map.characters[character].animator.visibility(0);
+              }
             }
           }
         }
