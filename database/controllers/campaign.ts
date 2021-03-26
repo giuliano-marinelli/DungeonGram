@@ -45,6 +45,43 @@ class CampaignCtrl extends BaseCtrl {
               as: "invitations"
             }
           },
+          // $lookup USING $group
+          {
+            $unwind: {
+              path: "$invitations",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "invitations.recipient",
+              foreignField: "_id",
+              as: "invitations.recipient_info"
+            }
+          },
+          {
+            $unwind: {
+              path: "$invitations.recipient_info",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $group: {
+              _id: "$_id",
+              title: { "$first": "$title" },
+              description: { "$first": "$description" },
+              private: { "$first": "$private" },
+              owner: { "$first": "$owner" },
+              owner_info: { "$first": "$owner_info" },
+              maps: { "$first": "$maps" },
+              maps_info: { "$first": "$maps_info" },
+              openedMap: { "$first": "$openedMap" },
+              users: { "$first": "$users" },
+              settings: { "$first": "$settings" },
+              invitations: { "$push": "$invitations" }
+            }
+          },
           {
             $match: {
               $or: [
@@ -54,7 +91,8 @@ class CampaignCtrl extends BaseCtrl {
                 { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
               ]
             }
-          }
+          },
+          { $sort: { _id: 1 } }
         ]).skip(skip).limit(limit);
       } else {
         docs = await this.model.aggregate([
@@ -83,17 +121,56 @@ class CampaignCtrl extends BaseCtrl {
               as: "invitations"
             }
           },
+          // $lookup USING $group
+          {
+            $unwind: {
+              path: "$invitations",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "invitations.recipient",
+              foreignField: "_id",
+              as: "invitations.recipient_info"
+            }
+          },
+          {
+            $unwind: {
+              path: "$invitations.recipient_info",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $group: {
+              _id: "$_id",
+              title: { "$first": "$title" },
+              description: { "$first": "$description" },
+              private: { "$first": "$private" },
+              owner: { "$first": "$owner" },
+              owner_info: { "$first": "$owner_info" },
+              maps: { "$first": "$maps" },
+              maps_info: { "$first": "$maps_info" },
+              openedMap: { "$first": "$openedMap" },
+              users: { "$first": "$users" },
+              settings: { "$first": "$settings" },
+              invitations: { "$push": "$invitations" }
+            }
+          },
           {
             $match: {
               owner: { $ne: resu?.user?._id },
               // players: { $nin: [resu?.user?._id] },
               $or: [
+                { invitations: { $eq: [{}] } },
                 { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
                 { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
               ],
               private: false
             }
-          }
+          },
+          { $sort: { _id: 1 } }
         ]).skip(skip).limit(limit);
       }
       res.status(200).json(docs);
@@ -214,6 +291,43 @@ class CampaignCtrl extends BaseCtrl {
             localField: "_id",
             foreignField: "campaign",
             as: "invitations"
+          }
+        },
+        // $lookup USING $group
+        {
+          $unwind: {
+            path: "$invitations",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "invitations.recipient",
+            foreignField: "_id",
+            as: "invitations.recipient_info"
+          }
+        },
+        {
+          $unwind: {
+            path: "$invitations.recipient_info",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $group: {
+            _id: "$_id",
+            title: { "$first": "$title" },
+            description: { "$first": "$description" },
+            private: { "$first": "$private" },
+            owner: { "$first": "$owner" },
+            owner_info: { "$first": "$owner_info" },
+            maps: { "$first": "$maps" },
+            maps_info: { "$first": "$maps_info" },
+            openedMap: { "$first": "$openedMap" },
+            users: { "$first": "$users" },
+            settings: { "$first": "$settings" },
+            invitations: { "$push": "$invitations" }
           }
         },
         {

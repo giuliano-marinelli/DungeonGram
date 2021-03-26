@@ -61,28 +61,30 @@ export class CampaignListComponent implements OnInit {
   }
 
   getCampaigns(own: boolean): void {
-    this.countCampaigns(own);
-    this.campaignService.getCampaigns(
-      {
-        own: own,
-        page: own ? this.pageOwnCampaigns : this.pagePublicCampaigns,
-        count: own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns
-      }
-    ).subscribe(
-      data => {
-        if (own) this.ownCampaigns = data
-        else this.publicCampaigns = data
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
-      },
-      error => console.log(error),
-      () => {
-        if (own) this.isLoadingOwn = false
-        else this.isLoadingPublic = false
-      }
-    );
+    if (this.auth.loggedIn || !own) {
+      this.countCampaigns(own);
+      this.campaignService.getCampaigns(
+        {
+          own: own,
+          page: own ? this.pageOwnCampaigns : this.pagePublicCampaigns,
+          count: own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns
+        }
+      ).subscribe(
+        data => {
+          if (own) this.ownCampaigns = data
+          else this.publicCampaigns = data
+          setTimeout(() => {
+            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+            $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+          });
+        },
+        error => console.log(error),
+        () => {
+          if (own) this.isLoadingOwn = false
+          else this.isLoadingPublic = false
+        }
+      );
+    }
   }
 
   deleteCampaign(campaign: Campaign): void {
@@ -163,6 +165,11 @@ export class CampaignListComponent implements OnInit {
   }
 
   getInvitation(campaign: Campaign): Invitation {
-    return campaign["invitations"]?.find(invitation => invitation.recipient == this.auth.currentUser._id)
+    if (this.auth.loggedIn) return campaign["invitations"]?.find(invitation => invitation.recipient == this.auth.currentUser._id);
+    else return null;
+  }
+
+  getPlayers(campaign: Campaign): string[] {
+    return campaign["invitations"]?.filter(invitation => invitation.accepted).map(invitation => invitation.recipient_info?.username);
   }
 }

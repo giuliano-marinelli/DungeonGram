@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -19,7 +19,7 @@ declare var iziToast;
   templateUrl: './invite.component.html',
   styleUrls: ['./invite.component.scss']
 })
-export class InviteComponent implements OnInit {
+export class InviteComponent implements OnInit, OnDestroy {
 
   @Input() public campaign: Campaign;
   @Output("getCampaigns") getCampaigns: EventEmitter<any> = new EventEmitter();
@@ -55,6 +55,10 @@ export class InviteComponent implements OnInit {
     if (this.campaign) this.isLoadingCampaign = false;
     this.getPlayers();
     this.getInvitations();
+  }
+
+  ngOnDestroy(): void {
+    this.getCampaigns.emit();
   }
 
   countPlayers(): void {
@@ -99,10 +103,6 @@ export class InviteComponent implements OnInit {
       },
       error => console.log(error)
     );
-  }
-
-  getCampaignPlayers(): void {
-
   }
 
   sendInvitation(player: User): void {

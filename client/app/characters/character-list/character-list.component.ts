@@ -57,28 +57,30 @@ export class CharacterListComponent implements OnInit {
   }
 
   getCharacters(own: boolean): void {
-    this.countCharacters(own);
-    this.characterService.getCharacters(
-      {
-        own: own,
-        page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
-        count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
-      }
-    ).subscribe(
-      data => {
-        if (own) this.ownCharacters = data
-        else this.publicCharacters = data
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
-      },
-      error => console.log(error),
-      () => {
-        if (own) this.isLoadingOwn = false
-        else this.isLoadingPublic = false
-      }
-    );
+    if (this.auth.loggedIn || !own) {
+      this.countCharacters(own);
+      this.characterService.getCharacters(
+        {
+          own: own,
+          page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
+          count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
+        }
+      ).subscribe(
+        data => {
+          if (own) this.ownCharacters = data
+          else this.publicCharacters = data
+          setTimeout(() => {
+            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
+            $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+          });
+        },
+        error => console.log(error),
+        () => {
+          if (own) this.isLoadingOwn = false
+          else this.isLoadingPublic = false
+        }
+      );
+    }
   }
 
   deleteCharacter(character: Character): void {
