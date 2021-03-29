@@ -49,7 +49,7 @@ export class CampaignListComponent implements OnInit {
         if (own) this.countOwnCampaigns = data
         else this.countPublicCampaigns = data
       },
-      error => console.log(error)
+      error => iziToast.error({ message: 'There was an error, campaigns can\'t be counted.' })
     );
   }
 
@@ -74,7 +74,7 @@ export class CampaignListComponent implements OnInit {
           if (own) this.ownCampaigns = data
           else this.publicCampaigns = data
         },
-        error => console.log(error),
+        error => iziToast.error({ message: 'There was an error, campaigns can\'t be getted.' }),
         () => {
           if (own) this.isLoadingOwn = false
           else this.isLoadingPublic = false
@@ -84,34 +84,14 @@ export class CampaignListComponent implements OnInit {
   }
 
   deleteCampaign(campaign: Campaign): void {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to delete campaign <b>' + campaign.title + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          self.campaignService.deleteCampaign(campaign).subscribe(
-            data => iziToast.success({ message: 'Campaign deleted successfully.' }),
-            error => iziToast.error({ message: 'There was an error, campaign can\'t be deleted.' }),
-            () => {
-              self.getCampaigns(true);
-              self.getCampaigns(false)
-            }
-          );
-        }]
-      ]
-    });
+    this.campaignService.deleteCampaign(campaign).subscribe(
+      data => iziToast.success({ message: 'Campaign deleted successfully.' }),
+      error => iziToast.error({ message: 'There was an error, campaign can\'t be deleted.' }),
+      () => {
+        this.getCampaigns(true);
+        this.getCampaigns(false)
+      }
+    );
   }
 
   openCampaign(campaign?: Campaign): void {
@@ -159,36 +139,16 @@ export class CampaignListComponent implements OnInit {
   }
 
   leaveInvitation(campaign: Campaign): void {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to leave the campaign <b>' + campaign.title + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          var invitation = self.getInvitation(campaign);
-          invitation.accepted = false;
-          self.invitationService.editInvitation(invitation).subscribe(
-            data => iziToast.success({ message: 'You leaved the campaign successfully.' }),
-            error => iziToast.error({ message: 'There was an error, you can\'t leave the campaign.' }),
-            () => {
-              self.getCampaigns(true);
-              self.getCampaigns(false)
-            }
-          );
-        }]
-      ]
-    });
+    var invitation = this.getInvitation(campaign);
+    invitation.accepted = false;
+    this.invitationService.editInvitation(invitation).subscribe(
+      data => iziToast.success({ message: 'You leaved the campaign successfully.' }),
+      error => iziToast.error({ message: 'There was an error, you can\'t leave the campaign.' }),
+      () => {
+        this.getCampaigns(true);
+        this.getCampaigns(false)
+      }
+    );
   }
 
   getInvitation(campaign: Campaign): Invitation {

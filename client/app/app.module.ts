@@ -35,7 +35,6 @@ import { MapComponent } from './maps/map/map.component';
 import { InviteComponent } from './players/invite/invite.component';
 // Style Components
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ConfirmationPopoverModule } from 'angular-confirmation-popover';
 import { TippyModule, tooltipVariation, popperVariation } from '@ngneat/helipopper';
 // Color Pickers
 import { ColorAlphaModule } from 'ngx-color/alpha'; // <color-alpha-picker></color-alpha-picker>
@@ -83,9 +82,6 @@ import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></colo
       }
     }),
     NgbModule,
-    ConfirmationPopoverModule.forRoot({
-      confirmButtonType: 'danger',
-    }),
     TippyModule.forRoot({
       defaultVariation: 'tooltip',
       variations: {

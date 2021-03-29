@@ -26,37 +26,16 @@ export class AdminComponent implements OnInit {
   getUsers(): void {
     this.userService.getUsers().subscribe(
       data => this.users = data,
-      error => console.log(error),
+      error => iziToast.error({ message: 'There was an error, users can\'t be getted.' }),
       () => this.isLoading = false
     );
   }
 
   deleteUser(user: User): void {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to delete <b>' + user.username + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          self.userService.deleteUser(user).subscribe(
-            data => iziToast.success({ message: 'User deleted successfully.' }),
-            error => console.log(error),
-            () => self.getUsers()
-          );
-        }]
-      ]
-    });
+    this.userService.deleteUser(user).subscribe(
+      data => iziToast.success({ message: 'User deleted successfully.' }),
+      error => iziToast.error({ message: 'There was an error, user can\'t be deleted.' }),
+      () => this.getUsers()
+    );
   }
-
 }

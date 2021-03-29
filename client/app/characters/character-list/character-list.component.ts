@@ -45,7 +45,7 @@ export class CharacterListComponent implements OnInit {
         if (own) this.countOwnCharacters = data
         else this.countPublicCharacters = data
       },
-      error => console.log(error)
+      error => iziToast.error({ message: 'There was an error, characeters can\'t be counted.' })
     );
   }
 
@@ -70,7 +70,7 @@ export class CharacterListComponent implements OnInit {
           if (own) this.ownCharacters = data
           else this.publicCharacters = data
         },
-        error => console.log(error),
+        error => iziToast.error({ message: 'There was an error, characeters can\'t be getted.' }),
         () => {
           if (own) this.isLoadingOwn = false
           else this.isLoadingPublic = false
@@ -80,34 +80,14 @@ export class CharacterListComponent implements OnInit {
   }
 
   deleteCharacter(character: Character): void {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to delete character <b>' + character.name + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          self.characterService.deleteCharacter(character).subscribe(
-            data => iziToast.success({ message: 'Character deleted successfully.' }),
-            error => console.log(error),
-            () => {
-              self.getCharacters(true);
-              self.getCharacters(false)
-            }
-          );
-        }]
-      ]
-    });
+    this.characterService.deleteCharacter(character).subscribe(
+      data => iziToast.success({ message: 'Character deleted successfully.' }),
+      error => iziToast.error({ message: 'There was an error, character can\'t be deleted.' }),
+      () => {
+        this.getCharacters(true);
+        this.getCharacters(false)
+      }
+    );
   }
 
   openCharacter(character?) {

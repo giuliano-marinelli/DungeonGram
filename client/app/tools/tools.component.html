@@ -38,16 +38,16 @@
                         <div class="card-body p-0 map-btn">
                           <div class="btn-group" role="group">
                             <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
-                              tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}" placement="top"
+                              tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
                               [appendTo]="tool_maps_container">
                               <i class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
                             </button>
-                            <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" title="Edit"
-                              tippy="Edit" placement="top" [appendTo]="tool_maps_container">
+                            <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" tippy="Edit"
+                              [appendTo]="tool_maps_container">
                               <i class="fa fa-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" (click)="deleteMap(map)" title="Delete" tippy="Delete"
-                              placement="top" [appendTo]="tool_maps_container">
+                            <button class="btn btn-sm btn-danger" (confirm)="deleteMap(map)" confirmDoubleCheck="true"
+                              [confirmAppendTo]="tool_maps_container" tippy="Delete" [appendTo]="tool_maps_container">
                               <i class="fa fa-trash"></i>
                             </button>
                           </div>
@@ -60,8 +60,8 @@
                     <div class="col-12 mb-2">
                       <div class="card" style="height: 20px;">
                         <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
-                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Map" tippy="Add Map"
-                          placement="bottom" [appendTo]="tool_maps_container">
+                          style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Map" placement="bottom"
+                          [appendTo]="tool_maps_container">
                           <i class="fa fa-plus"></i>
                         </button>
                       </div>
@@ -81,7 +81,7 @@
                         <div class="col-12 mb-2">
                           <div class="card" style="height: 20px;">
                             <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
-                              style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Character" placement="top"
+                              style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Character"
                               [appendTo]="tool_characters_container">
                               <i class="fa fa-plus"></i>
                             </button>
@@ -108,11 +108,12 @@
                             <div class="card-body p-0 character-btn">
                               <div class="btn-group" role="group">
                                 <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openCharacter(character)"
-                                  title="Edit" tippy="Edit" placement="top" [appendTo]="tool_characters_container">
+                                  tippy="Edit" [appendTo]="tool_characters_container">
                                   <i class="fa fa-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" (click)="deleteCharacter(character)"
-                                  title="Delete" tippy="Delete" placement="top" [appendTo]="tool_characters_container">
+                                <button class="btn btn-sm btn-danger" (confirm)="deleteCharacter(character)"
+                                  confirmDoubleCheck="true" [confirmAppendTo]="tool_characters_container" tippy="Delete"
+                                  [appendTo]="tool_characters_container">
                                   <i class="fa fa-trash"></i>
                                 </button>
                               </div>
@@ -197,29 +198,15 @@
                               <div class="card-body p-0 character-btn">
                                 <div class="btn-group" role="group">
                                   <button class="btn btn-sm btn-dark campaign-btn-alt"
-                                    (click)="openCharacter(character.modelId, character.id)" title="Edit" tippy="Edit"
-                                    placement="top" [appendTo]="tool_characters_container">
+                                    (click)="openCharacter(character.modelId, character.id)" tippy="Edit"
+                                    [appendTo]="tool_characters_container">
                                     <i class="fa fa-pencil"></i>
                                   </button>
-
-                                  <ng-template #tool_character_delete_confirmation let-hide>
-                                    <p class="text-center mb-1">Sure?</p>
-                                    <button class="btn btn-sm btn-dark mr-1" (click)="hide()">
-                                      <i class="fa fa-fw fa-times"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger"
-                                      (click)="tool.actions.remove(character); hide()">
-                                      <i class="fa fa-fw fa-check"></i>
-                                    </button>
-                                  </ng-template>
-                                  <span tippy="Delete" placement="top" [appendTo]="tool_characters_container">
-                                    <button class="btn btn-sm btn-danger" title="Delete"
-                                      [tippy]="tool_character_delete_confirmation" variation="tooltip"
-                                      [appendTo]="tool_characters_container" placement="top" interactive="true"
-                                      trigger="click">
-                                      <i class="fa fa-trash"></i>
-                                    </button>
-                                  </span>
+                                  <button class="btn btn-sm btn-danger" tippy="Delete"
+                                    [appendTo]="tool_characters_container" (confirm)="tool.actions.remove(character)"
+                                    [confirmAppendTo]="tool_characters_container">
+                                    <i class="fa fa-trash"></i>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -261,7 +248,7 @@
                                     <div class="card-body p-0 character-btn">
                                       <div class="btn-group" role="group">
                                         <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)"
-                                          title="Remove" tippy="Remove" placement="top" [appendTo]="tool_characters_container">
+                                          tippy="Remove" [appendTo]="tool_characters_container">
                                           <i class="fa fa-trash"></i>
                                         </button>
                                       </div>
@@ -528,7 +515,8 @@
         <!-- <h6 class="text-muted">{{tools.characters.options.selectedCharacterObj.value?.group}}</h6> -->
       </div>
       <div class="selection-content">
-        <i class="fa fa-fw fa-eye"></i> {{tools.characters.options.selectedCharacterObj.value?.visionRange}}
+        <i class="fa fa-fw fa-eye" tippy="Vision Range" placement="left"></i>
+        {{tools.characters.options.selectedCharacterObj.value?.visionRange}}
       </div>
     </span>
   </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Controller } from '../shared/controller/controller';
@@ -14,7 +14,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   //babylon
   canvas: HTMLCanvasElement;
   engine: any;
@@ -46,7 +46,8 @@ export class GameComponent implements OnInit {
     if (this.campaign && this.access == null) {
       this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-      this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
+      this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true, doNotHandleContextLost: true });
+      this.engine.enableOfflineSupport = false;
       this.scene = new BABYLON.Scene(this.engine);
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
       this.assetsManager = new BABYLON.AssetsManager(this.scene);
@@ -73,6 +74,10 @@ export class GameComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    console.log('game disposed');
+    this.scene?.clearCachedVertexData();
+    this.scene?.cleanCachedTextureBuffer();
+    this.scene?.dispose();
     this.engine?.dispose();
     this.gameRoom?.leave();
   }

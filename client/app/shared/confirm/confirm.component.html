@@ -1,0 +1,17 @@
+<ng-template>
+  <p class="text-center mb-1">{{confirmMessage}}</p>
+  <p class="text-center mb-0">
+    <button class="btn btn-sm btn-dark mr-1" (click)="rejectAction()">
+      <i class="fa fa-fw fa-times"></i>
+    </button>
+    <button class="btn btn-sm btn-danger" *ngIf="confirmDoubleCheck" (confirm)="confirmAction()"
+      [confirmMessage]="confirmDoubleCheckMessage" [confirmPlacement]="confirmDoubleCheckPlacement"
+      [confirmAppendTo]="confirmAppendTo">
+      <i class="fa fa-fw fa-check"></i>
+    </button>
+    <button class="btn btn-sm btn-danger" *ngIf="!confirmDoubleCheck" (click)="confirmAction()">
+      <i class="fa fa-fw fa-check"></i>
+    </button>
+  </p>
+</ng-template>
+<ng-content></ng-content>

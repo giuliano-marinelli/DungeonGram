@@ -197,10 +197,12 @@ export class World extends Schema {
     setTimeout(() => {
       if (this.map) {
         var user = this.users[this.parameters.token];
-        if (user.tilemapShowGrid)
-          this.map.tilemap.ground.material = this.map.tilemap.gridMaterial;
-        else
-          this.map.tilemap.ground.material = new ShadowOnlyMaterial('shadowOnly', this.parameters.scene);
+        if (this.map.tilemap.ground) {
+          if (user.tilemapShowGrid)
+            this.map.tilemap.ground.material = this.map.tilemap.gridMaterial;
+          else
+            this.map.tilemap.ground.material = new ShadowOnlyMaterial('shadowOnly', this.parameters.scene);
+        }
       }
     });
   }

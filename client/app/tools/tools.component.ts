@@ -219,7 +219,7 @@ export class ToolsComponent implements OnInit {
 
     this.campaignService.getCampaignById(this.campaignId).subscribe(
       data => this.campaign = data,
-      error => console.log(error),
+      error => iziToast.error({ message: 'There was an error, campaign can\'t be getted.' }),
       () => {
         if (this.campaign != null) {
           this.isLoadingCampaign = false;
@@ -237,7 +237,7 @@ export class ToolsComponent implements OnInit {
         if (own) this.countOwnCharacters = data
         else this.countPublicCharacters = data
       },
-      error => console.log(error)
+      error => iziToast.error({ message: 'There was an error, characters can\'t be counted.' })
     );
   }
 
@@ -261,7 +261,7 @@ export class ToolsComponent implements OnInit {
         if (own) this.ownCharacters = data
         else this.publicCharacters = data
       },
-      error => console.log(error),
+      error => iziToast.error({ message: 'There was an error, characeters can\'t be getted.' }),
       () => {
         if (own) this.isLoadingOwnCharacters = false
         else this.isLoadingPublicCharacters = false
@@ -280,35 +280,15 @@ export class ToolsComponent implements OnInit {
   }
 
   deleteCharacter(character: Character): void {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to delete character <b>' + character.name + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          self.characterService.deleteCharacter(character).subscribe(
-            data => iziToast.success({ message: 'Character deleted successfully.' }),
-            error => console.log(error),
-            () => {
-              self.getCharacters(true);
-              self.getCharacters(false);
-              self.tools.characters.actions.update();
-            }
-          );
-        }]
-      ]
-    });
+    this.characterService.deleteCharacter(character).subscribe(
+      data => iziToast.success({ message: 'Character deleted successfully.' }),
+      error => iziToast.error({ message: 'There was an error, character can\'t be deleted.' }),
+      () => {
+        this.getCharacters(true);
+        this.getCharacters(false);
+        this.tools.characters.actions.update();
+      }
+    );
   }
 
   onImageError($event, defaultImage?) {
@@ -338,7 +318,7 @@ export class ToolsComponent implements OnInit {
     if (this.campaign?.openedMap) {
       this.mapService.getMap(this.campaign.maps_info.find((m: any) => { return m._id == this.campaign.openedMap })).subscribe(
         data => this.openedMap = data,
-        error => console.log(error),
+        error => iziToast.error({ message: 'There was an error, can\'t get opened map.' }),
         () => this.isLoadingOpenedMap = false
       );
     } else {
@@ -360,39 +340,19 @@ export class ToolsComponent implements OnInit {
   }
 
   deleteMap(map: Map) {
-    var self = this;
-    iziToast.question({
-      timeout: false,
-      close: false,
-      overlay: true,
-      displayMode: 'replace',
-      zindex: 1051,
-      color: 'red',
-      icon: 'fa fa-trash',
-      message: 'Are you sure to delete map <b>' + map.name + '</b>?',
-      position: 'topCenter',
-      buttons: [
-        ['<button>Cancel</button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-        }, true],
-        ['<button><b>Proceed</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          self.mapService.deleteMap(map).subscribe(
-            data => {
-              iziToast.success({ message: 'Map deleted successfully.' });
-              self.tools.maps.actions.update();
-              if (self.tools.maps.options.openedMap.value == map._id)
-                self.tools.maps.actions.discard();
-              if (self.tools.characters.options.selectedMap == map._id)
-                self.tools.characters.options.selectedMap = null;
-            },
-            error => console.log(error),
-            () => {
-              self.getCampaign();
-            }
-          );
-        }]
-      ]
-    });
+    this.mapService.deleteMap(map).subscribe(
+      data => {
+        iziToast.success({ message: 'Map deleted successfully.' });
+        this.tools.maps.actions.update();
+        if (this.tools.maps.options.openedMap.value == map._id)
+          this.tools.maps.actions.discard();
+        if (this.tools.characters.options.selectedMap == map._id)
+          this.tools.characters.options.selectedMap = null;
+      },
+      error => iziToast.error({ message: 'There was an error, map can\'t be deleted.' }),
+      () => {
+        this.getCampaign();
+      }
+    );
   }
 }

@@ -79,7 +79,7 @@
           [hidden]="auth.currentUser._id != campaign.owner" tippy="Edit">
           <i class="fa fa-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-danger ml-2" (click)="deleteCampaign(campaign)"
+        <button class="btn btn-sm btn-danger ml-2" (confirm)="deleteCampaign(campaign)" confirmDoubleCheck="true"
           [hidden]="auth.currentUser._id != campaign.owner" tippy="Delete">
           <i class="fa fa-trash"></i>
         </button>
@@ -92,7 +92,7 @@
           *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
           <i class="fa fa-times"></i> Denied
         </button>
-        <button class="btn btn-sm btn-danger ml-2" (click)="leaveInvitation(campaign)" tippy="Leave"
+        <button class="btn btn-sm btn-danger ml-2" (confirm)="leaveInvitation(campaign)" tippy="Leave"
           *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == true">
           <i class="fa fa-sign-out"></i>
         </button>

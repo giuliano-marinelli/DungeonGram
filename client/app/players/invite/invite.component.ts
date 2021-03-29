@@ -64,7 +64,7 @@ export class InviteComponent implements OnInit, OnDestroy {
   countPlayers(): void {
     this.userService.countUsers({ search: this.searchPlayers.value }).subscribe(
       data => this._countPlayers = data,
-      error => console.log(error)
+      error => iziToast.error({ message: 'There was an error, players can\'t be counted.' })
     );
   }
 
@@ -86,12 +86,8 @@ export class InviteComponent implements OnInit, OnDestroy {
     ).subscribe(
       data => {
         this.players = data;
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
       },
-      error => console.log(error),
+      error => iziToast.error({ message: 'There was an error, players can\'t be getted.' }),
       () => this.isLoadingPlayers = false
     );
   }
@@ -101,7 +97,7 @@ export class InviteComponent implements OnInit, OnDestroy {
       data => {
         this.invitations = data;
       },
-      error => console.log(error)
+      error => iziToast.error({ message: 'There was an error, invitations can\'t be getted.' })
     );
   }
 
@@ -111,8 +107,7 @@ export class InviteComponent implements OnInit, OnDestroy {
     invitation.campaign = this.campaign._id;
     this.invitationService.addInvitation(invitation).subscribe(
       res => {
-        iziToast.success({ message: 'Invitation sended correctly' });
-        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+        iziToast.success({ message: 'Invitation sended successfully' });
         this.getPlayers();
         this.getInvitations();
       },
@@ -124,8 +119,7 @@ export class InviteComponent implements OnInit, OnDestroy {
     var invitation = this.getInvitation(player);
     this.invitationService.deleteInvitation(invitation).subscribe(
       res => {
-        iziToast.success({ message: 'Invitation canceled correctly' });
-        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+        iziToast.success({ message: 'Invitation canceled successfully' });
         this.getPlayers();
         this.getInvitations();
       },

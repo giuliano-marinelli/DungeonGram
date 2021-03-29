@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { ShadowOnlyMaterial } from '@babylonjs/materials';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
@@ -20,7 +20,7 @@ declare var ng;
   templateUrl: './character.component.html',
   styleUrls: ['./character.component.scss']
 })
-export class CharacterComponent implements OnInit {
+export class CharacterComponent implements OnInit, OnDestroy {
   @Input() public character: Character | string;
   @Output("getCharacters") getCharacters: EventEmitter<any> = new EventEmitter();
 
@@ -86,7 +86,10 @@ export class CharacterComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    console.log('ngOnDestroy character.component')
+    console.log('character component disposed')
+    this.scene?.clearCachedVertexData();
+    this.scene?.cleanCachedTextureBuffer();
+    this.scene?.dispose();
     this.engine?.dispose();
   }
 
@@ -123,7 +126,8 @@ export class CharacterComponent implements OnInit {
       this.canvas = this.canvasRef?.nativeElement;
 
       if (this.canvas) {
-        this.engine = new BABYLON.Engine(this.canvas, true);
+        this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true, doNotHandleContextLost: true });
+        this.engine.enableOfflineSupport = false;
         this.scene = new BABYLON.Scene(this.engine);
         this.scene.actionManager = new BABYLON.ActionManager(this.scene);
 
@@ -146,10 +150,6 @@ export class CharacterComponent implements OnInit {
           wearsSelected: this.wears.value,
           height: this.height.value
         });
-
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-        }, 1000);
       } else {
         this.initEditor();
       }

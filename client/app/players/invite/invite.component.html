@@ -69,8 +69,7 @@
       <div class="col-md-8">
         <div class="card-body p-1 text-center">
           <h5 class="card-title text-truncate" style="font-size: 12px; height: 30px;"
-            attr.data-original-title="<b>{{player['username']}}</b><br />{{player['email']}}"
-            data-toggle-tooltip="tooltip" data-placement="right">
+            tippy="<b>{{player['username']}}</b><br />{{player['email']}}" placement="right" [maxWidth]="300">
             {{player['username']}} <br />
             <small *ngIf="campaign.owner == player._id">owner</small>
             <small *ngIf="getInvitation(player) && getInvitation(player).accepted == null">pending</small>
@@ -80,26 +79,22 @@
           <p class="card-text text-right" style="bottom: 0.5rem; right: 0.5rem; min-height: 30px;">
             <span *ngIf="campaign.owner != player._id">
               <button *ngIf="!getInvitation(player)" class="btn btn-sm btn-dark ml-2" (click)="sendInvitation(player)"
-                [hidden]="auth.currentUser._id != campaign.owner" title="Invite" data-toggle-tooltip="tooltip"
-                data-placement="top">
+                [hidden]="auth.currentUser._id != campaign.owner" tippy="Invite">
                 <i class="fa fa-fw fa-envelope"></i>
               </button>
               <button *ngIf="getInvitation(player) && getInvitation(player).accepted == false"
                 class="btn btn-sm btn-dark ml-2" (click)="sendInvitation(player)"
-                [hidden]="auth.currentUser._id != campaign.owner" title="Invite Again" data-toggle-tooltip="tooltip"
-                data-placement="top">
+                [hidden]="auth.currentUser._id != campaign.owner" tippy="Invite Again">
                 <i class="fa fa-fw fa-envelope"></i>
               </button>
               <button *ngIf="getInvitation(player) && getInvitation(player).accepted == null"
                 class="btn btn-sm btn-danger ml-2" (click)="cancelInvitation(player)"
-                [hidden]="auth.currentUser._id != campaign.owner" title="Cancel Invitation"
-                data-toggle-tooltip="tooltip" data-placement="top">
+                [hidden]="auth.currentUser._id != campaign.owner" tippy="Cancel Invitation">
                 <i class="fa fa-fw fa-times"></i>
               </button>
               <button *ngIf="getInvitation(player) && getInvitation(player).accepted != null"
-                class="btn btn-sm btn-danger ml-2" (click)="cancelInvitation(player)"
-                [hidden]="auth.currentUser._id != campaign.owner" title="Remove" data-toggle-tooltip="tooltip"
-                data-placement="top">
+                class="btn btn-sm btn-danger ml-2" (confirm)="cancelInvitation(player)"
+                [hidden]="auth.currentUser._id != campaign.owner" tippy="Remove">
                 <i class="fa fa-fw fa-trash"></i>
               </button>
             </span>

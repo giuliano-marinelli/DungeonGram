@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import {
@@ -11,7 +11,7 @@ import { AssetService } from '../services/asset.service';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss']
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent implements OnInit, OnDestroy {
 
   isLoading = true;
 
@@ -50,7 +50,8 @@ export class EditorComponent implements OnInit {
 
     this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
-    this.engine = new BABYLON.Engine(this.canvas, true);
+    this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true, doNotHandleContextLost: true });
+    this.engine.enableOfflineSupport = false;
     this.scene = this.createScene(); //call the createScene function
 
     //resize canvas on resize window
