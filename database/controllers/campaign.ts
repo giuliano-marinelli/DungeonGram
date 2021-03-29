@@ -78,6 +78,7 @@ class CampaignCtrl extends BaseCtrl {
               maps_info: { "$first": "$maps_info" },
               openedMap: { "$first": "$openedMap" },
               users: { "$first": "$users" },
+              characters: { "$first": "$characters"},
               settings: { "$first": "$settings" },
               invitations: { "$push": "$invitations" }
             }
@@ -154,6 +155,7 @@ class CampaignCtrl extends BaseCtrl {
               maps_info: { "$first": "$maps_info" },
               openedMap: { "$first": "$openedMap" },
               users: { "$first": "$users" },
+              characters: { "$first": "$characters"},
               settings: { "$first": "$settings" },
               invitations: { "$push": "$invitations" }
             }
@@ -326,6 +328,7 @@ class CampaignCtrl extends BaseCtrl {
             maps_info: { "$first": "$maps_info" },
             openedMap: { "$first": "$openedMap" },
             users: { "$first": "$users" },
+            characters: { "$first": "$characters"},
             settings: { "$first": "$settings" },
             invitations: { "$push": "$invitations" }
           }

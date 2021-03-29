@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import * as Colyseus from "colyseus.js";
 import { Controller } from '../shared/controller/controller';
 
@@ -8,12 +8,14 @@ declare var $;
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   @Input() controller: Controller;
   @Input() campaign: any;
 
   chatRoom: any;
   message: string;
+
+  minimized: boolean = false;
 
   constructor() { }
 
@@ -62,21 +64,4 @@ export class ChatComponent implements OnInit {
       this.message = "";
     }
   }
-
-  toggleChat() {
-    $('#chat-messages').toggle();
-    $('#chat-buttons').toggle();
-    $('#chat-send').toggle();
-    if ($("#chat-header .btn").attr('data-original-title') == 'Maximize Chat') {
-      $("#chat-header .btn").attr('data-original-title', 'Minimize Chat');
-      $("#chat-header .btn .material-icons").html('keyboard_arrow_down');
-    } else {
-      $("#chat-header .btn").attr('data-original-title', 'Maximize Chat');
-      $("#chat-header .btn .material-icons").html('keyboard_arrow_up');
-    }
-
-    $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-    $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-  }
-
 }

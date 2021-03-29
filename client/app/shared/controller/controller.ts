@@ -25,7 +25,7 @@ export class Controller {
   updateSetting(setting, value) {
     if (this.userSettings[setting] != null) {
       this.userSettings[setting].value = value;
-      if (this.userSettings[setting].update) this.userSettings[setting].update();
+      if (this.userSettings[setting].update) this.userSettings[setting].update(value);
     }
   }
 

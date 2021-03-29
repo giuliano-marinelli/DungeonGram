@@ -10,6 +10,8 @@ import "@babylonjs/loaders/glTF/2.0/glTFLoader";
 export class Character extends Schema {
   //schema
   id?: string;
+  modelId?: string;
+  map?: string;
   x?: number;
   y?: number;
   direction?: Point;
@@ -21,6 +23,7 @@ export class Character extends Schema {
   height?: number;
   addingMode?: boolean;
   name?: string;
+  description?: string;
   group?: string;
   portrait?: string;
   //game objects
@@ -42,8 +45,6 @@ export class Character extends Schema {
     super(parameters);
 
     this.id = parameters.id;
-
-    this.doMesh();
 
     this.synchronizeSchema(schema,
       {
@@ -77,6 +78,9 @@ export class Character extends Schema {
 
     changes?.forEach((change) => {
       switch (change.field) {
+        case 'map':
+          this.doMesh();
+          break;
         case 'x':
           if (!this.beignDragged) this.animator?.play('Run');
           BABYLON.Animation.CreateAndStartAnimation("moveX", this.mesh, "position.x",
@@ -128,24 +132,32 @@ export class Character extends Schema {
       }
     });
 
+    this.parameters.world.updateCharactersVisibility(this.id);
     if (this.parameters.world.users[this.parameters.token].selectedCharacter != null) {
-      this.parameters.world.updateCharactersVisibility(this.id);
       this.initSelection();
     }
   }
 
   remove() {
     super.remove();
-    this.detachSelection()
-    this.mesh.dispose();
-    this.collider.dispose();
-    this.colliderPhysics.dispose();
-    this.selectionMesh.dispose();
+    this.removeMesh();
+  }
+
+  removeMesh() {
+    this.detachSelection();
+    this.mesh?.dispose();
+    this.collider?.dispose();
+    this.colliderPhysics?.dispose();
+    this.selectionMesh?.dispose();
+    this.mesh = null;
+    this.collider = null;
+    this.colliderPhysics = null;
+    this.selectionMesh = null;
   }
 
   doMesh() {
-    if (!this.mesh) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (!this.mesh && this.map && this.parameters.world.map && this.parameters.world.map?.mapId == this.map) {
         //  BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
         // this.mesh = meshes[0];
         this.mesh = this.parameters.assets.base.clone();
@@ -251,12 +263,21 @@ export class Character extends Schema {
         this.initBeignDragged();
 
         this.update();
-      });
-    }
+      } else if (!this.map || !this.parameters.world.map || this.parameters.world.map?.mapId != this.map) {
+        this.removeMesh();
+      }
+    }, 100);
   }
 
   doWears() {
     if (this.mesh && this.animator) {
+      for (let wearMeshId in this.wearsMeshes) {
+        if (!this.wears[wearMeshId]) {
+          this.animator.unparent(this.wearsMeshes[wearMeshId]);
+          this.wearsMeshes[wearMeshId].dispose();
+          delete this.wearsMeshes[wearMeshId];
+        }
+      }
       for (let wearId in this.wears) {
         if (this.wears[wearId].category != "skin") {
           if (this.wearsMeshes[wearId]) {
@@ -311,6 +332,9 @@ export class Character extends Schema {
       this.selectionMesh.visibility = 0;
       // this.parameters.world.lights.highlightCharacter.removeMesh(this.selectionMesh);
       // this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
+      setTimeout(() => {
+        this.parameters.world.updateCharactersVisibility(this.id);
+      });
     }
   }
 

@@ -51,3 +51,10 @@ input:-webkit-autofill {
 @import "~bootstrap/scss/bootstrap";
 
 @import "~bootstrap-colorpicker/src/sass/colorpicker.scss";
+
+/* Importing HeliPopper CSS files (for tooltips and popovers) */
+@import "~tippy.js/dist/tippy.css";
+
+@import "~tippy.js/themes/translucent.css";
+
+@import "~tippy.js/animations/scale.css";

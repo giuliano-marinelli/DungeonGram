@@ -8,17 +8,16 @@
           <button
             class="btn btn-dark tool-btn {{tool.active ? 'active' : ''}} {{tool.dropdown ? 'dropdown-toggle' : ''}}"
             (click)="callTool($event, tool.name)" attr.data-toggle="{{tool.dropdown ? 'dropdown' : ''}}"
-            attr.data-toggle-tooltip="{{tool.dropdown ? '' : 'tooltip'}}" title="{{tool.dropdown ? '' : tool.label}}"
-            data-placement="right">
+            tippy="{{tool.label}}" [isEnabled]="!tool.dropdown" placement="right">
             <img src="{{tool.image}}">
           </button>
 
           <div *ngIf="tool.dropdown" class="dropdown-menu"
-            [style.width]="tool.name == 'maps' ? '250px' : (tool.name == 'characters' ? '450px' : '200px')">
+            [style.width]="tool.name == 'maps' ? '250px' : (tool.name == 'characters' ? '510px' : '200px')">
             <div [ngSwitch]="tool.name">
               <h5>{{tool.label}}</h5>
 
-              <div *ngSwitchCase="'maps'" id="tool-maps-container">
+              <div *ngSwitchCase="'maps'" id="tool-maps-container" #tool_maps_container>
                 <div id="maps-list">
 
                   <div *ngIf="isLoadingCampaign">
@@ -34,32 +33,21 @@
                       <div class="card h-100">
                         <img src="{{map['imageUrl']}}" class="card-img-top map-img"
                           onerror="this.src='assets/images/game/default_terrain.png'"
-                          attr.data-original-title="<b>{{map['name']}}</b><br />{{map['description']}}"
-                          data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-maps-container"
-                          data-boundary="viewport">
+                          tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
+                          [appendTo]="tool_maps_container">
                         <div class="card-body p-0 map-btn">
-                          <!-- <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private"
-                          data-toggle-tooltip="tooltip" data-placement="top"
-                          class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />
-                        <small class="text-muted">created by {{campaign.owner_info.username}}</small>
-                      </h5> -->
-                          <!-- <p class="card-text campaign-description mb-4" title="{{campaign.description}}"
-                        data-toggle-tooltip="tooltip" data-placement="right">{{campaign.description}}</p> -->
                           <div class="btn-group" role="group">
                             <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
-                              attr.data-original-title="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
-                              data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                              data-boundary="viewport" data-trigger="hover">
+                              tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}" placement="top"
+                              [appendTo]="tool_maps_container">
                               <i class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
                             </button>
                             <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" title="Edit"
-                              data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                              data-boundary="viewport" data-trigger="hover">
+                              tippy="Edit" placement="top" [appendTo]="tool_maps_container">
                               <i class="fa fa-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" (click)="deleteMap(map)" title="Delete"
-                              data-toggle-tooltip="tooltip" data-placement="top" data-container="#tool-maps-container"
-                              data-boundary="viewport" data-trigger="hover">
+                            <button class="btn btn-sm btn-danger" (click)="deleteMap(map)" title="Delete" tippy="Delete"
+                              placement="top" [appendTo]="tool_maps_container">
                               <i class="fa fa-trash"></i>
                             </button>
                           </div>
@@ -72,8 +60,8 @@
                     <div class="col-12 mb-2">
                       <div class="card" style="height: 20px;">
                         <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
-                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Map"
-                          data-toggle-tooltip="tooltip" data-container="#tool-maps-container" data-placement="bottom">
+                          style="width: 100%; height: 100%; font-size: 10px;" title="Add Map" tippy="Add Map"
+                          placement="bottom" [appendTo]="tool_maps_container">
                           <i class="fa fa-plus"></i>
                         </button>
                       </div>
@@ -83,7 +71,7 @@
                 </div>
               </div>
 
-              <div *ngSwitchCase="'characters'" id="tool-characters-container">
+              <div *ngSwitchCase="'characters'" id="tool-characters-container" #tool_characters_container>
                 <div class="row">
                   <div class="col-6">
                     <div id="characters-list">
@@ -93,9 +81,8 @@
                         <div class="col-12 mb-2">
                           <div class="card" style="height: 20px;">
                             <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
-                              style="width: 100%; height: 100%; font-size: 10px;" title="Add Character"
-                              data-toggle-tooltip="tooltip" data-container="#tool-characters-container"
-                              data-boundary="viewport" data-placement="top">
+                              style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Character" placement="top"
+                              [appendTo]="tool_characters_container">
                               <i class="fa fa-plus"></i>
                             </button>
                           </div>
@@ -106,7 +93,7 @@
                         <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
                       </div>
 
-                      <p *ngIf="ownCharacters.length <= 0">
+                      <p *ngIf="ownCharacters.length <= 0" class="text-center">
                         <small class="text-muted">You have not created characters yet</small>
                       </p>
 
@@ -116,22 +103,16 @@
                             <img src="{{character['portrait']}}"
                               class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
                               onerror="this.src='assets/images/characters/default-preview.jpg'"
-                              attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
-                              data-toggle-tooltip="tooltip" data-placement="right"
-                              data-container="#tool-characters-container" data-boundary="viewport"
-                              (click)="tool.actions.addingMode(character)">
+                              tippy="<b>{{character['name']}}</b><br />{{character['description']}}" placement="right"
+                              [appendTo]="tool_characters_container" (click)="tool.actions.addingMode(character)">
                             <div class="card-body p-0 character-btn">
                               <div class="btn-group" role="group">
                                 <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openCharacter(character)"
-                                  title="Edit" data-toggle-tooltip="tooltip" data-placement="top"
-                                  data-container="#tool-characters-container" data-boundary="viewport"
-                                  data-trigger="hover">
+                                  title="Edit" tippy="Edit" placement="top" [appendTo]="tool_characters_container">
                                   <i class="fa fa-pencil"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" (click)="deleteCharacter(character)"
-                                  title="Delete" data-toggle-tooltip="tooltip" data-placement="top"
-                                  data-container="#tool-characters-container" data-boundary="viewport"
-                                  data-trigger="hover">
+                                  title="Delete" tippy="Delete" placement="top" [appendTo]="tool_characters_container">
                                   <i class="fa fa-trash"></i>
                                 </button>
                               </div>
@@ -155,7 +136,7 @@
                         <app-loading [condition]="isLoadingPublicCharacters"></app-loading>
                       </div>
 
-                      <p *ngIf="publicCharacters.length <= 0">
+                      <p *ngIf="publicCharacters.length <= 0" class="text-center">
                         <small class="text-muted">There are no public characters created yet</small>
                       </p>
 
@@ -165,10 +146,8 @@
                             <img src="{{character['portrait']}}"
                               class="card-img-top character-img {{tool.options.addingModeModel?.value == character['_id'] ? 'selected': ''}}"
                               onerror="this.src='assets/images/characters/default-preview.jpg'"
-                              attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
-                              data-toggle-tooltip="tooltip" data-placement="right"
-                              data-container="#tool-characters-container" data-boundary="viewport"
-                              (click)="tool.actions.addingMode(character)">
+                              tippy="<b>{{character['name']}}</b><br />{{character['description']}}" placement="right"
+                              [appendTo]="tool_characters_container" (click)="tool.actions.addingMode(character)">
                           </div>
                         </div>
                       </div>
@@ -183,69 +162,139 @@
                   </div>
 
                   <div class="col-6">
-                    <div id="characters-list-onmap">
-                      <h6>On Map</h6>
+                    <div id="characters-list-onmap" style="width: 225px">
+                      <h6>On Campaign</h6>
 
-                      <div *ngIf="isLoadingOpenedMap">
-                        <app-loading [condition]="isLoadingCampaign"></app-loading>
-                      </div>
+                      <app-loading [condition]="isLoadingCampaign"></app-loading>
 
-                      <p *ngIf="!isLoadingOpenedMap && !tool.options.charactersOnMap?.value">
-                        <small class="text-muted">There is no loaded map</small>
+                      <p *ngIf="!campaign || campaign.maps_info.length <= 0">
+                        <small class="text-muted">You have to create a map first to add some characters</small>
                       </p>
+                      <span *ngIf="campaign?.maps_info?.length > 0">
+                        <select class="custom-select custom-select-sm"
+                          [(ngModel)]="tools.characters.options.selectedMap">
+                          <option value="" [ngValue]="null" selected disabled>Select a map...</option>
+                          <option *ngFor="let map of campaign.maps_info" [value]="map.name" [ngValue]="map._id">
+                            {{map.name | truncate: [24, "..."]}}
+                          </option>
+                        </select>
 
-                      <p
-                        *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value && ObjectValues(tool.options.charactersOnMap?.value).length <= 0">
-                        <small class="text-muted">There are no characters on map</small>
-                      </p>
+                        <p class="text-muted" *ngIf="tools.characters.options.selectedMap != null &&
+                          (ObjectValues(tool.options.charactersOnCampaign.value) |
+                          filter: { addingMode: false, map: tools.characters.options.selectedMap }).length <= 0">
+                          There are no characters on this map
+                        </p>
+                        <div class="row row-cols-2 characters-onmap">
+                          <div
+                            *ngFor="let character of ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: tools.characters.options.selectedMap }"
+                            class="col mb-2 p">
+                            <div class="card h-100">
+                              <img src="{{character.portrait}}"
+                                class="card-img-top character-img {{tool.options.selectedCharacter?.value == character.id ? 'selected': ''}}"
+                                onerror="this.src='assets/images/characters/default-preview.jpg'"
+                                tippy="<b>{{character.name}}</b><br />{{character.description}}" placement="right"
+                                [appendTo]="tool_characters_container" (click)="tool.actions.select(character)">
+                              <div class="card-body p-0 character-btn">
+                                <div class="btn-group" role="group">
+                                  <button class="btn btn-sm btn-dark campaign-btn-alt"
+                                    (click)="openCharacter(character.modelId, character.id)" title="Edit" tippy="Edit"
+                                    placement="top" [appendTo]="tool_characters_container">
+                                    <i class="fa fa-pencil"></i>
+                                  </button>
 
-                      <div *ngIf="!isLoadingOpenedMap && tool.options.charactersOnMap?.value"
-                        class="row row-cols-2 characters-onmap">
-                        <div
-                          *ngFor="let character of ObjectValues(tool.options.charactersOnMap.value) | filter:{ addingMode: false }"
-                          class="col mb-2 p">
-                          <div class="card h-100">
-                            <img src="{{character.portrait}}"
-                              class="card-img-top character-img {{tool.options.selectedCharacter?.value == character.id ? 'selected': ''}}"
-                              onerror="this.src='assets/images/characters/default-preview.jpg'"
-                              attr.data-original-title="<b>{{character.name}}</b><br />[{{character.group}}]"
-                              data-toggle-tooltip="tooltip" data-placement="right"
-                              data-container="#tool-characters-container" data-boundary="viewport"
-                              (click)="tool.actions.select(character)">
-                            <div class="card-body p-0 character-btn">
-                              <div class="btn-group" role="group">
-                                <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)"
-                                  title="Remove" data-toggle-tooltip="tooltip" data-placement="top"
-                                  data-container="#tool-characters-container" data-boundary="viewport"
-                                  data-trigger="hover">
-                                  <i class="fa fa-trash"></i>
-                                </button>
+                                  <ng-template #tool_character_delete_confirmation let-hide>
+                                    <p class="text-center mb-1">Sure?</p>
+                                    <button class="btn btn-sm btn-dark mr-1" (click)="hide()">
+                                      <i class="fa fa-fw fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger"
+                                      (click)="tool.actions.remove(character); hide()">
+                                      <i class="fa fa-fw fa-check"></i>
+                                    </button>
+                                  </ng-template>
+                                  <span tippy="Delete" placement="top" [appendTo]="tool_characters_container">
+                                    <button class="btn btn-sm btn-danger" title="Delete"
+                                      [tippy]="tool_character_delete_confirmation" variation="tooltip"
+                                      [appendTo]="tool_characters_container" placement="top" interactive="true"
+                                      trigger="click">
+                                      <i class="fa fa-trash"></i>
+                                    </button>
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </span>
 
+                      <!-- <div class="accordion" id="characters-list-maps" style="max-height: 555px; overflow: hidden">
+                        <div *ngFor="let map of campaign.maps_info" class="card"
+                          [ngStyle]="{'max-height': (590 - campaign.maps_info.length * 38).toString() +'px'}">
+                          <div class="card-header p-0" id="headingMap{{map._id}}">
+                            <h5 class="mb-0">
+                              <button class="btn btn-link btn-block text-left text-truncate text-decoration-none"
+                                type="button" data-toggle="collapse" attr.data-target="#collapseMap{{map._id}}"
+                                aria-expanded="true" attr.aria-controls="collapseMap{{map._id}}">
+                                {{map.name}}
+                              </button>
+                            </h5>
+                          </div>
+                          <div id="collapseMap{{map._id}}" class="collapse {{openedMap?._id == map._id ? 'show' : ''}}"
+                            attr.aria-labelledby="headingMap{{map._id}}" data-parent="#characters-list-maps">
+                            <div class="card-body">
+                              <p class="text-muted" style="margin-bottom: 1000px;"
+                                *ngIf="(ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: map._id }).length <= 0">
+                                There are no characters on this map
+                              </p>
+                              <div *ngIf="tool.options.charactersOnCampaign?.value"
+                                class="row row-cols-2 characters-onmap">
+                                <div
+                                  *ngFor="let character of ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: map._id }"
+                                  class="col mb-2 p">
+                                  <div class="card h-100">
+                                    <img src="{{character.portrait}}"
+                                      class="card-img-top character-img {{tool.options.selectedCharacter?.value == character.id ? 'selected': ''}}"
+                                      onerror="this.src='assets/images/characters/default-preview.jpg'"
+                                      tippy="<b>{{character.name}}</b><br />{{character.description}}" placement="right"
+                                      [appendTo]="tool_characters_container"
+                                      (click)="tool.actions.select(character)">
+                                    <div class="card-body p-0 character-btn">
+                                      <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-danger" (click)="tool.actions.remove(character)"
+                                          title="Remove" tippy="Remove" placement="top" [appendTo]="tool_characters_container">
+                                          <i class="fa fa-trash"></i>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
               </div>
 
               <div *ngSwitchCase="'grid'" id="tool-grid-container">
-                <div *ngIf="tools.users.options.isDM?.value" class="form-group">
-                  <label>Width</label>
-                  <label style="float: right">{{grid_width.value}}</label>
-                  <input type="range" class="form-control-range" #grid_width
-                    (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
-                    max="1000" step="2" value="{{tool.options.gridWidth?.value}}" />
-                </div>
-                <div *ngIf="tools.users.options.isDM?.value" class="form-group">
-                  <label>Height</label>
-                  <label style="float: right">{{grid_height.value}}</label>
-                  <input type="range" class="form-control-range" #grid_height
-                    (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
-                    max="1000" step="2" value="{{tool.options.gridHeight?.value}}" />
-                </div>
+                <span *ngIf="tools.users.options.isDM?.value">
+                  <div class="form-group">
+                    <label>Width</label>
+                    <label style="float: right">{{grid_width.value}}</label>
+                    <input type="range" class="form-control-range" #grid_width
+                      (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value  })" min="10"
+                      max="1000" step="2" value="{{tool.options.gridWidth?.value}}" />
+                  </div>
+                  <div class="form-group">
+                    <label>Height</label>
+                    <label style="float: right">{{grid_height.value}}</label>
+                    <input type="range" class="form-control-range" #grid_height
+                      (change)="tool.actions.gridSize({ width: grid_width.value, height: grid_height.value })" min="10"
+                      max="1000" step="2" value="{{tool.options.gridHeight?.value}}" />
+                  </div>
+                </span>
                 <div class="custom-control custom-switch">
                   <input type="checkbox" class="custom-control-input" id="tool-grid-show" #grid_show
                     (change)="tool.actions.show(grid_show.checked)" [(ngModel)]="tool.options.tilemapShowGrid.value">
@@ -253,14 +302,14 @@
                 </div>
               </div>
 
-              <div *ngSwitchCase="'walls'" id="tool-walls-container">
+              <div *ngSwitchCase="'walls'" id="tool-walls-container" #tool_walls_container>
                 <div class="form-check form-check-inline">
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-large" #walls_type_wall_large value="large"
                       (change)="tool.actions.size(walls_type_wall_large.value)" checked>
-                    <img src="assets/images/tools/walls/wall_large.png" alt="Large" data-toggle-tooltip="tooltip"
-                      title="Large" data-placement="bottom" data-container="#tool-walls-container">
+                    <img src="assets/images/tools/walls/wall_large.png" alt="Large" tippy="Large" placement="bottom"
+                      [appendTo]="tool_walls_container">
                   </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -268,8 +317,8 @@
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-medium" #walls_type_wall_medium value="medium"
                       (change)="tool.actions.size(walls_type_wall_medium.value)">
-                    <img src="assets/images/tools/walls/wall_medium.png" alt='Medium' data-toggle-tooltip="tooltip"
-                      title="Medium" data-placement="bottom" data-container="#tool-walls-container">
+                    <img src="assets/images/tools/walls/wall_medium.png" alt="Medium" tippy="Medium" placement="bottom"
+                      [appendTo]="tool_walls_container">
                   </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -277,8 +326,8 @@
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-small" #walls_type_wall_small value="small"
                       (change)="tool.actions.size(walls_type_wall_small.value)">
-                    <img src="assets/images/tools/walls/wall_small.png" alt='Small' data-toggle-tooltip="tooltip"
-                      title="Small" data-placement="bottom" data-container="#tool-walls-container">
+                    <img src="assets/images/tools/walls/wall_small.png" alt="Small" tippy="Small" placement="bottom"
+                      [appendTo]="tool_walls_container">
                   </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -286,9 +335,8 @@
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-collider" #walls_type_wall_collider value="collider"
                       (change)="tool.actions.size(walls_type_wall_collider.value)">
-                    <img src="assets/images/tools/walls/wall_collider.png" alt='Only Collider'
-                      data-toggle-tooltip="tooltip" title="Only Collider" data-placement="bottom"
-                      data-container="#tool-walls-container">
+                    <img src="assets/images/tools/walls/wall_collider.png" alt="Only Collider" tippy="Only Collider"
+                      placement="bottom" [appendTo]="tool_walls_container">
                   </label>
                 </div>
 
@@ -388,15 +436,15 @@
                 </div>
               </div>
 
-              <div *ngSwitchCase="'figure'" id="tool-figure-container">
+              <div *ngSwitchCase="'figure'" id="tool-figure-container" #tool_figure_container>
                 <div class="form-check form-check-inline">
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-figure-type"
                       id="tool-figure-type-triangle" #figure_type_triangle value="triangle"
                       (change)="tool.actions.type(figure_type_triangle.value)" checked>
                     <!-- <label class="form-check-label" for="tool-figure-type-triangle">Cone</label> -->
-                    <img src="assets/images/tools/figures/triangle.png" alt="Cone" data-toggle-tooltip="tooltip"
-                      title="Cone" data-placement="bottom" data-container="#tool-figure-container">
+                    <img src="assets/images/tools/figures/triangle.png" alt="Cone" tippy="Cone" placement="bottom"
+                      [appendTo]="tool_figure_container">
                   </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -405,8 +453,8 @@
                       id="tool-figure-type-circle" #figure_type_circle value="circle"
                       (change)="tool.actions.type(figure_type_circle.value)">
                     <!-- <label class="form-check-label" for="tool-figure-type-circle">Sphere</label> -->
-                    <img src="assets/images/tools/figures/circle.png" alt='Sphere' data-toggle-tooltip="tooltip"
-                      title="Sphere" data-placement="bottom" data-container="#tool-figure-container">
+                    <img src="assets/images/tools/figures/circle.png" alt="Sphere" tippy="Sphere" placement="bottom"
+                      [appendTo]="tool_figure_container">
                   </label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -415,8 +463,8 @@
                       id="tool-figure-type-square" #figure_type_square value="square"
                       (change)="tool.actions.type(figure_type_square.value)">
                     <!-- <label class="form-check-label" for="tool-figure-type-square">Cube</label> -->
-                    <img src="assets/images/tools/figures/square.png" alt='Cube' data-toggle-tooltip="tooltip"
-                      title="Cube" data-placement="bottom" data-container="#tool-figure-container">
+                    <img src="assets/images/tools/figures/square.png" alt="Cube" tippy="Cube" placement="bottom"
+                      [appendTo]="tool_figure_container">
                   </label>
                 </div>
 
@@ -469,18 +517,19 @@
     </div>
   </div>
 
-  <div id="selection-tools" class="{{tools.characters.options.selectedCharacter?.value && tools.maps.options.openedMap?.value ? 'show' : ''}}">
+  <div id="selection-tools"
+    class="{{tools.characters.options.selectedCharacter?.value && tools.maps.options.openedMap?.value ? 'show' : ''}}">
     <span>
-      <img class="selection-portrait float-right" src="{{tools.characters.options.selectedCharacterObj.value?.portrait}}"
+      <img class="selection-portrait float-right"
+        src="{{tools.characters.options.selectedCharacterObj.value?.portrait}}"
         onerror="this.src='assets/images/characters/default-preview.jpg'">
-      <!-- attr.data-original-title="<b>{{character['name']}}</b><br />{{character['description']}}"
-      data-toggle-tooltip="tooltip" data-placement="right" data-container="#tool-characters-container"
-      data-boundary="viewport" (click)="tool.actions.addingMode(character)"> -->
       <div class="selection-title">
         <h5>{{tools.characters.options.selectedCharacterObj.value?.name}}</h5>
-        <h6 class="text-muted">{{tools.characters.options.selectedCharacterObj.value?.group}}</h6>
+        <!-- <h6 class="text-muted">{{tools.characters.options.selectedCharacterObj.value?.group}}</h6> -->
       </div>
-
+      <div class="selection-content">
+        <i class="fa fa-fw fa-eye"></i> {{tools.characters.options.selectedCharacterObj.value?.visionRange}}
+      </div>
     </span>
   </div>
 

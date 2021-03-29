@@ -9,6 +9,10 @@ import { Utils } from '../utils';
 import { default as CharacterDB } from '../../database/models/character';
 
 export class Character extends Schema {
+  @type("string")
+  modelId;
+  @type("string")
+  map;
   @type("number")
   x = 0;
   @type("number")
@@ -32,7 +36,9 @@ export class Character extends Schema {
   @type("string")
   name;
   @type("string")
-  group;
+  description;
+  @type("string")
+  group = 'Ungrouped';
   @type("string")
   portrait;
   //internal attributes
@@ -52,8 +58,8 @@ export class Character extends Schema {
   @type('boolean')
   destroy: boolean = false;
 
-  db: any;
   dbId: string;
+  db: any;
 
   constructor() {
     super();
@@ -75,15 +81,26 @@ export class Character extends Schema {
     // this.wears[Utils.uuidv4()] = new Wear('legs', 'knees', 'metal.kneepads', '#c8e1eb');
   }
 
-  async load(characterId: string) {
-    this.dbId = characterId;
-    this.db = await CharacterDB.findOne({ _id: characterId });
+  async load(characterId?: string) {
+    if (characterId) {
+      this.dbId = characterId;
+      this.modelId = characterId.toString();
+    }
+    this.db = await CharacterDB.findOne({ _id: this.dbId });
 
     if (this.db) {
+      //remove old wears (in case there where some)
+      for (let wearId in this.wears) {
+        delete this.wears[wearId];
+      }
+      //add new wears
       this.db.wears.forEach((wear) => {
         this.wears[Utils.uuidv4()] = new Wear(wear.category, wear.subcategory, wear.name, wear.color);
       });
 
+      this.name = this.db.name;
+      this.description = this.db.description;
+      this.visionRange = this.db.visionRange;
       this.height = this.db.height;
       this.portrait = this.db.portrait;
     }

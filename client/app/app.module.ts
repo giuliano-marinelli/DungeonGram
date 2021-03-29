@@ -4,21 +4,6 @@ import { JwtModule } from '@auth0/angular-jwt';
 // Modules
 import { AppRoutingModule } from './app-routing.module';
 import { SharedModule } from './shared/shared.module';
-// Color Pickers
-import { ColorAlphaModule } from 'ngx-color/alpha'; // <color-alpha-picker></color-alpha-picker>
-import { ColorBlockModule } from 'ngx-color/block'; // <color-block></color-block>
-import { ColorChromeModule } from 'ngx-color/chrome'; // <color-chrome></color-chrome>
-import { ColorCircleModule } from 'ngx-color/circle'; // <color-circle></color-circle>
-import { ColorCompactModule } from 'ngx-color/compact'; // <color-compact></color-compact>
-import { ColorGithubModule } from 'ngx-color/github'; // <color-github></color-github>
-import { ColorHueModule } from 'ngx-color/hue'; // <color-hue-picker></color-hue-picker>
-import { ColorMaterialModule } from 'ngx-color/material'; // <color-material></color-material>
-import { ColorPhotoshopModule } from 'ngx-color/photoshop'; // <color-photoshop></color-photoshop>
-import { ColorSketchModule } from 'ngx-color/sketch'; // <color-sketch></color-sketch>
-import { ColorSliderModule } from 'ngx-color/slider'; // <color-slider></color-slider>
-import { ColorSwatchesModule } from 'ngx-color/swatches'; // <color-swatches></color-swatches>
-import { ColorTwitterModule } from 'ngx-color/twitter'; // <color-twitter></color-twitter>
-import { ColorShadeModule } from 'ngx-color/shade'; // <color-shade-picker></color-shade-picker>
 // Services
 import { UserService } from './services/user.service';
 import { CampaignService } from './services/campaign.service';
@@ -39,7 +24,6 @@ import { AccountComponent } from './account/account.component';
 import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { GameComponent } from './game/game.component';
 import { ChatComponent } from './chat/chat.component';
 import { ToolsComponent } from './tools/tools.component';
@@ -49,7 +33,25 @@ import { CampaignComponent } from './campaigns/campaign/campaign.component';
 import { CharacterListComponent } from './characters/character-list/character-list.component';
 import { MapComponent } from './maps/map/map.component';
 import { InviteComponent } from './players/invite/invite.component';
-
+// Style Components
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ConfirmationPopoverModule } from 'angular-confirmation-popover';
+import { TippyModule, tooltipVariation, popperVariation } from '@ngneat/helipopper';
+// Color Pickers
+import { ColorAlphaModule } from 'ngx-color/alpha'; // <color-alpha-picker></color-alpha-picker>
+import { ColorBlockModule } from 'ngx-color/block'; // <color-block></color-block>
+import { ColorChromeModule } from 'ngx-color/chrome'; // <color-chrome></color-chrome>
+import { ColorCircleModule } from 'ngx-color/circle'; // <color-circle></color-circle>
+import { ColorCompactModule } from 'ngx-color/compact'; // <color-compact></color-compact>
+import { ColorGithubModule } from 'ngx-color/github'; // <color-github></color-github>
+import { ColorHueModule } from 'ngx-color/hue'; // <color-hue-picker></color-hue-picker>
+import { ColorMaterialModule } from 'ngx-color/material'; // <color-material></color-material>
+import { ColorPhotoshopModule } from 'ngx-color/photoshop'; // <color-photoshop></color-photoshop>
+import { ColorSketchModule } from 'ngx-color/sketch'; // <color-sketch></color-sketch>
+import { ColorSliderModule } from 'ngx-color/slider'; // <color-slider></color-slider>
+import { ColorSwatchesModule } from 'ngx-color/swatches'; // <color-swatches></color-swatches>
+import { ColorTwitterModule } from 'ngx-color/twitter'; // <color-twitter></color-twitter>
+import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></color-shade-picker>
 @NgModule({
   declarations: [
     AppComponent,
@@ -81,6 +83,30 @@ import { InviteComponent } from './players/invite/invite.component';
       }
     }),
     NgbModule,
+    ConfirmationPopoverModule.forRoot({
+      confirmButtonType: 'danger',
+    }),
+    TippyModule.forRoot({
+      defaultVariation: 'tooltip',
+      variations: {
+        tooltip: {
+          theme: 'translucent',
+          arrow: true,
+          maxWidth: 200,
+          animation: 'scale',
+          trigger: 'mouseenter',
+          offset: [0, 5]
+        },
+        popper: {
+          theme: 'translucent',
+          arrow: true,
+          maxWidth: 200,
+          animation: 'scale',
+          trigger: 'click',
+          offset: [0, 5]
+        },
+      }
+    }),
     ColorAlphaModule,
     ColorBlockModule,
     ColorChromeModule,

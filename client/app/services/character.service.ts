@@ -25,6 +25,10 @@ export class CharacterService {
     return this.http.get<Character>(`/api/character/${character._id}`);
   }
 
+  getCharacterById(id: string): Observable<Character> {
+    return this.http.get<Character>(`/api/character/${id}`);
+  }
+
   editCharacter(character: Character): Observable<any> {
     return this.http.put(`/api/character/${character._id}`, character, { responseType: 'text' });
   }

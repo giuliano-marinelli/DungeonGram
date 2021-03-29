@@ -69,10 +69,6 @@ export class CharacterListComponent implements OnInit {
         data => {
           if (own) this.ownCharacters = data
           else this.publicCharacters = data
-          setTimeout(() => {
-            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-            $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-          });
         },
         error => console.log(error),
         () => {

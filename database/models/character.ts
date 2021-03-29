@@ -13,8 +13,10 @@ const characterSchema = new mongoose.Schema({
     }
   ],
   height: Number,
+  visionRange: Number,
   private: Boolean,
-  portrait: String
+  portrait: String,
+  copyOf: { type: mongoose.Schema.Types.ObjectId, ref: 'Character' }
 });
 
 //omit the __v when returning a character

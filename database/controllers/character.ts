@@ -29,7 +29,8 @@ class CharacterCtrl extends BaseCtrl {
           { $unwind: "$owner_info" },
           {
             $match: {
-              owner: resu.user._id
+              owner: resu.user._id,
+              copyOf: null
             }
           }
         ]).skip(skip).limit(limit);
@@ -47,7 +48,8 @@ class CharacterCtrl extends BaseCtrl {
           {
             $match: {
               owner: { $ne: resu?.user?._id },
-              private: false
+              private: false,
+              copyOf: null
             }
           }
         ]).skip(skip).limit(limit);
@@ -75,12 +77,14 @@ class CharacterCtrl extends BaseCtrl {
       if (own) {
         if (resu.status != 200) throw new Error('unauthorized');
         count = await this.model.count({
-          owner: resu.user._id
+          owner: resu.user._id,
+          copyOf: null
         });
       } else {
         count = await this.model.count({
           owner: { $ne: resu?.user?._id },
-          private: false
+          private: false,
+          copyOf: null
         });
       }
       res.status(200).json(count);
@@ -109,7 +113,7 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
 
-      const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }] });
+      const obj = await this.model.findOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { private: false }, { copyOf: { $ne: null } }] });
       res.status(200).json(obj);
     } catch (err) {
       return res.status(500).json({ error: err.message });
@@ -122,7 +126,7 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
+      await this.model.findOneAndUpdate({ _id: req.params.id, $or: [{ owner: resu.user._id }, { copyOf: { $ne: null } }] }, req.body);
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });

@@ -44,6 +44,8 @@ export class ToolsComponent implements OnInit {
   openedMap: Map;
   isLoadingOpenedMap: boolean = true;
 
+  selectedMap: Map;
+
   ObjectValues = Object.values; //for get values of object
 
   constructor(
@@ -136,7 +138,9 @@ export class ToolsComponent implements OnInit {
       maps: {
         name: "maps", label: "Maps", image: 'assets/images/tools/maps.png', dropdown: true,
         options: {
-          openedMap: this.controller.initSetting("openedMap", null)
+          openedMap: this.controller.initSetting("openedMap", null, (value) => {
+            this.tools.characters.options.selectedMap = value || null;
+          }),
         },
         actions: {
           open: (map) => {
@@ -160,16 +164,12 @@ export class ToolsComponent implements OnInit {
       characters: {
         name: "characters", label: "Characters", image: 'assets/images/tools/characters.png', dropdown: true,
         options: {
-          charactersOnMap: this.controller.initSetting("charactersOnMap", null, () => {
-            setTimeout(() => {
-              $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-              $('.tooltip').tooltip('hide');
-            });
-          }),
+          charactersOnCampaign: this.controller.initSetting("charactersOnCampaign", null),
           addingMode: this.controller.initSetting("addingMode", false),
           selectedCharacter: this.controller.initSetting("selectedCharacter", null),
           selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null),
-          addingModeModel: this.controller.initSetting("addingModeModel", null)
+          addingModeModel: this.controller.initSetting("addingModeModel", null),
+          selectedMap: null //map is selected when openedMap setting change on maps tool options
         },
         actions: {
           addingMode: (character) => {
@@ -181,8 +181,8 @@ export class ToolsComponent implements OnInit {
           remove: (character) => {
             this.controller.send('game', 'character', { id: character.id, action: 'remove' });
           },
-          update: () => {
-            this.controller.send('game', 'character', { action: 'update' });
+          update: (character?) => {
+            this.controller.send('game', 'character', { action: 'update', character: character });
           }
         }
       }
@@ -198,13 +198,10 @@ export class ToolsComponent implements OnInit {
       this.getCharacters(true);
       this.getCharacters(false);
     });
-
-    setTimeout(() => $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true }));
   }
 
   callTool(event, tool) {
     if (this.tools[tool]?.actions?.toggle) this.tools[tool].actions.toggle();
-    $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
     event.stopPropagation(); //to stop dropdown work on click (only on hover)
   }
 
@@ -221,13 +218,7 @@ export class ToolsComponent implements OnInit {
     this.isLoadingCampaign = true;
 
     this.campaignService.getCampaignById(this.campaignId).subscribe(
-      data => {
-        this.campaign = data;
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('.tooltip').tooltip('hide');
-        });
-      },
+      data => this.campaign = data,
       error => console.log(error),
       () => {
         if (this.campaign != null) {
@@ -269,10 +260,6 @@ export class ToolsComponent implements OnInit {
       data => {
         if (own) this.ownCharacters = data
         else this.publicCharacters = data
-        setTimeout(() => {
-          $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-          $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-        });
       },
       error => console.log(error),
       () => {
@@ -282,13 +269,13 @@ export class ToolsComponent implements OnInit {
     );
   }
 
-  openCharacter(character?) {
+  openCharacter(character?, instancedCharacter?) {
     var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
     if (character) modalRef.componentInstance.character = character;
     modalRef.componentInstance.getCharacters.subscribe(() => {
       this.getCharacters(true);
       this.getCharacters(false);
-      this.tools.characters.actions.update();
+      this.tools.characters.actions.update(instancedCharacter);
     });
   }
 
@@ -350,13 +337,7 @@ export class ToolsComponent implements OnInit {
 
     if (this.campaign?.openedMap) {
       this.mapService.getMap(this.campaign.maps_info.find((m: any) => { return m._id == this.campaign.openedMap })).subscribe(
-        data => {
-          this.openedMap = data;
-          setTimeout(() => {
-            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-            $('.tooltip').tooltip('hide');
-          });
-        },
+        data => this.openedMap = data,
         error => console.log(error),
         () => this.isLoadingOpenedMap = false
       );
@@ -397,13 +378,17 @@ export class ToolsComponent implements OnInit {
         ['<button><b>Proceed</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
           self.mapService.deleteMap(map).subscribe(
-            data => iziToast.success({ message: 'Map deleted successfully.' }),
-            error => console.log(error),
-            () => {
-              self.getCampaign();
+            data => {
+              iziToast.success({ message: 'Map deleted successfully.' });
               self.tools.maps.actions.update();
               if (self.tools.maps.options.openedMap.value == map._id)
                 self.tools.maps.actions.discard();
+              if (self.tools.characters.options.selectedMap == map._id)
+                self.tools.characters.options.selectedMap = null;
+            },
+            error => console.log(error),
+            () => {
+              self.getCampaign();
             }
           );
         }]

@@ -27,7 +27,7 @@
               class="{{wearCategory.key == 'head' || wearCategory.key == 'legs' || wearCategory.key == 'skin' ? 'dropleft' : 'dropright'}}">
 
               <button type="button" class="btn btn-dark ce-btn dropdown-toggle" attr.data-toggle="dropdown"
-                attr.data-toggle-tooltip="tooltip" data-placement="right">
+                data-placement="right">
                 <img src="assets/images/characters/{{wearSubcategory.key}}.png" alt="{{wearSubcategory.key}}"
                   onerror="this.src='assets/images/characters/default.png'">
               </button>
@@ -36,7 +36,7 @@
                 class="dropdown-menu {{wearCategory.key == 'arms' || wearCategory.key == 'legs' || wearCategory.key == 'skin' ? 'to-up': ''}}">
                 <h5>{{wearSubcategory.key}}</h5>
 
-                <div id="ce-{{wearSubcategory.key}}-container">
+                <div id="ce-{{wearSubcategory.key}}-container" #ce_wear_subcategory_container>
 
                   <div *ngIf="wearCategory.key != 'skin' && wearSubcategory.key != 'character'"
                     class="form-check form-check-inline">
@@ -45,9 +45,8 @@
                         value="none" (change)="scenario.wearChange(wearCategory.key, wearSubcategory.key, 'none')"
                         checked>
                       <img src="assets/images/characters/none.png" alt="None"
-                        onerror="this.src='assets/images/characters/default.png'" title="None"
-                        data-toggle-tooltip="tooltip" data-placement="bottom"
-                        attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                        onerror="this.src='assets/images/characters/default.png'" tippy="None" placement="bottom"
+                        [appendTo]="ce_wear_subcategory_container">
                     </label>
                   </div>
 
@@ -58,8 +57,7 @@
                         (change)="scenario.wearChange(wearCategory.key, wearSubcategory.key, wear, colorPicker)">
                       <img src="assets/images/characters/{{wearCategory.key}}/{{wearSubcategory.key}}/{{wear}}.png"
                         (error)="onImageError($event, 'assets/images/characters/' + wearSubcategory.key + '.png')"
-                        data-toggle-tooltip="tooltip" data-placement="bottom" title="{{wear}}"
-                        attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                        placement="bottom" tippy="{{wear}}" [appendTo]="ce_wear_subcategory_container">
                     </label>
                   </div>
 
@@ -110,29 +108,33 @@
                         <label>
                           <input class="form-check-input check-image" type="radio" formControlName="height" value=1.25
                             (change)="scenario.heightChange($event)" name="height">
-                          <img src="assets/images/characters/height_large.png" alt="Large" data-toggle-tooltip="tooltip"
-                            title="Large" data-placement="bottom"
-                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                          <img src="assets/images/characters/height_large.png" alt="Large" tippy="Large"
+                            placement="bottom" [appendTo]="ce_wear_subcategory_container">
                         </label>
                       </div>
                       <div class="form-check form-check-inline">
                         <label>
                           <input class="form-check-input check-image" type="radio" formControlName="height" value=1
                             (change)="scenario.heightChange($event)" name="height" checked>
-                          <img src="assets/images/characters/height_medium.png" alt='Medium'
-                            data-toggle-tooltip="tooltip" title="Medium" data-placement="bottom"
-                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                          <img src="assets/images/characters/height_medium.png" alt='Medium' tippy="Medium"
+                            placement="bottom" [appendTo]="ce_wear_subcategory_container">
                         </label>
                       </div>
                       <div class="form-check form-check-inline">
                         <label>
                           <input class="form-check-input check-image" type="radio" formControlName="height" value=0.75
                             (change)="scenario.heightChange($event)" name="height">
-                          <img src="assets/images/characters/height_small.png" alt='Small' data-toggle-tooltip="tooltip"
-                            title="Small" data-placement="bottom"
-                            attr.data-container="#ce-{{wearSubcategory.key}}-container">
+                          <img src="assets/images/characters/height_small.png" alt='Small' tippy="Small"
+                            placement="bottom" [appendTo]="ce_wear_subcategory_container">
                         </label>
                       </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label>Vision Range <span class="text-muted">(sq)</span></label>
+                      <label style="float: right">{{visionRange.value}}</label>
+                      <input type="range" class="form-control-range" formControlName="visionRange" min="0" max="200"
+                        step="1" />
                     </div>
 
                     <div class="custom-control custom-checkbox">

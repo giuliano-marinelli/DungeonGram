@@ -12,5 +12,6 @@ export class Campaign {
   maps_info?: object[];
   openedMap?: string;
   openedMap_info?: object;
-  settings: object;
+  characters?: object[];
+  settings?: object;
 }

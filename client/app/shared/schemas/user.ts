@@ -78,19 +78,19 @@ export class User extends Schema {
             break;
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();
-            if (change.previousValue && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.previousValue]?.initSelection();
-            if (change.value && this.parameters.world.map?.characters) this.parameters.world.map?.characters[change.value]?.initSelection();
+            if (change.previousValue && this.parameters.world.characters) this.parameters.world.characters[change.previousValue]?.initSelection();
+            if (change.value && this.parameters.world.characters) this.parameters.world.characters[change.value]?.initSelection();
             if (this.id == this.parameters.token) {
               this.parameters.controller.updateSetting('selectedCharacter', this.selectedCharacter);
               setTimeout(() => {
                 if (this.selectedCharacter)
-                  this.parameters.controller.updateSetting('selectedCharacterObj', this.parameters.world.map?.characters[this.selectedCharacter])
+                  this.parameters.controller.updateSetting('selectedCharacterObj', this.parameters.world.characters[this.selectedCharacter])
                 else
                   setTimeout(() => { if (!this.selectedCharacter) this.parameters.controller.updateSetting('selectedCharacterObj', null) }, 800);
               }, 400);
 
-              if (change.value && this.parameters.world.map?.characters)
-                this.parameters.world.camera?.focusOnMesh(this.parameters.world.map?.characters[change.value].mesh);
+              if (change.value && this.parameters.world.characters)
+                this.parameters.world.camera?.focusOnMesh(this.parameters.world.characters[change.value].mesh);
             }
 
             break;

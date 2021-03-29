@@ -21,7 +21,7 @@ declare var ng;
   styleUrls: ['./character.component.scss']
 })
 export class CharacterComponent implements OnInit {
-  @Input() public character: Character;
+  @Input() public character: Character | string;
   @Output("getCharacters") getCharacters: EventEmitter<any> = new EventEmitter();
 
   isLoading = true;
@@ -42,7 +42,13 @@ export class CharacterComponent implements OnInit {
   height = new FormControl(1, [
     Validators.required
   ]);
+  visionRange = new FormControl(10, [
+    Validators.required,
+    Validators.min(0),
+    Validators.max(200)
+  ]);
   private = new FormControl(false, []);
+  copyOf = new FormControl(null, []);
 
   //babylon
   @ViewChild('renderCanvasCharacter') canvasRef: ElementRef;
@@ -70,7 +76,9 @@ export class CharacterComponent implements OnInit {
       description: this.description,
       wears: this.wears,
       height: this.height,
-      private: this.private
+      visionRange: this.visionRange,
+      private: this.private,
+      copyOf: this.copyOf
     });
     if (this.character) this.getCharacter(); else this.isLoading = false;
 
@@ -149,7 +157,8 @@ export class CharacterComponent implements OnInit {
   }
 
   getCharacter(): void {
-    this.characterService.getCharacter(this.character).subscribe(
+    var characterId = this.character instanceof Object ? this.character._id : this.character;
+    this.characterService.getCharacterById(characterId).subscribe(
       data => {
         this.characterForm.patchValue(data)
       },

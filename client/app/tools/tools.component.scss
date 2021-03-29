@@ -140,6 +140,7 @@
   min-height: 200px;
   width: 210px;
   margin-bottom: 10px;
+  margin-left: 10px;
 }
 
 .characters-public {
@@ -148,17 +149,20 @@
   min-height: 200px;
   width: 210px;
   margin-bottom: 10px;
+  margin-left: 10px;
 }
 
 .characters-onmap {
   overflow: auto;
-  max-height: 550px;
+  max-height: 515px;
   width: 210px;
-  margin-bottom: 10px;
+  margin-left: 0px;
+  margin-top: 10px;
 }
 
 .characters-add {
   width: 210px;
+  margin-left: 10px;
 }
 
 /* HIDE RADIO */
@@ -201,14 +205,28 @@
 }
 
 #selection-tools .selection-title {
-  position: absolute;
   width: 100px;
+  height: 0px;
   opacity: 0;
   padding-top: 5px;
   transition: all 200ms;
 }
 
 #selection-tools.show .selection-title {
+  height: auto;
+  opacity: 1;
+}
+
+#selection-tools .selection-content {
+  width: 100px;
+  height: 0px;
+  opacity: 0;
+  padding-top: 5px;
+  transition: all 200ms;
+}
+
+#selection-tools.show .selection-content {
+  height: auto;
   opacity: 1;
 }
 

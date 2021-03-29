@@ -73,10 +73,6 @@ export class CampaignListComponent implements OnInit {
         data => {
           if (own) this.ownCampaigns = data
           else this.publicCampaigns = data
-          setTimeout(() => {
-            $('[data-toggle-tooltip="tooltip"]').tooltip({ html: true });
-            $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
-          });
         },
         error => console.log(error),
         () => {
@@ -107,7 +103,7 @@ export class CampaignListComponent implements OnInit {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
           self.campaignService.deleteCampaign(campaign).subscribe(
             data => iziToast.success({ message: 'Campaign deleted successfully.' }),
-            error => console.log(error),
+            error => iziToast.error({ message: 'There was an error, campaign can\'t be deleted.' }),
             () => {
               self.getCampaigns(true);
               self.getCampaigns(false)
@@ -140,13 +136,12 @@ export class CampaignListComponent implements OnInit {
     var invitation = this.getInvitation(campaign);
     invitation.accepted = true;
     this.invitationService.editInvitation(invitation).subscribe(
-      res => {
-        iziToast.success({ message: 'Invitation accepted' });
-        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+      data => iziToast.success({ message: 'Invitation accepted' }),
+      error => iziToast.error({ message: 'There was an error, invitation can\'t be accepted.' }),
+      () => {
         this.getCampaigns(true);
         this.getCampaigns(false);
-      },
-      error => iziToast.error({ message: 'There was an error, invitation can\'t be accepted.' })
+      }
     );
   }
 
@@ -154,14 +149,46 @@ export class CampaignListComponent implements OnInit {
     var invitation = this.getInvitation(campaign);
     invitation.accepted = false;
     this.invitationService.editInvitation(invitation).subscribe(
-      res => {
-        iziToast.success({ message: 'Invitation accepted' });
-        $('[data-toggle-tooltip="tooltip"]').tooltip('hide');
+      data => iziToast.success({ message: 'Invitation denied' }),
+      error => iziToast.error({ message: 'There was an error, invitation can\'t be denied.' }),
+      () => {
         this.getCampaigns(true);
         this.getCampaigns(false);
-      },
-      error => iziToast.error({ message: 'There was an error, invitation can\'t be accepted.' })
+      }
     );
+  }
+
+  leaveInvitation(campaign: Campaign): void {
+    var self = this;
+    iziToast.question({
+      timeout: false,
+      close: false,
+      overlay: true,
+      displayMode: 'replace',
+      zindex: 1051,
+      color: 'red',
+      icon: 'fa fa-trash',
+      message: 'Are you sure to leave the campaign <b>' + campaign.title + '</b>?',
+      position: 'topCenter',
+      buttons: [
+        ['<button>Cancel</button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }, true],
+        ['<button><b>Proceed</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          var invitation = self.getInvitation(campaign);
+          invitation.accepted = false;
+          self.invitationService.editInvitation(invitation).subscribe(
+            data => iziToast.success({ message: 'You leaved the campaign successfully.' }),
+            error => iziToast.error({ message: 'There was an error, you can\'t leave the campaign.' }),
+            () => {
+              self.getCampaigns(true);
+              self.getCampaigns(false)
+            }
+          );
+        }]
+      ]
+    });
   }
 
   getInvitation(campaign: Campaign): Invitation {

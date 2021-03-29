@@ -6,6 +6,8 @@ export class Character {
   description?: string;
   wears?: object[];
   height?: number;
+  visionRange?: number;
   private?: boolean;
   portrait?: string;
+  copyOf?: string;
 }

@@ -11,6 +11,7 @@ import { LoadingComponent } from './loading/loading.component';
 import { LeaveGuardWarningComponent } from './leave-guard-warning/leave-guard-warning.component';
 // Pipes
 import { FilterPipe } from './pipes/filter.pipe';
+import { TruncatePipe } from './pipes/truncate.pipe';
 @NgModule({
   imports: [
     BrowserModule,
@@ -29,14 +30,16 @@ import { FilterPipe } from './pipes/filter.pipe';
     ToastComponent,
     LoadingComponent,
     // Shared Pipes
-    FilterPipe
+    FilterPipe,
+    TruncatePipe
   ],
   declarations: [
     GlobalComponent,
     ToastComponent,
     LoadingComponent,
     LeaveGuardWarningComponent,
-    FilterPipe
+    FilterPipe,
+    TruncatePipe
   ],
   providers: [
     ToastComponent

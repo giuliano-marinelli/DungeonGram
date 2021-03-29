@@ -32,6 +32,7 @@ const campaignSchema = new mongoose.Schema({
       settings: Object,
     }
   ],
+  characters: [Object],
   settings: Object
 });
 

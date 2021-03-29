@@ -5,8 +5,8 @@
   </div>
   <div class="card-body" *ngIf="!isLoadingOwn">
     <p class="card-text">
-      <span class="d-inline-block" title="{{!auth.loggedIn ? 'You must be logged in to create campaigns' : ''}}"
-        attr.data-toggle-tooltip="{{!auth.loggedIn ? 'tooltip' : ''}}" data-placement="right">
+      <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
+        [isEnabled]="!auth.loggedIn">
         <button type="button" class="btn btn-dark campaign-btn" (click)="openCampaign()" [disabled]="!auth.loggedIn"
           attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
           <i class="fa fa-plus"></i> New Campaign
@@ -52,13 +52,14 @@
   <div class="card h-100 {{getInvitation(campaign) && getInvitation(campaign).accepted == null ? 'invitation' : ''}}">
     <img src="assets/images/campaigns/default.jpg" class="card-img-top campaign-img" alt="{{campaign.title}}">
     <div class="card-body">
-      <h5 class="card-title"><i *ngIf="campaign.private" title="This campaign is private" data-toggle-tooltip="tooltip"
-          data-placement="top" class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />
+      <h5 class="card-title"><i *ngIf="campaign.private" tippy="This campaign is private"
+          class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />
         <small class="text-muted">created by {{campaign.owner_info.username}}</small>
       </h5>
       <p class="card-text campaign-description mb-4"
-        title="{{campaign.description}}{{getPlayers(campaign).length > 0 ? '<br /><small class=\'text-muted\'>players: ' + getPlayers(campaign).join(', ') + '</small>': ''}}"
-        data-toggle-tooltip="tooltip" data-placement="right">
+        tippy="{{campaign.description}}{{campaign.description && getPlayers(campaign).length > 0 ? '<br />' : ''}}
+        {{getPlayers(campaign).length > 0 ? '<small class=\'text-muted\'>players: ' + getPlayers(campaign).join(', ') + '</small>': ''}}"
+        [isEnabled]="campaign.description || getPlayers(campaign).length > 0" placement="right">
         {{campaign.description}}
         <br />
         <small class="text-muted" *ngIf="getPlayers(campaign).length > 0">
@@ -71,18 +72,15 @@
           <i class="fa fa-play"></i> Play
         </button>
         <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openInvite(campaign)"
-          [hidden]="auth.currentUser._id != campaign.owner" title="Invite Players" data-toggle-tooltip="tooltip"
-          data-placement="top">
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Invite Players">
           <i class="fa fa-user-plus"></i>
         </button>
         <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openCampaign(campaign)"
-          [hidden]="auth.currentUser._id != campaign.owner" title="Edit" data-toggle-tooltip="tooltip"
-          data-placement="top">
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Edit">
           <i class="fa fa-pencil"></i>
         </button>
         <button class="btn btn-sm btn-danger ml-2" (click)="deleteCampaign(campaign)"
-          [hidden]="auth.currentUser._id != campaign.owner" title="Delete" data-toggle-tooltip="tooltip"
-          data-placement="top">
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Delete">
           <i class="fa fa-trash"></i>
         </button>
 
@@ -93,6 +91,10 @@
         <button class="btn btn-sm btn-danger ml-2" (click)="deniedInvitation(campaign)"
           *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
           <i class="fa fa-times"></i> Denied
+        </button>
+        <button class="btn btn-sm btn-danger ml-2" (click)="leaveInvitation(campaign)" tippy="Leave"
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == true">
+          <i class="fa fa-sign-out"></i>
         </button>
       </p>
     </div>
