@@ -228,7 +228,7 @@ export class World extends Schema {
     if (selectedCharacter && this.characters[selectedCharacter]?.mesh && this.characters[selectedCharacter]?.collider) {
       setTimeout(() => {
         if (this.map) {
-          this.characters[selectedCharacter].animator.resetVisibility();
+          this.characters[selectedCharacter].animator.show();
           // this.map.characters[selectedCharacter].visionRays.forEach(visionRay => {
           //   visionRay?.dispose();
           // });
@@ -242,7 +242,7 @@ export class World extends Schema {
           }
           this.characters[selectedCharacter].collider.isCollible = true;
           // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
-          //   if (characterMesh) characterMesh.animator.resetVisibility();
+          //   if (characterMesh) characterMesh.animator.show();
           // });
         }
       }, this.characters[selectedCharacter].movementCooldown);
@@ -253,10 +253,10 @@ export class World extends Schema {
             if (this.characters[character].mesh) {
               if (this.users[this.parameters.token]?.isDM) {
                 this.characters[character].collider.isPickable = true;
-                this.characters[character].animator.resetVisibility();
+                this.characters[character].animator.show();
               } else {
                 this.characters[character].collider.isPickable = false;
-                this.characters[character].animator.visibility(0);
+                this.characters[character].animator.hide();
               }
             }
           }
@@ -282,9 +282,9 @@ export class World extends Schema {
         return mesh.isCollible && (!mesh.isCharacter || mesh.name == this.characters[character].id)
       })?.pickedMesh;
       if (pickedMesh && this.characters[character].id == pickedMesh.name)
-        this.characters[character].animator.resetVisibility();
+        this.characters[character].animator.show();
       else {
-        this.characters[character].animator.visibility(0);
+        this.characters[character].animator.hide();
         this.characters[character].collider.isPickable = false;
       }
     }

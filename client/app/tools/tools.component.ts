@@ -183,6 +183,12 @@ export class ToolsComponent implements OnInit {
           },
           update: (character?) => {
             this.controller.send('game', 'character', { action: 'update', character: character });
+          },
+          assignTo: (character, user) => {
+            this.controller.send('game', 'character', { action: 'assignTo', character: character, user: user });
+          },
+          moveToMap: (character, map) => {
+            this.controller.send('game', 'character', { action: 'moveToMap', character: character, map: map });
           }
         }
       }
@@ -354,5 +360,9 @@ export class ToolsComponent implements OnInit {
         this.getCampaign();
       }
     );
+  }
+
+  getPlayers(campaign: Campaign): string[] {
+    return campaign["invitations"]?.filter(invitation => invitation.accepted).map(invitation => invitation.recipient_info);
   }
 }

@@ -199,6 +199,22 @@ export class World extends Schema {
         validate: (client: string, data: any) => {
           return (data.character == null || typeof data.character === "string")
         }
+      },
+      assignTo: {
+        do: (client: string, data: any) => {
+          this.users[data.user].selectedCharacter = data.character;
+        },
+        validate: (client: string, data: any) => {
+          return data.character != null && typeof data.character === "string" && data.user != null && typeof data.user === "string" && this.users[client].isDM
+        }
+      },
+      moveToMap: {
+        do: (client: string, data: any) => {
+          this.characters[data.character].map = data.map;
+        },
+        validate: (client: string, data: any) => {
+          return data.character != null && typeof data.character === "string" && data.map != null && typeof data.map === "string" && this.users[client].isDM
+        }
       }
     },
     wall: {

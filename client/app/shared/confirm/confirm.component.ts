@@ -13,7 +13,7 @@ export class ConfirmComponent {
   @Input() confirmAppendTo: Element;
   @Input() confirmDoubleCheck: Boolean = false;
   @Input() confirmDoubleCheckMessage: string = "Really?";
-  @Input() confirmDoubleCheckPlacement: Placement = 'right';
+  @Input() confirmDoubleCheckPlacement: Placement = 'right-end';
 
   @Output() confirm = new EventEmitter();
   @Output() reject = new EventEmitter();

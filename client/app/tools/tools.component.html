@@ -190,6 +190,12 @@
                             *ngFor="let character of ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: tools.characters.options.selectedMap }"
                             class="col mb-2 p">
                             <div class="card h-100">
+                              <button class="btn position-absolute" style="right: 0; z-index: 1;"
+                                [tippy]="character_context_menu" interactive="true"
+                                [appendTo]="tool_characters_container" trigger="click" placement="right-start"
+                                [maxWidth]="300">
+                                <i class="fa fa-ellipsis-v"></i>
+                              </button>
                               <img src="{{character.portrait}}"
                                 class="card-img-top character-img {{tool.options.selectedCharacter?.value == character.id ? 'selected': ''}}"
                                 onerror="this.src='assets/images/characters/default-preview.jpg'"
@@ -210,6 +216,49 @@
                                 </div>
                               </div>
                             </div>
+                            <ng-template #character_context_menu>
+                              <div class="list-group">
+                                <button type="button" class="list-group-item list-group-item-action p-2"
+                                  [tippy]="character_context_submenu_assign_to" interactive="true"
+                                  [appendTo]="tool_characters_container" placement="right-start">
+                                  <i class="fa fa-fw fa-user"></i> Assign to Player <i
+                                    class="fa fa-fw fa-caret-right pull-right"></i>
+                                </button>
+                                <ng-template #character_context_submenu_assign_to>
+                                  <div class="list-group">
+                                    <button *ngFor="let player of getPlayers(campaign)" type="button"
+                                      class="list-group-item list-group-item-action p-2"
+                                      (click)="tool.actions.assignTo(character.id, player._id)">
+                                      {{player.username}}
+                                    </button>
+                                  </div>
+                                </ng-template>
+                                <button type="button" class="list-group-item list-group-item-action p-2"
+                                  [tippy]="character_context_submenu_move_to_map" interactive="true"
+                                  [appendTo]="tool_characters_container" placement="right-start">
+                                  <i class="fa fa-fw fa-map-marker"></i> Move to Map <i
+                                    class="fa fa-fw fa-caret-right pull-right"></i>
+                                </button>
+                                <ng-template #character_context_submenu_move_to_map>
+                                  <div class="list-group">
+                                    <button *ngFor="let map of campaign?.maps_info" type="button"
+                                      class="list-group-item list-group-item-action p-2"
+                                      (click)="tool.actions.moveToMap(character.id, map._id)">
+                                      {{map.name}}
+                                    </button>
+                                  </div>
+                                </ng-template>
+                                <button type="button" class="list-group-item list-group-item-action p-2"
+                                  (click)="openCharacter(character.modelId, character.id)">
+                                  <i class="fa fa-fw fa-pencil"></i> Edit
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action p-2"
+                                  style="color: #dc3545;" (confirm)="tool.actions.remove(character)"
+                                  [confirmAppendTo]="tool_characters_container" confirmPlacement="right-start">
+                                  <i class="fa fa-fw fa-trash"></i> Delete
+                                </button>
+                              </div>
+                            </ng-template>
                           </div>
                         </div>
                       </span>
@@ -504,8 +553,9 @@
     </div>
   </div>
 
-  <div id="selection-tools"
-    class="{{tools.characters.options.selectedCharacter?.value && tools.maps.options.openedMap?.value ? 'show' : ''}}">
+  <div id="selection-tools" class="{{tools.characters.options.selectedCharacter?.value &&  tools.characters.options.selectedCharacterObj?.value  &&
+    tools.characters.options.selectedCharacterObj?.value?.map == tools.maps.options.openedMap?.value &&
+    tools.maps.options.openedMap?.value ? 'show' : ''}}">
     <span>
       <img class="selection-portrait float-right"
         src="{{tools.characters.options.selectedCharacterObj.value?.portrait}}"

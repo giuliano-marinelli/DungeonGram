@@ -162,7 +162,7 @@ export class Character extends Schema {
         // this.mesh = meshes[0];
         this.mesh = this.parameters.assets.base.clone();
         this.mesh.skeleton = this.parameters.assets.base.skeleton.clone();
-        this.mesh.setEnabled(true);
+        // this.mesh.setEnabled(true);
         this.mesh.name = this.id;
 
         //scaling mesh by height
@@ -289,7 +289,7 @@ export class Character extends Schema {
             // BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
             // this.wearsMeshes[wearId] = meshes[0];
             this.wearsMeshes[wearId] = this.parameters.assets[this.wears[wearId].category][this.wears[wearId].subcategory][this.wears[wearId].name].clone();
-            this.wearsMeshes[wearId].setEnabled(true);
+            // this.wearsMeshes[wearId].setEnabled(true);
             var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
             material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
             this.wearsMeshes[wearId].material = material;
@@ -343,7 +343,7 @@ export class Character extends Schema {
     if (this.addingMode) {
       if (this.animator) {
         this.animator.defaultVisibility = 0.5;
-        this.animator.resetVisibility();
+        this.animator.show();
       }
     }
   }

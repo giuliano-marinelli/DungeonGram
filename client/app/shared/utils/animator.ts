@@ -84,8 +84,21 @@ export class Animator {
     }
   }
 
-  resetVisibility() {
+  enabled(value) {
+    this.mesh.setEnabled(value);
+    for (let childId in this.registeredChildren) {
+      this.registeredChildren[childId].setEnabled(value);
+    }
+  }
+
+  hide() {
+    this.visibility(0);
+    this.enabled(false);
+  }
+
+  show() {
     this.visibility(this.defaultVisibility);
+    this.enabled(true);
   }
 
   rotate(direction?) {
