@@ -93,7 +93,7 @@
     "babylonjs-loaders": "^4.1.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "codelyzer": "^5.2.2",
+    "codelyzer": "^6.0.1",
     "concurrently": "^5.2.0",
     "copyfiles": "^2.3.0",
     "htmlhint": "^0.11.0",
