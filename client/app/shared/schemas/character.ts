@@ -289,6 +289,7 @@ export class Character extends Schema {
             // BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
             // this.wearsMeshes[wearId] = meshes[0];
             this.wearsMeshes[wearId] = this.parameters.assets[this.wears[wearId].category][this.wears[wearId].subcategory][this.wears[wearId].name].clone();
+            this.wearsMeshes[wearId].setEnabled(true);
             var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
             material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
             this.wearsMeshes[wearId].material = material;
