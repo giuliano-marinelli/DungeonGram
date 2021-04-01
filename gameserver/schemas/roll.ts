@@ -51,7 +51,7 @@ export class Roll extends Schema {
     var sum = [];
     this.results.forEach(result => {
       if (Array.isArray(result)) {
-        sum.push('( ' + result.join(' + ') + ' )');
+        sum.push('(' + result.join(' + ') + ')');
       } else {
         sum.push(result);
       }

@@ -15,9 +15,10 @@
           <div *ngIf="tool.dropdown" class="dropdown-menu"
             [style.width]="tool.name == 'maps' ? '250px' : (tool.name == 'characters' ? '510px' : '200px')">
             <div [ngSwitch]="tool.name">
-              <h5>{{tool.label}}</h5>
+
 
               <div *ngSwitchCase="'maps'" id="tool-maps-container" #tool_maps_container>
+                <h5>{{tool.label}}</h5>
                 <div id="maps-list">
 
                   <div *ngIf="isLoadingCampaign">
@@ -72,6 +73,14 @@
               </div>
 
               <div *ngSwitchCase="'characters'" id="tool-characters-container" #tool_characters_container>
+                <h5>{{tool.label}}
+                  <i class="fa fa-info-circle text-muted" [style.font-size.px]="15"
+                    tippy="
+                    <span class='badge badge-secondary'>TIP</span> You can select characters on map using <i>CTRL + Click</i> on them.<br>
+                    <span class='badge badge-secondary'>TIP</span> You can make character look at some place by <i>SHIFT + Click</i> on that place when character is selected.<br>
+                    <span class='badge badge-secondary'>TIP</span> If you hold press <i>ALT Key</i> when click to move the character, it moves to more accuratelly position."
+                    placement="right" [maxWidth]="400"></i>
+                </h5>
                 <div class="row">
                   <div class="col-6">
                     <div id="characters-list">
@@ -315,6 +324,7 @@
               </div>
 
               <div *ngSwitchCase="'grid'" id="tool-grid-container">
+                <h5>{{tool.label}}</h5>
                 <span *ngIf="tools.users.options.isDM?.value">
                   <div class="form-group">
                     <label>Width</label>
@@ -339,6 +349,7 @@
               </div>
 
               <div *ngSwitchCase="'walls'" id="tool-walls-container" #tool_walls_container>
+                <h5>{{tool.label}}</h5>
                 <div class="form-check form-check-inline">
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
@@ -418,6 +429,7 @@
               </div>
 
               <div *ngSwitchCase="'fogOfWar'" id="tool-fogOfWar-container">
+                <h5>{{tool.label}}</h5>
                 <div class="form-group">
                   <label>Visibility</label>
                   <label style="float: right">{{fogOfWar_visibility.value}}</label>
@@ -436,6 +448,7 @@
               </div>
 
               <div *ngSwitchCase="'rule'" id="tool-rule-container">
+                <h5>{{tool.label}}</h5>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="tool-rule-adjust-to"
                     id="tool-rule-adjust-to-half-grid" value="half_grid" #rule_adjust_to_half_grid
@@ -473,6 +486,7 @@
               </div>
 
               <div *ngSwitchCase="'figure'" id="tool-figure-container" #tool_figure_container>
+                <h5>{{tool.label}}</h5>
                 <div class="form-check form-check-inline">
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-figure-type"
@@ -565,8 +579,19 @@
         <!-- <h6 class="text-muted">{{tools.characters.options.selectedCharacterObj.value?.group}}</h6> -->
       </div>
       <div class="selection-content">
-        <i class="fa fa-fw fa-eye" tippy="Vision Range" placement="left"></i>
+        <i class="fa fa-fw fa-eye" tippy="Vision Range" placement="left"></i>&nbsp;
         {{tools.characters.options.selectedCharacterObj.value?.visionRange}}
+        <br>
+        <i class="fa fa-fw fa-signing" tippy="Animations" placement="left"></i>&nbsp;
+        <div class="btn-group">
+          <button class="btn btn-sm btn-sm" tippy="Stand" (click)="tools.characters.actions.animation('None')">St</button>
+          <button class="btn btn-sm btn-sm" tippy="Sit" (click)="tools.characters.actions.animation('Sit')">Si</button>
+          <button class="btn btn btn-sm" tippy="Sleep" (click)="tools.characters.actions.animation('Sleep')">Sl</button>
+          <button class="btn btn btn-sm" tippy="Float" (click)="tools.characters.actions.animation('Float')">Fl</button>
+          <button class="btn btn btn-sm" tippy="Die" (click)="tools.characters.actions.animation('Die')">D1</button>
+          <button class="btn btn btn-sm" tippy="Die 2"
+            (click)="tools.characters.actions.animation('Die.001')">D2</button>
+        </div>
       </div>
     </span>
   </div>

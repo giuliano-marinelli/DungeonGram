@@ -199,13 +199,13 @@
 }
 
 #selection-tools.show {
-  width: 210px;
+  width: 250px;
   opacity: 1;
   border-radius: 25px 50px 5px 5px;
 }
 
 #selection-tools .selection-title {
-  width: 100px;
+  width: 135px;
   height: 0px;
   opacity: 0;
   padding-top: 5px;
@@ -213,12 +213,14 @@
 }
 
 #selection-tools.show .selection-title {
-  height: auto;
   opacity: 1;
+  height: 90px;
+  word-break: break-word;
+  padding-top: 7px;
 }
 
 #selection-tools .selection-content {
-  width: 100px;
+  width: 230px;
   height: 0px;
   opacity: 0;
   padding-top: 5px;

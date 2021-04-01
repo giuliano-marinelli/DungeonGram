@@ -189,6 +189,9 @@ export class ToolsComponent implements OnInit {
           },
           moveToMap: (character, map) => {
             this.controller.send('game', 'character', { action: 'moveToMap', character: character, map: map });
+          },
+          animation: (animation) => {
+            this.controller.send('game', 'character', { action: 'animation', animation: animation });
           }
         }
       }

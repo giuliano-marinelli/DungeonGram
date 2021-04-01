@@ -1,11 +1,17 @@
-import { Client, Room } from "colyseus";
-import { Roll } from '../schemas/roll';
+import { Room, Client } from "colyseus";
+import { Schema, type } from '@colyseus/schema';
+import { Messenger } from '../schemas/messenger';
 
 //database models
 import User from '../../database/models/user';
 import Campaign from '../../database/models/campaign';
 
 import mongoose from 'mongoose';
+
+export class State extends Schema {
+  @type(Messenger)
+  messenger = new Messenger();
+}
 
 export class ChatRoom extends Room {
   clientUser: any = {};
@@ -16,15 +22,19 @@ export class ChatRoom extends Room {
 
     console.log('ChatRoom-', this.roomId, '-: created');
 
-    this.onMessage("message", (client, message) => {
-      console.log('ChatRoom-', this.roomId, '-: client', this.clientUserObj[client.sessionId].username, 'send message =>', message);
-      var roll = new Roll(message);
-      console.log(roll);
-      this.broadcast("messages", '<b>' + this.clientUserObj[client.sessionId].username + '</b> ' +
-        (roll.isRoll
-          ? 'rolling ' + roll.rolls.join(' + ') + '<br>' + (roll.getSum() + ' = ' + roll.getValue())
-          : message ? message : ""
-        ));
+    this.setState(new State());
+
+    this.onMessage("*", (client, type, data) => {
+      if (type == 'message' && data.content && typeof data.content === "string") {
+        console.log('ChatRoom-', this.roomId, '-: client', this.clientUserObj[client.sessionId].username, 'send message =>', data.content);
+        this.state.messenger?.addMessage(data.content, this.clientUserObj[client.sessionId]);
+      }
+
+      // this.broadcast("messages", '<b>' + this.clientUserObj[client.sessionId].username + '</b> ' +
+      //   (roll.isRoll
+      //     ? 'rolling ' + roll.rolls.join(' + ') + '<br>' + (roll.getSum() + ' = ' + roll.getValue())
+      //     : message ? message : ""
+      //   ));
     });
   }
 
@@ -79,12 +89,14 @@ export class ChatRoom extends Room {
 
   onJoin(client) {
     console.log('ChatRoom-', this.roomId, '-: user', this.clientUserObj[client.sessionId].username, 'join');
-    this.broadcast("messages", `<b>${this.clientUserObj[client.sessionId].username}</b> joined.`);
+    // this.state.messenger?.addMessage('<i><b>' + this.clientUserObj[client.sessionId].username + '</b> joined.</i>');
+    // this.broadcast("messages", `<b>${this.clientUserObj[client.sessionId].username}</b> joined.`);
   }
 
   onLeave(client) {
     console.log('ChatRoom-', this.roomId, '-: user', this.clientUserObj[client.sessionId].username, 'leave');
-    this.broadcast("messages", `<b>${this.clientUserObj[client.sessionId].username}</b> left.`);
+    // this.state.messenger?.addMessage('<i><b>' + this.clientUserObj[client.sessionId].username + '</b> leaved.</i>');
+    // this.broadcast("messages", `<b>${this.clientUserObj[client.sessionId].username}</b> left.`);
   }
 
   onDispose() {

@@ -14,7 +14,9 @@ export class Character extends Schema {
   map?: string;
   x?: number;
   y?: number;
+  z?: number = 0.05;
   direction?: Point;
+  animation?: string;
   movementPath?: Path;
   movementCooldown?: number;
   beignDragged?: boolean;
@@ -30,6 +32,7 @@ export class Character extends Schema {
   mesh?: any;
   wearsMeshes?: any = {};
   selectionMesh?: any;
+  selectionMeshZ?: number = 0;
   collider?: any;
   animator?: any;
   visionLight?: any;
@@ -82,25 +85,28 @@ export class Character extends Schema {
           this.doMesh();
           break;
         case 'x':
-          if (!this.beignDragged) this.animator?.play('Run');
+          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.play('Run');
           BABYLON.Animation.CreateAndStartAnimation("moveX", this.mesh, "position.x",
             100, this.movementCooldown / 10, this.mesh?.position.x, this.x,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to && !this.beignDragged)
-                this.animator?.play('Idle');
+                if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
             });
           break;
         case 'y':
-          if (!this.beignDragged) this.animator?.play('Run');
+          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.play('Run');
           BABYLON.Animation.CreateAndStartAnimation("moveZ", this.mesh, "position.z",
             100, this.movementCooldown / 10, this.mesh?.position.z, this.y,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to && !this.beignDragged)
-                this.animator?.play('Idle');
+                if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
             });
           break;
         case 'direction':
           this.animator?.rotate(this.direction);
+          break;
+        case 'animation':
+          this.initAnimation();
           break;
         case 'beignDragged':
           this.initBeignDragged();
@@ -117,8 +123,9 @@ export class Character extends Schema {
         case 'isCollidingPhysics':
           if (this.colliderPhysics)
             this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
-          if (this.isCollidingPhysics && !this.beignDragged)
-            this.animator?.play('Idle');
+          if (this.isCollidingPhysics && !this.beignDragged) {
+            // this.animator?.play('Idle');
+          }
           break;
         case 'wears':
           this.doWears();
@@ -169,7 +176,7 @@ export class Character extends Schema {
         this.mesh.scaling.y = this.height;
 
         //positioning mesh
-        this.mesh.position.y = -0.05;
+        this.mesh.position.y = this.z;
         this.mesh.position.x = this.x;
         this.mesh.position.z = this.y;
         this.mesh.isPickable = false;
@@ -201,7 +208,7 @@ export class Character extends Schema {
         this.selectionMesh = BABYLON.MeshBuilder.CreateCylinder('', { height: 0.05, diameter: 1.75 }, this.parameters.scene);
         this.selectionMesh.parent = this.mesh;
         this.selectionMesh.name = this.id + "-selection";
-        this.selectionMesh.position.y = 0;
+        this.selectionMesh.position.y = this.selectionMeshZ;
         this.selectionMesh.visibility = 0;
         this.selectionMesh.isPickable = false;
         var selectionMeshMaterial = new BABYLON.StandardMaterial("wall", this.parameters.scene);
@@ -262,6 +269,10 @@ export class Character extends Schema {
 
         this.initBeignDragged();
 
+        setTimeout(() => {
+          this.initAnimation();
+        }, 2000);
+
         this.update();
       } else if (!this.map || !this.parameters.world.map || this.parameters.world.map?.mapId != this.map) {
         this.removeMesh();
@@ -314,6 +325,7 @@ export class Character extends Schema {
         //show selection mesh
         // this.selectionMesh.intensity = 1;
         this.selectionMesh.visibility = 1;
+        this.selectionMesh.position.y = this.selectionMeshZ;
         // this.parameters.world.lights.highlightCharacter.addMesh(this.selectionMesh, BABYLON.Color3.Black(), true);
         // this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
       }
@@ -350,19 +362,48 @@ export class Character extends Schema {
 
   initBeignDragged() {
     if (this.beignDragged) {
-      this.animator?.play('Float');
+      if (!this.animation || this.animation == 'None') this.animator?.play('Float');
       if (this.collider) this.collider.isDragged = true;
       BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
         10, 1, this.mesh?.position.y, 0.5, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       BABYLON.Animation.CreateAndStartAnimation("moveYSelection", this.selectionMesh, "position.y",
         10, 1, this.selectionMesh?.position.y, -0.45, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     } else {
-      this.animator?.play('Idle');
+      if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
       if (this.collider) this.collider.isDragged = false;
       BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
-        10, 1, this.mesh?.position.y, -0.05, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        10, 1, this.mesh?.position.y, this.z, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       BABYLON.Animation.CreateAndStartAnimation("moveYSelection", this.selectionMesh, "position.y",
-        10, 1, this.selectionMesh?.position.y, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        10, 1, this.selectionMesh?.position.y, this.selectionMeshZ, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    }
+  }
+
+  initAnimation() {
+    var scaling = 1;
+    var loop = true;
+    switch (this.animation) {
+      case 'Sleep':
+        this.z = -this.height;
+        this.selectionMeshZ = 1;
+        scaling = this.height;
+        break;
+      case 'Die': case 'Die.001':
+        this.z = -0.05;
+        this.selectionMeshZ = 0;
+        loop = false;
+        break;
+      default:
+        this.z = -0.05;
+        this.selectionMeshZ = 0;
+        break;
+    }
+    if (this.animation && this.animation != 'None') this.animator?.play(this.animation, loop);
+    else this.animator?.play('Idle');
+    if (this.mesh) {
+      this.mesh.position.y = this.z;
+      this.selectionMesh.position.y = this.selectionMeshZ;
+      this.mesh.scaling.x = scaling;
+      this.mesh.scaling.z = scaling;
     }
   }
 

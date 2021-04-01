@@ -2,13 +2,12 @@
   display: flex;
   flex-flow: column;
   padding-bottom: 0px;
-  max-height: 300px;
 }
 
 #chat-header {
   flex: 0 0 auto;
   text-align: right;
-  padding-bottom: 5px;
+  // height: 30px;
   // display: none;
 }
 
@@ -16,12 +15,19 @@
   width: 25px;
   height: 25px;
   padding: 0px;
-  margin: 0px;
+  margin: -10px;
 }
 
 #chat-messages {
   flex: 1 1 auto;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+::ng-deep #chat-messages p,
+.chat-tooltip-message {
+  margin-bottom: 2px !important;
+  word-break: break-word;
 }
 
 #chat-buttons {
@@ -59,4 +65,58 @@
   background-color: #343a40;
   border-color: #343a40;
   box-shadow: none;
+}
+
+.chat-portrait-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+}
+
+.chat-portrait-image.small {
+  width: 28px;
+  height: 28px;
+}
+
+.bubble {
+  position: relative;
+  background-color: black;
+  padding: 5px 5px 5px 10px;
+  border-radius: 0px 10px 10px 10px;
+  margin-right: 20px;
+}
+
+.bubble.own {
+  background-color: #343a40;
+}
+
+.bubble.rest {
+  border-radius: 10px;
+  margin-top: 0.25rem;
+}
+
+.bubble.short {
+  white-space: nowrap;
+  // overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px 5px 5px 10px;
+  margin-left: 10px;
+  margin-right: 0px;
+}
+
+::ng-deep .bubble.short p {
+  margin-bottom: 0px;
+}
+
+.bubble.triangle:after {
+  content: " ";
+  position: absolute;
+  left: -10px;
+  top: 0px;
+  border: 10px solid;
+  border-color: black transparent transparent transparent;
+}
+
+.bubble.triangle.own:after {
+  border-color: #343a40 transparent transparent transparent;
 }

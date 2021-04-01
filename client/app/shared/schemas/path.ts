@@ -28,7 +28,7 @@ export class Path extends Schema {
     changes?.forEach((change) => {
       switch (change.field) {
         case 'to':
-          this.parameters.character.animator?.play('Idle');
+          if (!this.parameters.character.animation || this.parameters.character.animation == 'None') this.parameters.character.animator?.play('Idle');
           break;
       }
     });

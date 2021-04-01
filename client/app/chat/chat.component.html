@@ -1,11 +1,66 @@
 <div id="chat">
+  <div class="resize resize__top" [hidden]="minimized" (resize)="onResize($event)" [targetElement]="chat_messages"
+    [direction]="AngularResizeElementDirection.TOP"></div>
   <div id="chat-header">
-    <button class="btn" tippy="{{minimized ? 'Maximize Chat' : 'Minimize Chat'}}" (click)="minimized = !minimized">
-      <span class="material-icons">{{minimized ? 'keyboard_arrow_up': 'keyboard_arrow_down'}}</span>
-    </button>
+    <div class="row">
+      <div class="col-1">
+        <img *ngIf="minimized && messages?.value && getLastMessage()"
+          class="chat-portrait-image small mr-2" src="{{getLastMessage().userPortrait}}"
+          onerror="this.src='assets/images/characters/default-preview.jpg'" [tippy]="short_message_user_tooltip" />
+        <ng-template #short_message_user_tooltip>
+          {{getLastMessage().username}}&nbsp;
+          <span class='badge badge-warning'
+            [hidden]='!users?.value || !users.value[getLastMessage().user]?.isDM'>
+            DM
+          </span>
+        </ng-template>
+      </div>
+      <div class="col-10">
+        <div *ngIf="minimized && messages?.value && getLastMessage()"
+          class="bubble triangle short text-left {{getLastMessage().user == auth.currentUser._id ? 'own' : ''}}">
+          <div [innerHTML]="getShortContent(getLastMessage())"
+            style="text-overflow: ellipsis; overflow: hidden"
+            [tippy]="getShortContent(getLastMessage())" [maxWidth]="300"></div>
+        </div>
+      </div>
+      <div class="col-1">
+        <button class="btn" tippy="{{minimized ? 'Maximize Chat' : 'Minimize Chat'}}"
+          (click)="minimized = !minimized; scrollDown()">
+          <span class="material-icons">{{minimized ? 'keyboard_arrow_up': 'keyboard_arrow_down'}}</span>
+        </button>
+      </div>
+    </div>
   </div>
-  <div id="chat-messages" [hidden]="minimized"></div>
-  <div id="chat-buttons" [hidden]="minimized">
+  <div id="chat-messages" [hidden]="minimized" #chat_messages [style.height.px]="chatHeight">
+    <span *ngIf="messages?.value && ObjectValues(messages.value).length > 0">
+      <div class="row mb-2" *ngFor="let message of ObjectValues(messages.value)">
+        <div class="col-2">
+          <img class="chat-portrait-image" src="{{message.userPortrait}}"
+            onerror="this.src='assets/images/characters/default-preview.jpg'" />
+        </div>
+        <div class="col-10">
+          <div class="bubble triangle {{message.user == auth.currentUser._id ? 'own' : ''}}">
+            <b>{{message.username}}&nbsp;
+              <span class="badge badge-warning" [hidden]="!users?.value || !users.value[message.user]?.isDM">
+                DM
+              </span>
+            </b>
+            <span class="text-muted float-right pr-2" style="font-size: 12px">{{getTime(message.date)}}</span>
+            <br>
+            <span [innerHTML]="getFirstParagraph(message)"></span>
+          </div>
+          <div *ngFor="let messageParagraph of getRestParagraphs(message)" class="bubble rest  {{message.user == auth.currentUser._id ? 'own' : ''}}">
+            <span [innerHTML]="messageParagraph"></span>
+          </div>
+        </div>
+      </div>
+    </span>
+    <span *ngIf="!messages?.value || ObjectValues(messages.value).length <= 0" class="text-center">
+      <p><i class="fa fa-comments fa-5x"></i></p>
+      <p>There are no messages yet</p>
+    </span>
+  </div>
+  <div id="chat-buttons">
     <input class="dice-btn" type="image" src="assets/images/chat/d4.png" (click)='sendMessage("/roll 1d4")'
       tippy="d4" />
     <input class="dice-btn" type="image" src="assets/images/chat/d6.png" (click)='sendMessage("/roll 1d6")'
@@ -19,7 +74,7 @@
     <input class="dice-btn" type="image" src="assets/images/chat/d20.png" (click)='sendMessage("/roll 1d20")'
       tippy="d20" />
   </div>
-  <div id="chat-send" [hidden]="minimized">
+  <div id="chat-send">
     <div class="input-group">
       <input class="form-control" type="text" id="input" value="" [(ngModel)]="message" autofocus autocomplete="off"
         (keydown.enter)='sendMessage()' placeholder="Enter text or /roll command" />

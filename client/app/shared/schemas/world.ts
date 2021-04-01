@@ -40,7 +40,8 @@ export class World extends Schema {
               id: key
             }
           }
-        }, map: {
+        },
+        map: {
           type: Map, datatype: Object, parameters: () => {
             return {
               world: this,
@@ -78,6 +79,9 @@ export class World extends Schema {
           for (let character in this.characters) {
             this.characters[character].doMesh();
           }
+          break;
+        case 'users':
+          this.parameters.controller.updateSetting('usersOnCampaign', this.users);
           break;
         case 'characters':
           this.parameters.controller.updateSetting('charactersOnCampaign', this.characters);

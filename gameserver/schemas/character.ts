@@ -19,6 +19,8 @@ export class Character extends Schema {
   y = 0;
   @type(Point)
   direction: Point = new Point(1, 0);
+  @type("string")
+  animation;
   @type(Path)
   movementPath: Path = new Path();
   @type("number")
@@ -154,8 +156,10 @@ export class Character extends Schema {
       this.isCollidingPhysics = this.characterPhysics.isColliding;
   }
 
-  move(movement: any) {
+  move(movement: any, animate?: boolean) {
     if (movement.x != this.x || movement.y != this.y) {
+      if (animate == null || !animate) this.animation = "None";
+
       //set a initial cooldown so physics movement do first
       // this.movementAcum = 100;
       var path = this.characterPhysics.getPath({ x: movement.x, y: movement.y });
@@ -174,7 +178,14 @@ export class Character extends Schema {
     // });
   }
 
+  lookAt(place: any) {
+    this.direction.x = place.x - this.x;
+    this.direction.y = place.y - this.y;
+  }
+
   drag(position?) {
+    // this.animation = "None";
+
     this.beignDragged = true;
     this.movementPath.unset();
     if (position) {

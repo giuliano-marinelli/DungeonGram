@@ -34,16 +34,8 @@ export class World extends Schema {
         do: async (client: string, data: any) => {
           if (!this.users[client]) {
             const campaign = await CampaignDB.findOne({ _id: this.campaignId });
-            var campaignUser = campaign.users.find((u) => u.ref == client);
-            this.users[client] = new User();
-            this.users[client].isDM = client == campaign.owner; //set as DM to the owner
-            if (campaignUser) {
-              this.users[client].wallsVisibility = campaignUser.settings.wallsVisibility;
-              this.users[client].fogOfWarVisibility = campaignUser.settings.fogOfWarVisibility;
-              this.users[client].tilemapShowGrid = campaignUser.settings.tilemapShowGrid;
-              this.users[client].selectedCharacter = campaignUser.settings.selectedCharacter;
-              this.users[client].isDM = campaignUser.settings.isDM || client == campaign.owner;
-            }
+            var user = campaign.users.find((u) => u.ref == client);
+            this.addUser(user, campaign, client);
           }
 
           // if (this.map && !this.map.characters[client]) {
@@ -214,6 +206,32 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.character != null && typeof data.character === "string" && data.map != null && typeof data.map === "string" && this.users[client].isDM
+        }
+      },
+      lookAt: {
+        do: (client: string, data: any) => {
+          if (this.map != null && this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map) {
+            if (!this.users[client].addingModeCharacter &&
+              this.users[client].selectedCharacter &&
+              data.x >= 0 && data.y >= 0 &&
+              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
+              this.characters[this.users[client].selectedCharacter].lookAt({ x: data.x, y: data.y });
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number"
+        }
+      },
+      animation: {
+        do: (client: string, data: any) => {
+          if (this.map != null && this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map) {
+            if (!this.users[client].addingModeCharacter &&
+              this.users[client].selectedCharacter)
+              this.characters[this.users[client].selectedCharacter].animation = data.animation;
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.animation != null && typeof data.animation === "string"
         }
       }
     },
@@ -519,6 +537,10 @@ export class World extends Schema {
 
     const campaign = await CampaignDB.findOne({ _id: this.campaignId });
 
+    campaign.users.forEach(user => {
+      this.addUser(user, campaign)
+    });
+
     campaign.characters.forEach(character => {
       this.addCharacter(character)
     });
@@ -570,6 +592,7 @@ export class World extends Schema {
             x: this.characters[characterId].direction.x,
             y: this.characters[characterId].direction.y
           },
+          animation: this.characters[characterId].animation,
           // name: this.characters[characterId].name,
           // group: this.characters[characterId].group,
           // visionRange: this.characters[characterId].visionRange,
@@ -590,11 +613,30 @@ export class World extends Schema {
     this.map?.persist();
   }
 
+  async addUser(user, campaign, client?) {
+    if (!user.ref && !client) return;
+
+    if (!user.ref) user.ref = client;
+    if (!user.settings.wallsVisibility) user.settings.wallsVisibility = 0;
+    if (!user.settings.fogOfWarVisibility) user.settings.fogOfWarVisibility = 0;
+    if (!user.settings.tilemapShowGrid) user.settings.tilemapShowGrid = 1;
+    if (!user.settings.selectedCharacter) user.settings.selectedCharacter = null;
+    if (!user.settings.isDM) user.settings.isDM = client == campaign.owner;
+
+    this.users[user.ref] = new User();
+    this.users[user.ref].wallsVisibility = user.settings.wallsVisibility;
+    this.users[user.ref].fogOfWarVisibility = user.settings.fogOfWarVisibility;
+    this.users[user.ref].tilemapShowGrid = user.settings.tilemapShowGrid;
+    this.users[user.ref].selectedCharacter = user.settings.selectedCharacter;
+    this.users[user.ref].isDM = user.settings.isDM;
+  }
+
   async addCharacter(character) {
     if (!character._id) character._id = Utils.uuidv4();
     if (!character.map) character.map = this.map?.mapId;
     if (!character.position) character.position = { x: 0, y: 0 };
     if (!character.direction) character.direction = { x: 1, y: 0 };
+    if (!character.animation) character.animation = "None";
     // if (!character.visionRange) character.visionRange = 10;
     // if (!character.group) character.group = 'Ungrouped';
     // if (!character.name) {
@@ -612,6 +654,7 @@ export class World extends Schema {
     this.characters[character._id].x = character.position.x;
     this.characters[character._id].y = character.position.y;
     this.characters[character._id].direction = new Point(character.direction.x, character.direction.y);
+    this.characters[character._id].animation = character.animation;
     // this.characters[character._id].visionRange = character.visionRange;
     // this.characters[character._id].group = character.group;
     // this.characters[character._id].name = character.name;

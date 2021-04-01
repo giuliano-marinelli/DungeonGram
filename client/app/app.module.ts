@@ -36,6 +36,7 @@ import { InviteComponent } from './players/invite/invite.component';
 // Style Components
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TippyModule, tooltipVariation, popperVariation } from '@ngneat/helipopper';
+import { AngularResizeElementModule } from 'angular-resize-element';
 // Color Pickers
 import { ColorAlphaModule } from 'ngx-color/alpha'; // <color-alpha-picker></color-alpha-picker>
 import { ColorBlockModule } from 'ngx-color/block'; // <color-block></color-block>
@@ -103,6 +104,7 @@ import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></colo
         },
       }
     }),
+    AngularResizeElementModule,
     ColorAlphaModule,
     ColorBlockModule,
     ColorChromeModule,
