@@ -49,13 +49,6 @@ export class CharacterListComponent implements OnInit {
     );
   }
 
-  setPageCharacters(own: boolean, page: number): void {
-    if (own) this.pageOwnCharacters = page;
-    else this.pagePublicCharacters = page;
-
-    this.getCharacters(own);
-  }
-
   getCharacters(own: boolean): void {
     if (this.auth.loggedIn || !own) {
       this.countCharacters(own);

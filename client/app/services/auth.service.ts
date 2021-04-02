@@ -64,6 +64,7 @@ export class AuthService {
     this.currentUser._id = decodedUser._id;
     this.currentUser.username = decodedUser.username;
     this.currentUser.role = decodedUser.role;
+    this.currentUser.avatar = decodedUser.avatar;
     this.isAdmin = decodedUser.role === 'admin';
     delete decodedUser.role;
   }

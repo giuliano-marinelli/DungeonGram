@@ -47,4 +47,14 @@ export class GlobalComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  static createFormData(object: any): FormData {
+    var formData: any = new FormData();
+
+    Object.entries(object).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    return formData;
+  }
+
 }

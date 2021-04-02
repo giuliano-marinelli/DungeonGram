@@ -7,9 +7,14 @@ import { User } from '../shared/models/user.model';
 declare var iziToast;
 @Component({
   selector: 'app-admin',
-  templateUrl: './admin.component.html'
+  templateUrl: './admin.component.html',
+  styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
+
+  pageUsers: number = 1;
+  pageSizeUsers: number = 10;
+  _countUsers: number = 0;
 
   users: User[] = [];
   isLoading = true;
@@ -23,8 +28,19 @@ export class AdminComponent implements OnInit {
     this.getUsers();
   }
 
+  countUsers(): void {
+    this.userService.countUsers().subscribe(
+      data => this._countUsers = data,
+      error => iziToast.error({ message: 'There was an error, characeters can\'t be counted.' })
+    );
+  }
+
   getUsers(): void {
-    this.userService.getUsers().subscribe(
+    this.countUsers();
+    this.userService.getUsers({
+      page: this.pageUsers,
+      count: this.pageSizeUsers
+    }).subscribe(
       data => this.users = data,
       error => iziToast.error({ message: 'There was an error, users can\'t be getted.' }),
       () => this.isLoading = false

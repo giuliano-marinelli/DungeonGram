@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { User } from '../shared/models/user.model';
+import { GlobalComponent } from '../shared/global/global.component';
 
 @Injectable()
 export class UserService {
@@ -26,7 +27,7 @@ export class UserService {
   }
 
   addUser(user: User): Observable<User> {
-    return this.http.post<User>('/api/user', user);
+    return this.http.post<User>('/api/user', GlobalComponent.createFormData(user));
   }
 
   getUser(user: User): Observable<User> {
@@ -34,7 +35,7 @@ export class UserService {
   }
 
   editUser(user: User): Observable<any> {
-    return this.http.put(`/api/user/${user._id}`, user, { responseType: 'text' });
+    return this.http.post(`/api/user/${user._id}`, GlobalComponent.createFormData(user), { responseType: 'text' });
   }
 
   deleteUser(user: User): Observable<any> {

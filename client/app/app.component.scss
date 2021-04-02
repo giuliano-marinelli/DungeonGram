@@ -56,3 +56,14 @@
 .dungeon-navbar #navbar-supported-content a.active {
   filter: drop-shadow(0px 0px 2px white);
 }
+
+.profile-img {
+  width: 25px;
+  height: 25px;
+  border-radius: 15px;
+  -o-object-fit: cover;
+  object-fit: cover;
+  -o-object-position: top;
+  object-position: top;
+  overflow: hidden;
+}

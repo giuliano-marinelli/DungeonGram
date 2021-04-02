@@ -53,13 +53,6 @@ export class CampaignListComponent implements OnInit {
     );
   }
 
-  setPage(own: boolean, page: number): void {
-    if (own) this.pageOwnCampaigns = page;
-    else this.pagePublicCampaigns = page;
-
-    this.getCampaigns(own);
-  }
-
   getCampaigns(own: boolean): void {
     if (this.auth.loggedIn || !own) {
       this.countCampaigns(own);

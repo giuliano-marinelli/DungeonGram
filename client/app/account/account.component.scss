@@ -2,3 +2,48 @@
   max-width: 25rem;
   margin: auto;
 }
+
+.profile-img {
+  width: 250px;
+  height: 250px;
+  border-radius: 125px;
+  -o-object-fit: cover;
+  object-fit: cover;
+  -o-object-position: top;
+  object-position: top;
+  overflow: hidden;
+}
+
+.profile-img-upload {
+  display: none;
+  width: 250px;
+  height: 250px;
+  border-radius: 125px;
+}
+
+.profile-img-container {
+  position: relative;
+  display: inline-block;
+  border-radius: 125px;
+}
+
+.profile-img-container:hover .profile-img-upload {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: inset 0px 0px 30px 20px #000000;
+  box-shadow: inset 0px 0px 30px 20px #000000;
+  cursor: pointer;
+}
+
+.profile-img-upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}

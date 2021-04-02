@@ -38,7 +38,8 @@
         </li>
         <li class="nav-item">
           <a routerLink="/account" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
-            <i class="fa fa-fw fa-user"></i> {{auth.currentUser.username}}
+            <img class="profile-img" [src]="auth.currentUser.avatar" onerror="this.src='assets/images/characters/default-preview.jpg'" />
+            {{auth.currentUser.username}}
           </a>
         </li>
       </ul>

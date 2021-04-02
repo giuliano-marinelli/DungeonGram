@@ -250,13 +250,6 @@ export class ToolsComponent implements OnInit {
     );
   }
 
-  setPageCharacters(own: boolean, page: number): void {
-    if (own) this.pageOwnCharacters = page;
-    else this.pagePublicCharacters = page;
-
-    this.getCharacters(own);
-  }
-
   getCharacters(own: boolean): void {
     this.countCharacters(own);
     this.characterService.getCharacters(

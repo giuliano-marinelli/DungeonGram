@@ -4,9 +4,23 @@
   <div class="card">
     <h4 class="card-header">Account settings</h4>
     <div class="card-body">
-      <form [formGroup]="accountForm" (ngSubmit)="save()" autocomplete="off">
+      <div class="profile-img-container">
+        <img class="mb-4 profile-img" src="{{avatar.value}}" #avatar_img
+          onerror="this.src='assets/images/characters/default-preview.jpg'" />
+        <label for="avatarFile">
+          <div class="profile-img-upload">
+            <div class="profile-img-upload-text">
+              <i class="fa fa-upload fa-4x"></i><br>
+              Change Avatar
+            </div>
+          </div>
+        </label>
+        <input [hidden]="true" type="file" name="avatarFile" id="avatarFile"
+          (change)="onChangeAvatar($event.target?.files)">
+      </div>
+      <form [formGroup]="accountForm" (ngSubmit)="save()" autocomplete="off" enctype="multipart/form-data">
         <div class="input-group">
-          <div class="input-group-prepend">
+          <div class="input-group-prepend" tippy="Username">
             <span class="input-group-text">
               <i class="fa fa-fw fa-user"></i>
             </span>
@@ -26,7 +40,7 @@
           </div>
         </div>
         <div class="input-group">
-          <div class="input-group-prepend">
+          <div class="input-group-prepend" tippy="Email">
             <span class="input-group-text">
               <i class="fa fa-fw fa-envelope"></i>
             </span>
@@ -46,12 +60,13 @@
           </div>
         </div>
         <div class="input-group" *ngIf="auth.loggedIn && auth.isAdmin">
-          <div class="input-group-prepend">
+          <div class="input-group-prepend" tippy="Role">
             <span class="input-group-text">
               <i class="fa fa-fw fa-black-tie"></i>
             </span>
           </div>
-          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')" disabled>
+          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')"
+            disabled>
             <option value="" disabled>Role</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>

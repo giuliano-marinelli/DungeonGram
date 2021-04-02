@@ -7,10 +7,11 @@ import setMongo from '../database/mongo';
 import setRoutes from './routes';
 
 const app = express();
+
 dotenv.config();
 app.set('port', (process.env.PORT || 3000));
-app.use('/', express.static(path.join(__dirname, '../public')));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folde public
+app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 if (process.env.NODE_ENV !== 'test') {

@@ -134,7 +134,7 @@
                       <ngb-pagination *ngIf="countOwnCharacters > 0" class="d-flex justify-content-center" size="sm"
                         [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pageOwnCharacters"
                         [pageSize]="pageSizeOwnCharacters" [collectionSize]="countOwnCharacters"
-                        (pageChange)="setPageCharacters(true, pageOwnCharacters)">
+                        (pageChange)="getCharacters(true)">
                       </ngb-pagination>
 
                     </div>
@@ -165,7 +165,7 @@
                       <ngb-pagination *ngIf="countPublicCharacters > 0" class="d-flex justify-content-center" size="sm"
                         [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pagePublicCharacters"
                         [pageSize]="pageSizePublicCharacters" [collectionSize]="countPublicCharacters"
-                        (pageChange)="setPageCharacters(false, pagePublicCharacters)">
+                        (pageChange)="getCharacters(false)">
                       </ngb-pagination>
 
                     </div>

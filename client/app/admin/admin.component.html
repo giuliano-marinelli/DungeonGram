@@ -1,35 +1,41 @@
-<app-loading [condition]="isLoading"></app-loading>
-
-<div class="card" *ngIf="!isLoading">
-  <h4 class="card-header">Registered users ({{users.length}})</h4>
-  <div class="card-body">
-    <table class="table table-bordered">
-      <thead class="thead-dark">
-        <tr>
-          <th scope="col">Username</th>
-          <th scope="col">Email</th>
-          <th scope="col">Role</th>
-          <th scope="col">Actions</th>
-        </tr>
-      </thead>
-      <tbody *ngIf="users.length === 0">
-        <tr>
-          <td colspan="4">There are no registered users.</td>
-        </tr>
-      </tbody>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td>{{user.username}}</td>
-          <td>{{user.email}}</td>
-          <td>{{user.role}}</td>
-          <td>
-            <button class="btn btn-sm btn-danger" (confirm)="deleteUser(user)" confirmDoubleCheck="true"
-              [disabled]="auth.currentUser._id === user._id">
-              <i class="fa fa-trash"></i> Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<div class="card user-container">
+  <h4 class="card-header">Registered Users ({{users.length}})</h4>
+  <div class="card-body" *ngIf="isLoading">
+    <app-loading [condition]="isLoading"></app-loading>
+  </div>
+  <div class="card-body" *ngIf="!isLoading">
+    <p *ngIf="users.length <= 0" class="card-text">
+      There are no registered users
+    </p>
+    <div *ngIf="users.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+      <div *ngFor="let user of users" class="col mb-4">
+        <ng-container [ngTemplateOutlet]="userCard" [ngTemplateOutletContext]="{ user: user }">
+        </ng-container>
+      </div>
+    </div>
+    <ngb-pagination *ngIf="_countUsers > 0" class="d-flex justify-content-end" [(page)]="pageUsers"
+      [pageSize]="pageSizeUsers" [collectionSize]="_countUsers" (pageChange)="getUsers()">
+    </ngb-pagination>
   </div>
 </div>
+
+<ng-template #userCard let-user='user'>
+  <div class="card h-100">
+    <img class="card-img-top user-img" [src]="user.avatar"
+      onerror="this.src='assets/images/characters/default-preview.jpg'" alt="{{user.username}}">
+    <div class="card-body user-card-body">
+      <h5 class="card-title">{{user.username}} <span
+          class="badge badge-{{user.role == 'admin' ? 'warning': 'light' }}">{{user.role}}</span>
+      </h5>
+      <p class="card-text user-description mb-4" tippy="{{user.email}}" [maxWidth]="300" placement="right">
+        {{user.email}}
+      </p>
+      <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
+        <button class="btn btn-sm btn-danger ml-2" (confirm)="deleteUser(user)" confirmDoubleCheck="true"
+          [disabled]="auth.currentUser._id === user._id" tippy="Delete">
+          <i class="fa fa-trash"></i>
+        </button>
+      </p>
+    </div>
+  </div>
+</ng-template>
