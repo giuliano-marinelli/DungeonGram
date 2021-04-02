@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -17,6 +17,7 @@ export class CampaignComponent implements OnInit {
 
   @Input() public campaign: Campaign;
   @Output("getCampaigns") getCampaigns: EventEmitter<any> = new EventEmitter();
+  @ViewChild("banner_img") bannerImage: ElementRef;
 
   isLoading = true;
   campaignForm: FormGroup;
@@ -32,6 +33,8 @@ export class CampaignComponent implements OnInit {
     Validators.maxLength(200)
   ]);
   private = new FormControl(false, []);
+  banner = new FormControl('', []);
+  bannerFile = new FormControl('', []);
   // players = new FormControl([], []);
   // maps = new FormControl([], []);
 
@@ -40,7 +43,8 @@ export class CampaignComponent implements OnInit {
     public auth: AuthService,
     private campaignService: CampaignService,
     public activeModal: NgbActiveModal,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private changeDetector: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -51,7 +55,9 @@ export class CampaignComponent implements OnInit {
       description: this.description,
       // players: this.players,
       // maps: this.maps,
-      private: this.private
+      private: this.private,
+      banner: this.banner,
+      bannerFile: this.bannerFile
     });
     if (this.campaign) this.getCampaign(); else this.isLoading = false
   }
@@ -97,6 +103,23 @@ export class CampaignComponent implements OnInit {
       }
     } else {
       iziToast.error({ message: 'Some values are invalid, please check.' });
+    }
+  }
+
+  onChangeBanner(files: File[]): void {
+    const reader = new FileReader();
+    if (files && files.length) {
+      const [file] = files;
+      this.campaignForm.patchValue({
+        bannerFile: file
+      });
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        //here the file can be showed (base 64 is on reader.result)
+        this.bannerImage.nativeElement.src = reader.result;
+        //need to run change detector since file load runs outside of zone
+        this.changeDetector.markForCheck();
+      };
     }
   }
 }

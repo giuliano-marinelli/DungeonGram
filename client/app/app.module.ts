@@ -10,7 +10,6 @@ import { CampaignService } from './services/campaign.service';
 import { CharacterService } from './services/character.service';
 import { MapService } from './services/map.service';
 import { InvitationService } from './services/invitation.service';
-import { AssetService } from './services/asset.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
@@ -128,8 +127,7 @@ import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></colo
     CampaignService,
     CharacterService,
     MapService,
-    InvitationService,
-    AssetService
+    InvitationService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]

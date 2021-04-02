@@ -4,8 +4,6 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import {
   GridMaterial
 } from '@babylonjs/materials';
-import { AssetService } from '../services/asset.service';
-
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
@@ -33,12 +31,12 @@ export class EditorComponent implements OnInit, OnDestroy {
   //assets
   assets: [];
 
-  constructor(private assetService: AssetService) { }
+  constructor() { }
 
   ngOnInit(): void {
     var self = this;
 
-    this.getAssets();
+    // this.getAssets();
 
     var host = window.document.location.host.replace(/:.*/, '');
 
@@ -75,16 +73,16 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.roomMap.leave();
   }
 
-  getAssets() {
-    this.assetService.getAssets().subscribe(
-      data => {
-        this.assets = data;
-        console.log(this.assets);
-      },
-      error => console.log(error),
-      () => this.isLoading = false
-    );
-  }
+  // getAssets() {
+  //   this.assetService.getAssets().subscribe(
+  //     data => {
+  //       this.assets = data;
+  //       console.log(this.assets);
+  //     },
+  //     error => console.log(error),
+  //     () => this.isLoading = false
+  //   );
+  // }
 
   joinedRoomChat() {
     console.log("joined chat");

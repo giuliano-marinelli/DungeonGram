@@ -50,7 +50,8 @@
 
 <ng-template #campaignCard let-campaign='campaign'>
   <div class="card h-100 {{getInvitation(campaign) && getInvitation(campaign).accepted == null ? 'invitation' : ''}}">
-    <img src="assets/images/campaigns/default.jpg" class="card-img-top campaign-img" alt="{{campaign.title}}">
+    <img [src]="campaign.banner" class="card-img-top campaign-img" alt="{{campaign.title}}"
+      onerror="this.src='assets/images/campaigns/default.jpg'">
     <div class="card-body">
       <h5 class="card-title"><i *ngIf="campaign.private" tippy="This campaign is private"
           class="fa fa-user-secret">&nbsp;</i>{{campaign.title}}<br />

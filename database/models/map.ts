@@ -17,25 +17,25 @@ const mapSchema = new mongoose.Schema({
       size: String
     }
   ],
-  characters: [
-    {
-      position: {
-        x: Number,
-        y: Number
-      },
-      direction: {
-        x: Number,
-        y: Number
-      },
-      name: String,
-      group: String,
-      visionRange: Number,
-      model: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Character'
-      }
-    }
-  ],
+  // characters: [
+  //   {
+  //     position: {
+  //       x: Number,
+  //       y: Number
+  //     },
+  //     direction: {
+  //       x: Number,
+  //       y: Number
+  //     },
+  //     name: String,
+  //     group: String,
+  //     visionRange: Number,
+  //     model: {
+  //       type: mongoose.Schema.Types.ObjectId,
+  //       ref: 'Character'
+  //     }
+  //   }
+  // ],
   tilemap: {
     width: Number,
     height: Number,
@@ -45,7 +45,8 @@ const mapSchema = new mongoose.Schema({
     },
   },
   imageUrl: String,
-  private: Boolean
+  private: Boolean,
+  terrain: String
 });
 
 //omit the __v when returning a map

@@ -30,7 +30,7 @@ export class CharacterService {
   }
 
   editCharacter(character: Character): Observable<any> {
-    return this.http.put(`/api/character/${character._id}`, character, { responseType: 'text' });
+    return this.http.post(`/api/character/${character._id}`, character, { responseType: 'text' });
   }
 
   deleteCharacter(character: Character): Observable<any> {

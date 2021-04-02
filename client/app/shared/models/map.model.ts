@@ -4,8 +4,8 @@ export class Map {
   name?: string;
   description?: string;
   walls?: object[];
-  characters?: object[];
   tilemap?: object;
   private?: boolean;
   imageUrl?: string;
+  terrain?: string;
 }

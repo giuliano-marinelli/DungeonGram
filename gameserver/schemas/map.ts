@@ -35,7 +35,7 @@ export class Map extends Schema {
     this.mapId = mapId.toString();
     const map = await MapDB.findOne({ _id: this.mapId });
 
-    this.tilemap = new TileMap(map?.tilemap?.width, map?.tilemap?.height, map?.imageUrl);
+    this.tilemap = new TileMap(map?.tilemap?.width, map?.tilemap?.height, map?.terrain);
 
     this.worldPhysics.setGrid({ width: this.tilemap.width, height: this.tilemap.height });
 
@@ -103,7 +103,7 @@ export class Map extends Schema {
   async updateTilemap() {
     const map = await MapDB.findOne({ _id: this.mapId });
 
-    this.tilemap?.changeImage(map?.imageUrl);
+    this.tilemap?.changeTerrain(map?.terrain);
   }
 
   // async updateDb(attr, value) {

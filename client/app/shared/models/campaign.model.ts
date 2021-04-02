@@ -14,4 +14,5 @@ export class Campaign {
   openedMap_info?: object;
   characters?: object[];
   settings?: object;
+  banner?: string;
 }

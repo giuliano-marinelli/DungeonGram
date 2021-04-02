@@ -76,7 +76,6 @@ export class AccountComponent implements OnInit {
   save(): void {
     this.accountForm.markAllAsTouched();
     if (this.accountForm.valid) {
-      console.log(this.accountForm.value);
       this.userService.editUser(this.accountForm.value).subscribe(
         res => {
           iziToast.success({ message: 'Account settings saved.' });
@@ -100,7 +99,7 @@ export class AccountComponent implements OnInit {
       reader.onload = () => {
         //here the file can be showed (base 64 is on reader.result)
         this.avatarImage.nativeElement.src = reader.result;
-        // need to run change detector since file load runs outside of zone
+        //need to run change detector since file load runs outside of zone
         this.changeDetector.markForCheck();
       };
     }

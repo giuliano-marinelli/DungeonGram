@@ -31,7 +31,7 @@ function setRoutes(app): void {
   const upload = multer({
     storage: storage,
     limits: {
-      fileSize: 1024 * 1024 * 5
+      fileSize: 8192 * 8192 * 5
     },
     fileFilter: (req, file, cb) => {
       if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
@@ -55,9 +55,9 @@ function setRoutes(app): void {
   //campaign
   router.route('/campaigns').get(campaignCtrl.getAll);
   router.route('/campaigns/count').get(campaignCtrl.count);
-  router.route('/campaign').post(campaignCtrl.insert);
+  router.route('/campaign').post(upload.single("bannerFile"), campaignCtrl.insert);
   router.route('/campaign/:id').get(campaignCtrl.get);
-  router.route('/campaign/:id').put(campaignCtrl.update);
+  router.route('/campaign/:id').post(upload.single("bannerFile"), campaignCtrl.update);
   router.route('/campaign/:id').delete(campaignCtrl.delete);
 
   //characters
@@ -65,15 +65,15 @@ function setRoutes(app): void {
   router.route('/characters/count').get(characterCtrl.count);
   router.route('/character').post(characterCtrl.insert);
   router.route('/character/:id').get(characterCtrl.get);
-  router.route('/character/:id').put(characterCtrl.update);
+  router.route('/character/:id').post(characterCtrl.update);
   router.route('/character/:id').delete(characterCtrl.delete);
 
   //maps
   router.route('/maps').get(mapCtrl.getAll);
   router.route('/maps/count').get(mapCtrl.count);
-  router.route('/map').post(mapCtrl.insert);
+  router.route('/map').post(upload.single("terrainFile"), mapCtrl.insert);
   router.route('/map/:id').get(mapCtrl.get);
-  router.route('/map/:id').put(mapCtrl.update);
+  router.route('/map/:id').post(upload.single("terrainFile"), mapCtrl.update);
   router.route('/map/:id').delete(mapCtrl.delete);
 
   //invitations
@@ -81,7 +81,7 @@ function setRoutes(app): void {
   router.route('/invitations/count').get(invitationCtrl.count);
   router.route('/invitation').post(invitationCtrl.insert);
   router.route('/invitation/:id').get(invitationCtrl.get);
-  router.route('/invitation/:id').put(invitationCtrl.update);
+  router.route('/invitation/:id').post(invitationCtrl.update);
   router.route('/invitation/:id').delete(invitationCtrl.delete);
 
 

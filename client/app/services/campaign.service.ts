@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Campaign } from '../shared/models/campaign.model';
+import { GlobalComponent } from '../shared/global/global.component';
 
 @Injectable()
 export class CampaignService {
@@ -18,7 +19,7 @@ export class CampaignService {
   }
 
   addCampaign(campaign: Campaign): Observable<Campaign> {
-    return this.http.post<Campaign>('/api/campaign', campaign);
+    return this.http.post<Campaign>('/api/campaign', GlobalComponent.createFormData(campaign));
   }
 
   getCampaign(campaign: Campaign): Observable<Campaign> {
@@ -30,7 +31,7 @@ export class CampaignService {
   }
 
   editCampaign(campaign: Campaign): Observable<any> {
-    return this.http.put(`/api/campaign/${campaign._id}`, campaign, { responseType: 'text' });
+    return this.http.post(`/api/campaign/${campaign._id}`, GlobalComponent.createFormData(campaign), { responseType: 'text' });
   }
 
   deleteCampaign(campaign: Campaign): Observable<any> {

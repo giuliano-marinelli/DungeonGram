@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,7 @@ export class MapComponent implements OnInit {
   @Input() public map: Map;
   @Input() public campaign: Campaign;
   @Output("getMaps") getMaps: EventEmitter<any> = new EventEmitter();
+  @ViewChild("terrain_img") terrainImage: ElementRef;
 
   isLoading = true;
   mapForm: FormGroup;
@@ -38,16 +39,18 @@ export class MapComponent implements OnInit {
     Validators.maxLength(10000)
   ]);
   private = new FormControl(false, []);
-  walls = new FormControl([], []);
-  characters = new FormControl([], []);
-  tilemap = new FormControl('', []);
+  // walls = new FormControl([], []);
+  // tilemap = new FormControl('', []);
+  terrain = new FormControl('', []);
+  terrainFile = new FormControl('', []);
 
   constructor(
     private formBuilder: FormBuilder,
     public auth: AuthService,
     private mapService: MapService,
     public activeModal: NgbActiveModal,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private changeDetector: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -56,11 +59,12 @@ export class MapComponent implements OnInit {
       owner: this.owner,
       name: this.name,
       description: this.description,
-      walls: this.walls,
-      characters: this.characters,
-      tilemap: this.tilemap,
+      // walls: this.walls,
+      // tilemap: this.tilemap,
       imageUrl: this.imageUrl,
-      private: this.private
+      private: this.private,
+      terrain: this.terrain,
+      terrainFile: this.terrainFile
     });
     if (this.map) this.getMap(); else this.isLoading = false
   }
@@ -106,6 +110,23 @@ export class MapComponent implements OnInit {
       }
     } else {
       iziToast.error({ message: 'Some values are invalid, please check.' });
+    }
+  }
+
+  onChangeTerrain(files: File[]): void {
+    const reader = new FileReader();
+    if (files && files.length) {
+      const [file] = files;
+      this.mapForm.patchValue({
+        terrainFile: file
+      });
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        //here the file can be showed (base 64 is on reader.result)
+        this.terrainImage.nativeElement.src = reader.result;
+        //need to run change detector since file load runs outside of zone
+        this.changeDetector.markForCheck();
+      };
     }
   }
 }

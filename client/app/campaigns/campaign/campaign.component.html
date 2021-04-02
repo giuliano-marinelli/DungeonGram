@@ -11,6 +11,21 @@
       <app-loading [condition]="isLoading"></app-loading>
     </div>
     <div class="modal-body" *ngIf="!isLoading">
+      <label>Banner</label>
+      <div class="campaign-img-container">
+        <img class="mb-3 campaign-img" [src]="banner.value" #banner_img
+          onerror="this.src='assets/images/campaigns/default.jpg'" />
+        <label for="bannerFile">
+          <div class="campaign-img-upload">
+            <div class="campaign-img-upload-text">
+              <i class="fa fa-upload fa-4x"></i><br>
+              Change Banner
+            </div>
+          </div>
+        </label>
+        <input [hidden]="true" type="file" name="bannerFile" id="bannerFile"
+          (change)="onChangeBanner($event.target?.files)">
+      </div>
       <div class="mb-3">
         <label for="title">Title <small class="text-muted">*</small></label>
         <input class="form-control" type="text" name="title" formControlName="title"
@@ -43,7 +58,8 @@
       </div>
       <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
-        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you and the players of
+        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you and the players
+            of
             this campaign can see
             it)</small></label>
       </div>

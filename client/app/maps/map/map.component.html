@@ -11,6 +11,21 @@
       <app-loading [condition]="isLoading"></app-loading>
     </div>
     <div class="modal-body" *ngIf="!isLoading">
+      <label>Terrain</label>
+      <div class="map-img-container">
+        <img class="mb-3 map-img" [src]="terrain.value" #terrain_img
+          onerror="this.src='assets/images/game/default_terrain.png'" />
+        <label for="terrainFile">
+          <div class="map-img-upload">
+            <div class="map-img-upload-text">
+              <i class="fa fa-upload fa-4x"></i><br>
+              Change Terrain
+            </div>
+          </div>
+        </label>
+        <input [hidden]="true" type="file" name="terrainFile" id="terrainFile"
+          (change)="onChangeTerrain($event.target?.files)">
+      </div>
       <div class="mb-3">
         <label for="name">Name <small class="text-muted">*</small></label>
         <input class="form-control" type="text" name="name" formControlName="name"
@@ -41,7 +56,7 @@
           </div>
         </div>
       </div>
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label for="imageUrl">Image URL<small class="text-muted">*</small></label>
         <input class="form-control" type="text" name="imageUrl" formControlName="imageUrl"
           placeholder="http://example.com/mymapimage.png" [ngClass]="setValid('imageUrl')" autocomplete="off">
@@ -53,11 +68,11 @@
             Image  URL must be as maximum 10000 characters long
           </div>
         </div>
-      </div>
-      <div class="custom-control custom-checkbox">
+      </div> -->
+      <!-- <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
         <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can use it)</small></label>
-      </div>
+      </div> -->
     </div>
     <div class="modal-footer">
       <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"

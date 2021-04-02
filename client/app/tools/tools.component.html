@@ -32,7 +32,7 @@
                   <div *ngIf="!isLoadingCampaign" class="row row-cols-2 maps">
                     <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
                       <div class="card h-100">
-                        <img src="{{map['imageUrl']}}" class="card-img-top map-img"
+                        <img src="{{map['terrain']}}" class="card-img-top map-img"
                           onerror="this.src='assets/images/game/default_terrain.png'"
                           tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
                           [appendTo]="tool_maps_container">

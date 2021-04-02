@@ -614,7 +614,8 @@ export class World extends Schema {
   }
 
   async addUser(user, campaign, client?) {
-    if (!user.ref && !client) return;
+    if (!user) user = { settings: {} };
+    if (!user?.ref && !client) return;
 
     if (!user.ref) user.ref = client;
     if (!user.settings.wallsVisibility) user.settings.wallsVisibility = 0;

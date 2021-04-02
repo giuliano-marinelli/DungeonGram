@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { Map } from '../shared/models/map.model';
 import { Campaign } from '../shared/models/campaign.model';
+import { GlobalComponent } from '../shared/global/global.component';
 
 @Injectable()
 export class MapService {
@@ -19,7 +20,9 @@ export class MapService {
   }
 
   addMap(map: Map, campaign: Campaign): Observable<Map> {
-    return this.http.post<Map>('/api/map', { map: map, campaign: campaign });
+    var formData = GlobalComponent.createFormData(map);
+    formData.append('campaign', campaign._id);
+    return this.http.post<Map>('/api/map', formData);
   }
 
   getMap(map: Map): Observable<Map> {
@@ -27,7 +30,7 @@ export class MapService {
   }
 
   editMap(map: Map): Observable<any> {
-    return this.http.put(`/api/map/${map._id}`, map, { responseType: 'text' });
+    return this.http.post(`/api/map/${map._id}`, GlobalComponent.createFormData(map), { responseType: 'text' });
   }
 
   deleteMap(map: Map): Observable<any> {

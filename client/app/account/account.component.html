@@ -5,7 +5,7 @@
     <h4 class="card-header">Account settings</h4>
     <div class="card-body">
       <div class="profile-img-container">
-        <img class="mb-4 profile-img" src="{{avatar.value}}" #avatar_img
+        <img class="mb-4 profile-img" [src]="avatar.value" #avatar_img
           onerror="this.src='assets/images/characters/default-preview.jpg'" />
         <label for="avatarFile">
           <div class="profile-img-upload">

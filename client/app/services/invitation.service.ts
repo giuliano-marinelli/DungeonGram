@@ -28,7 +28,7 @@ export class InvitationService {
   }
 
   editInvitation(invitation: Invitation): Observable<any> {
-    return this.http.put(`/api/invitation/${invitation._id}`, invitation, { responseType: 'text' });
+    return this.http.post(`/api/invitation/${invitation._id}`, invitation, { responseType: 'text' });
   }
 
   deleteInvitation(invitation: Invitation): Observable<any> {

@@ -8,12 +8,12 @@ export class TileMap extends Schema {
   //schema
   width?: number;
   height?: number;
-  imageUrl?: string;
+  terrain?: string;
   // tiles?: Tile[];
   //game objects
   ground?: any;
   baseTileMesh?: any;
-  terrain?: any;
+  terrainMesh?: any;
   terrainShadows?: any;
   gridMaterial?: any;
   //aux
@@ -45,7 +45,7 @@ export class TileMap extends Schema {
     super.remove();
     this.baseTileMesh?.dispose();
     this.ground?.dispose();
-    this.terrain?.dispose();
+    this.terrainMesh?.dispose();
     this.terrainShadows?.dispose();
     this.gridMaterial?.dispose();
     this.actions.forEach((action) => {
@@ -57,7 +57,7 @@ export class TileMap extends Schema {
   update(changes) {
     changes?.forEach((change) => {
       switch (change.field) {
-        case 'imageUrl':
+        case 'terrain':
           this.updateTerrainImage();
           break;
       }
@@ -213,19 +213,19 @@ export class TileMap extends Schema {
   }
 
   initTerrain() {
-    if (this.terrain) {
-      this.terrain.scaling.x = this.width;
-      this.terrain.scaling.z = this.height;
-      this.terrain.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
+    if (this.terrainMesh) {
+      this.terrainMesh.scaling.x = this.width;
+      this.terrainMesh.scaling.z = this.height;
+      this.terrainMesh.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
 
       this.terrainShadows.scaling.x = this.width;
       this.terrainShadows.scaling.z = this.height;
       this.terrainShadows.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.025, this.height / 2 - 0.5);
     } else {
-      this.terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 1, height: 1 }, this.parameters.scene);
-      this.terrain.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
-      this.terrain.scaling.x = this.width;
-      this.terrain.scaling.z = this.height;
+      this.terrainMesh = BABYLON.MeshBuilder.CreateGround('terrain', { width: 1, height: 1 }, this.parameters.scene);
+      this.terrainMesh.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.05, this.height / 2 - 0.5);
+      this.terrainMesh.scaling.x = this.width;
+      this.terrainMesh.scaling.z = this.height;
 
       this.terrainShadows = BABYLON.MeshBuilder.CreateGround('terrainShadows', { width: 1, height: 1 }, this.parameters.scene);
       this.terrainShadows.position = new BABYLON.Vector3(this.width / 2 - 0.5, -0.025, this.height / 2 - 0.5);
@@ -238,8 +238,8 @@ export class TileMap extends Schema {
       // var texture = new BABYLON.Texture('https://i.imgur.com/bc3ECkA.jpg',
       // var texture = new BABYLON.Texture('../uploads/414828b4b8adbd332c9d5d6043ab5809.jpg',
       var texture = new BABYLON.Texture('assets/images/game/default_terrain.png', this.parameters.scene);
-      if (this.imageUrl)
-        texture = new BABYLON.Texture(this.imageUrl, this.parameters.scene);
+      if (this.terrain)
+        texture = new BABYLON.Texture(this.terrain, this.parameters.scene);
       material.diffuseTexture = texture;
 
       // material = new BABYLON.StandardMaterial("terrain", this.parameters.scene);
@@ -247,29 +247,29 @@ export class TileMap extends Schema {
       // material.specularColor = new BABYLON.Color3(0, 0, 0);
 
       //set material of ground
-      this.terrain.material = material;
+      this.terrainMesh.material = material;
 
       this.terrainShadows.material = new ShadowOnlyMaterial('shadowOnly', this.parameters.scene)
 
       //receive shadows
-      this.terrain.receiveShadows = true;
+      this.terrainMesh.receiveShadows = true;
 
       this.terrainShadows.receiveShadows = true;
 
       //update global lights to exclude or include only: terrain and terrainShadows
-      this.parameters.world.lights.baseLight.excludedMeshes.push(this.terrain);
-      this.parameters.world.lights.secondLight.excludedMeshes.push(this.terrain);
-      this.parameters.world.lights.fogLight.includedOnlyMeshes.push(this.terrain);
-      this.parameters.world.lights.characterLight.includedOnlyMeshes.push(this.terrain);
+      this.parameters.world.lights.baseLight.excludedMeshes.push(this.terrainMesh);
+      this.parameters.world.lights.secondLight.excludedMeshes.push(this.terrainMesh);
+      this.parameters.world.lights.fogLight.includedOnlyMeshes.push(this.terrainMesh);
+      this.parameters.world.lights.characterLight.includedOnlyMeshes.push(this.terrainMesh);
     }
   }
 
   updateTerrainImage() {
-    if (this.terrain?.material) {
+    if (this.terrainMesh?.material) {
       var texture = new BABYLON.Texture('assets/images/game/default_terrain.png', this.parameters.scene);
-      if (this.imageUrl)
-        texture = new BABYLON.Texture(this.imageUrl, this.parameters.scene);
-      this.terrain.material.diffuseTexture = texture;
+      if (this.terrain)
+        texture = new BABYLON.Texture(this.terrain, this.parameters.scene);
+      this.terrainMesh.material.diffuseTexture = texture;
     }
   }
 

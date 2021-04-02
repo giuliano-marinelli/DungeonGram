@@ -80,6 +80,7 @@ class CampaignCtrl extends BaseCtrl {
               users: { "$first": "$users" },
               characters: { "$first": "$characters"},
               settings: { "$first": "$settings" },
+              banner: { "$first": "$banner" },
               invitations: { "$push": "$invitations" }
             }
           },
@@ -157,6 +158,7 @@ class CampaignCtrl extends BaseCtrl {
               users: { "$first": "$users" },
               characters: { "$first": "$characters"},
               settings: { "$first": "$settings" },
+              banner: { "$first": "$banner" },
               invitations: { "$push": "$invitations" }
             }
           },
@@ -254,6 +256,8 @@ class CampaignCtrl extends BaseCtrl {
       if (resu.status != 200) throw new Error('unauthorized');
 
       req.body.owner = resu.user._id;
+      if (req.file) req.body.banner = req.file.destination + req.file.filename;
+
       const obj = await new this.model(req.body).save();
       res.status(201).json(obj);
     } catch (err) {
@@ -330,6 +334,7 @@ class CampaignCtrl extends BaseCtrl {
             users: { "$first": "$users" },
             characters: { "$first": "$characters"},
             settings: { "$first": "$settings" },
+            banner: { "$first": "$banner" },
             invitations: { "$push": "$invitations" }
           }
         },
@@ -359,6 +364,8 @@ class CampaignCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
+
+      if (req.file) req.body.banner = req.file.destination + req.file.filename;
 
       await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
