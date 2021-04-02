@@ -43,6 +43,8 @@ export class Character extends Schema {
   group = 'Ungrouped';
   @type("string")
   portrait;
+  @type("string")
+  facePortrait;
   //internal attributes
   movementAcum = 0;
   collide = false;
@@ -105,6 +107,7 @@ export class Character extends Schema {
       this.visionRange = this.db.visionRange;
       this.height = this.db.height;
       this.portrait = this.db.portrait;
+      this.facePortrait = this.db.facePortrait;
     }
   }
 

@@ -173,6 +173,7 @@ export class CharacterComponent implements OnInit, OnDestroy {
       var characterValue = this.characterForm.value;
       characterValue.wears = this.getSelectedWears();
       characterValue.portrait = await this.getPortrait();
+      characterValue.facePortrait = await this.getFacePortrait();
       if (!this.character) {
         this.characterService.addCharacter(characterValue).subscribe(
           res => {
@@ -235,16 +236,27 @@ export class CharacterComponent implements OnInit, OnDestroy {
 
   getPortrait() {
     return new Promise(resolve => {
-      BABYLON.Tools.CreateScreenshotUsingRenderTarget(this.engine, this.scenario.photoCamera, 400, (data) => resolve(data));
+      BABYLON.Tools.CreateScreenshotUsingRenderTarget(this.engine, this.scenario.photoCamera, 400, (image) => resolve(image));
+    });
+  }
+
+  getFacePortrait() {
+    this.scenario.facePhotoCamera._target = new BABYLON.Vector3(0, this.height.value * 2, 0);
+    return new Promise(resolve => {
+      BABYLON.Tools.CreateScreenshotUsingRenderTarget(this.engine, this.scenario.facePhotoCamera, 400, (image) => {
+        GlobalComponent.cropImage(image, 100, 200, 200, 200).then((croppedImage: any) => {
+          resolve(croppedImage);
+        });
+      });
     });
   }
 }
-
 
 export class Scenario {
   parameters?: any;
   camera?: any;
   photoCamera?: any;
+  facePhotoCamera?: any;
   lights?: any = {};
   ground?: any;
   character?: any;
@@ -283,6 +295,11 @@ export class Scenario {
 
     this.photoCamera = new BABYLON.ArcRotateCamera("PhotoCamera", 0, 0, 0, new BABYLON.Vector3(0, 0.75, 0), this.parameters.scene);
     this.photoCamera.setPosition(new BABYLON.Vector3(0, 1.5, 5));
+
+    this.facePhotoCamera = new BABYLON.ArcRotateCamera("PhotoCamera", 0, 0, 0, new BABYLON.Vector3(0, 0.75, 0), this.parameters.scene);
+    this.facePhotoCamera.alpha = 1.5;
+    this.facePhotoCamera.beta = 1.5;
+    this.facePhotoCamera.radius = 1.5;
   }
 
   initLights() {

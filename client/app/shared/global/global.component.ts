@@ -57,4 +57,23 @@ export class GlobalComponent implements OnInit {
     return formData;
   }
 
+  static cropImage(data, x, y, width, height) {
+    // we return a Promise that gets resolved with our canvas element
+    return new Promise((resolve) => {
+      // this image will hold our source image data
+      const inputImage = new Image();
+      // we want to wait for our image to load
+      inputImage.onload = () => {
+        const outputImage = document.createElement("canvas");
+        outputImage.width = width;
+        outputImage.height = height;
+        const ctx = outputImage.getContext("2d");
+        ctx.drawImage(inputImage, x, y, width, height, 0, 0, width, height);
+        resolve(outputImage.toDataURL());
+      };
+      // start loading our image
+      inputImage.src = data;
+    });
+  }
+
 }

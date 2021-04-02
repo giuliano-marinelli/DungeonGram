@@ -16,6 +16,7 @@ const characterSchema = new mongoose.Schema({
   visionRange: Number,
   private: Boolean,
   portrait: String,
+  facePortrait: String,
   copyOf: { type: mongoose.Schema.Types.ObjectId, ref: 'Character' }
 });
 

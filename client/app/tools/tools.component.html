@@ -571,8 +571,9 @@
     tools.characters.options.selectedCharacterObj?.value?.map == tools.maps.options.openedMap?.value &&
     tools.maps.options.openedMap?.value ? 'show' : ''}}">
     <span>
-      <img class="selection-portrait float-right"
-        src="{{tools.characters.options.selectedCharacterObj.value?.portrait}}"
+      <img class="selection-portrait float-right" src="{{tools.characters.options.selectedCharacterObj.value?.facePortrait
+          ? tools.characters.options.selectedCharacterObj.value?.facePortrait
+          :tools.characters.options.selectedCharacterObj.value?.portrait}}"
         onerror="this.src='assets/images/characters/default-preview.jpg'">
       <div class="selection-title">
         <h5>{{tools.characters.options.selectedCharacterObj.value?.name}}</h5>
@@ -584,7 +585,8 @@
         <br>
         <i class="fa fa-fw fa-signing" tippy="Animations" placement="left"></i>&nbsp;
         <div class="btn-group">
-          <button class="btn btn-sm btn-sm" tippy="Stand" (click)="tools.characters.actions.animation('None')">St</button>
+          <button class="btn btn-sm btn-sm" tippy="Stand"
+            (click)="tools.characters.actions.animation('None')">St</button>
           <button class="btn btn-sm btn-sm" tippy="Sit" (click)="tools.characters.actions.animation('Sit')">Si</button>
           <button class="btn btn btn-sm" tippy="Sleep" (click)="tools.characters.actions.animation('Sleep')">Sl</button>
           <button class="btn btn btn-sm" tippy="Float" (click)="tools.characters.actions.animation('Float')">Fl</button>

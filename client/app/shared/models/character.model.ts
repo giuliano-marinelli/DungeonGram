@@ -9,5 +9,6 @@ export class Character {
   visionRange?: number;
   private?: boolean;
   portrait?: string;
+  facePortrait?: string;
   copyOf?: string;
 }
