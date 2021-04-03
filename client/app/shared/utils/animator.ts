@@ -9,6 +9,7 @@ export class Animator {
   lastDirection: BABYLON.Vector2 = new BABYLON.Vector2(0, 1);
   transition: number = 0.05;
   registeredChildren: any = {};
+  registeredChildrenUI: any = {};
   defaultVisibility: number = 1;
 
   constructor(mesh: any, skeleton: any, options?: any) {
@@ -77,6 +78,17 @@ export class Animator {
     this.mesh.removeChild(child);
   }
 
+  parentUI(control, alphaOn, alphaOff) {
+    control.linkWithMesh(this.mesh);
+    this.registeredChildrenUI[control.uniqueId] = { control: control, alphaOn: alphaOn, alphaOff: alphaOff, active: false };
+    this.registeredChildrenUI[control.uniqueId].control.alpha = 0;
+  }
+
+  unparentUI(child) {
+    delete this.registeredChildrenUI[child.uniqueId];
+    child.linkWithMesh(null);
+  }
+
   visibility(value) {
     this.mesh.visibility = value;
     for (let childId in this.registeredChildren) {
@@ -84,10 +96,26 @@ export class Animator {
     }
   }
 
+  toggleUI(child, active?) {
+    if (this.registeredChildrenUI[child.uniqueId]) {
+      this.registeredChildrenUI[child.uniqueId].active = active != null ? active : !this.registeredChildrenUI[child.uniqueId].active;
+      if (this.mesh.isEnabled()) {
+        this.registeredChildrenUI[child.uniqueId].control.alpha = this.registeredChildrenUI[child.uniqueId].active
+          ? this.registeredChildrenUI[child.uniqueId].alphaOn
+          : this.registeredChildrenUI[child.uniqueId].alphaOff;
+      }
+    }
+  }
+
   enabled(value) {
     this.mesh.setEnabled(value);
     for (let childId in this.registeredChildren) {
       this.registeredChildren[childId].setEnabled(value);
+    }
+    for (let childId in this.registeredChildrenUI) {
+      this.registeredChildrenUI[childId].control.alpha = value
+        ? (this.registeredChildrenUI[childId].active ? this.registeredChildrenUI[childId].alphaOn : this.registeredChildrenUI[childId].alphaOff)
+        : 0;
     }
   }
 

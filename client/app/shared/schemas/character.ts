@@ -6,6 +6,7 @@ import { Schema } from './schema';
 import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
+import { AdvancedDynamicTexture, Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
 
 export class Character extends Schema {
   //schema
@@ -38,6 +39,9 @@ export class Character extends Schema {
   visionLight?: any;
   visionRays?: any = [];
   visibleCharacters?: any = [];
+  uiSigns?: any;
+  nameSign?: any;
+  nameSignText?: any;
   //physics
   xPhysics?: number;
   yPhysics?: number;
@@ -136,6 +140,9 @@ export class Character extends Schema {
         case 'addingMode':
           this.initAddingMode();
           break;
+        case 'name':
+          if (this.nameSignText) this.nameSignText.text = this.name;
+          break;
       }
     });
 
@@ -152,6 +159,7 @@ export class Character extends Schema {
 
   removeMesh() {
     this.detachSelection();
+    this.removeSigns();
     this.mesh?.dispose();
     this.collider?.dispose();
     this.colliderPhysics?.dispose();
@@ -160,6 +168,15 @@ export class Character extends Schema {
     this.collider = null;
     this.colliderPhysics = null;
     this.selectionMesh = null;
+  }
+
+  removeSigns() {
+    this.uiSigns?.dispose();
+    this.nameSign?.dispose();
+    this.nameSignText?.dispose();
+    this.uiSigns = null;
+    this.nameSign = null;
+    this.nameSignText = null;
   }
 
   doMesh() {
@@ -227,38 +244,9 @@ export class Character extends Schema {
         //create the wears meshes and parent to character mesh
         this.doWears();
 
-        //set action on mouse in/out/click
-        this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-        // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, this.mesh.material, "emissiveColor", this.mesh.material.emissiveColor));
-        // this.mesh.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, this.mesh.material, "emissiveColor", BABYLON.Color3.White()));
-        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
-          if (e.sourceEvent.button == 0 && e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
-            console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
-            this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
-          }
-        }));
-        this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-          if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
-            this.parameters.controller.toggleAction('dragCharacter', true);
-            this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
-            var drag = () => {
-              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
-              if (pick?.pickedPoint) {
-                this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
-              }
-            }
-            var drop = (e) => {
-              this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
-              this.parameters.canvas.removeEventListener("pointerup", drop, false);
-              this.parameters.canvas.removeEventListener("pointermove", drag, false);
-              setTimeout(() => {
-                this.parameters.controller.toggleAction('dragCharacter', false);
-              }, 10);
-            };
-            this.parameters.canvas.addEventListener("pointermove", drag, false);
-            this.parameters.canvas.addEventListener("pointerup", drop, false);
-          }
-        }));
+        if (!this.addingMode) this.doSigns();
+
+        this.initActions();
 
         //cast shadows with base light
         this.parameters.world.lights.baseLight._shadowGenerator.addShadowCaster(this.mesh);
@@ -310,6 +298,78 @@ export class Character extends Schema {
           this.mesh.material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
         }
       }
+    }
+  }
+
+  doSigns() {
+    this.uiSigns = AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+    this.nameSign = new Rectangle();
+    this.nameSign.adaptWidthToChildren = true;
+    this.nameSign.adaptHeightToChildren = true;
+    // this.nameSign.width = "100px";
+    // this.nameSign.height = "40px";
+    this.nameSign.cornerRadius = 5;
+    this.nameSign.color = "White";
+    this.nameSign.thickness = 0;
+    this.nameSign.background = "Black";
+    this.nameSign.linkOffsetY = -55;
+    this.uiSigns.addControl(this.nameSign);
+    // this.nameSign.linkWithMesh(this.mesh);
+
+    this.nameSignText = new TextBlock();
+    this.nameSignText.text = this.name;
+    this.nameSignText.fontFamily = "Helvetica";
+    this.nameSignText.fontSize = 14;
+    this.nameSignText.width = "80px";
+    this.nameSignText.height = "30px";
+    this.nameSignText.textWrapping = TextWrapping.WordWrap;
+    this.nameSignText.resizeToFit = true;
+    this.nameSign.addControl(this.nameSignText);
+
+    this.animator.parentUI(this.nameSign, 0.8, 0.2);
+  }
+
+  initActions() {
+    //set action on mouse in/out/click
+    this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
+    this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
+      if (e.sourceEvent.button == 0 && e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
+        console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
+        this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
+      }
+    }));
+    this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+      if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
+        this.parameters.controller.toggleAction('dragCharacter', true);
+        this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
+        var drag = () => {
+          var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
+          if (pick?.pickedPoint) {
+            this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+          }
+        }
+        var drop = (e) => {
+          this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
+          this.parameters.canvas.removeEventListener("pointerup", drop, false);
+          this.parameters.canvas.removeEventListener("pointermove", drag, false);
+          setTimeout(() => {
+            this.parameters.controller.toggleAction('dragCharacter', false);
+          }, 10);
+        };
+        this.parameters.canvas.addEventListener("pointermove", drag, false);
+        this.parameters.canvas.addEventListener("pointerup", drop, false);
+      }
+    }));
+    if (!this.addingMode) {
+      this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, (e) => {
+        this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+        this.animator.toggleUI(this.nameSign, true);
+      }));
+      this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, (e) => {
+        this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
+        this.animator.toggleUI(this.nameSign, false);
+      }));
     }
   }
 
@@ -397,13 +457,15 @@ export class Character extends Schema {
         this.selectionMeshZ = 0;
         break;
     }
-    if (this.animation && this.animation != 'None') this.animator?.play(this.animation, loop);
-    else this.animator?.play('Idle');
-    if (this.mesh) {
-      this.mesh.position.y = this.z;
-      this.selectionMesh.position.y = this.selectionMeshZ;
-      this.mesh.scaling.x = scaling;
-      this.mesh.scaling.z = scaling;
+    if (!this.beignDragged) {
+      if (this.animation && this.animation != 'None') this.animator?.play(this.animation, loop);
+      else this.animator?.play('Idle');
+      if (this.mesh) {
+        this.mesh.position.y = this.z;
+        this.selectionMesh.position.y = this.selectionMeshZ;
+        this.mesh.scaling.x = scaling;
+        this.mesh.scaling.z = scaling;
+      }
     }
   }
 

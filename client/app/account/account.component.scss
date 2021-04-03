@@ -15,10 +15,18 @@
 }
 
 .profile-img-upload {
-  display: none;
+  display: inline-block;
+  position: absolute;
   width: 250px;
   height: 250px;
+  top: 0;
+  left: 0;
   border-radius: 125px;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: inset 0px 0px 30px 20px #000000;
+  box-shadow: inset 0px 0px 30px 20px #000000;
+  opacity: 0;
+  transition: all 0.5s;
 }
 
 .profile-img-container {
@@ -28,13 +36,7 @@
 }
 
 .profile-img-container:hover .profile-img-upload {
-  display: inline-block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.5);
-  -webkit-box-shadow: inset 0px 0px 30px 20px #000000;
-  box-shadow: inset 0px 0px 30px 20px #000000;
+  opacity: 1;
   cursor: pointer;
 }
 

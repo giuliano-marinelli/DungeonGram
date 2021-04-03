@@ -2,11 +2,7 @@ import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Vectors } from '../utils/vectors';
 import { Point } from './point';
 import { Schema } from './schema';
-import {
-  AdvancedDynamicTexture,
-  Rectangle,
-  TextBlock
-} from '@babylonjs/gui';
+import { AdvancedDynamicTexture, Rectangle, TextBlock } from '@babylonjs/gui';
 
 export class Rule extends Schema {
   //schema
