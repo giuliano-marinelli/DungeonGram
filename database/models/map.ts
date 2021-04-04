@@ -4,8 +4,9 @@ const mapSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   name: String,
   description: String,
-  walls: [
-    {
+  walls: {
+    type: "array",
+    contains: {
       from: {
         x: Number,
         y: Number
@@ -14,9 +15,10 @@ const mapSchema = new mongoose.Schema({
         x: Number,
         y: Number
       },
-      size: String
+      size: String,
+      type: String
     }
-  ],
+  },
   // characters: [
   //   {
   //     position: {

@@ -15,6 +15,8 @@ export class Map extends Schema {
   // characters = new MapSchema<Character>();
   @type({ map: Wall })
   walls = new MapSchema<Wall>();
+  @type({ map: Wall })
+  doors = new MapSchema<Wall>();
   @type(TileMap)
   tilemap: TileMap;
 
@@ -63,17 +65,33 @@ export class Map extends Schema {
     for (let key in this.walls) {
       this.walls[key].remove();
     }
+    for (let key in this.doors) {
+      this.doors[key].remove();
+    }
     this.tilemap.remove();
     this.destroy = true;
   }
 
   addWall(wall) {
     var randomId = Utils.uuidv4();
-    this.walls[randomId] = new Wall(wall.from, wall.to, wall.size);
-    this.walls[randomId].wallPhysics = this.worldPhysics.addEntity(randomId, 'wall', {
+    var wallObject = new Wall(wall.from, wall.to, wall.size, wall.type);
+    wallObject.wallPhysics = this.worldPhysics.addEntity(randomId, 'wall', {
       from: wall.from, to: wall.to
     }); //add physics wall
-    this.walls[randomId].updatePhysics(); //update for share physics data
+    wallObject.updatePhysics(); //update for share physics data
+
+    if (wall.type == "door") this.doors[randomId] = wallObject;
+    else this.walls[randomId] = wallObject;
+  }
+
+  getWall(id) {
+    if (this.walls[id]) return this.walls[id]
+    else return this.doors[id]
+  }
+
+  deleleWall(id) {
+    if (this.walls[id]) delete this.walls[id]
+    else return delete this.doors[id]
   }
 
   async persist() {
@@ -81,9 +99,9 @@ export class Map extends Schema {
     map.tilemap.width = this.tilemap.width;
     map.tilemap.height = this.tilemap.height;
 
-    var wallsOnMap = [];
+    map.walls = [];
     for (let wallId in this.walls) {
-      wallsOnMap.push({
+      map.walls.push({
         from: {
           x: this.walls[wallId].from.x,
           y: this.walls[wallId].from.y
@@ -92,12 +110,27 @@ export class Map extends Schema {
           x: this.walls[wallId].to.x,
           y: this.walls[wallId].to.y
         },
-        size: this.walls[wallId].size
-      })
+        size: this.walls[wallId].size,
+        type: this.walls[wallId].type
+      });
     }
-    map.walls = wallsOnMap;
 
-    await MapDB.findOneAndUpdate({ _id: this.mapId }, map);
+    for (let doorId in this.doors) {
+      map.walls.push({
+        from: {
+          x: this.doors[doorId].from.x,
+          y: this.doors[doorId].from.y
+        },
+        to: {
+          x: this.doors[doorId].to.x,
+          y: this.doors[doorId].to.y
+        },
+        size: this.doors[doorId].size,
+        type: this.doors[doorId].type
+      });
+    }
+
+    var res = await MapDB.findOneAndUpdate({ _id: this.mapId }, map);
   }
 
   async updateTilemap() {

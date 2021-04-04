@@ -71,6 +71,7 @@ export class ToolsComponent implements OnInit {
         options: {
           remove: true,
           adjustTo: 'grid',
+          type: 'wall',
           size: 'large',
           wallsVisibility: this.controller.initSetting("wallsVisibility", 0.5),
         },
@@ -82,7 +83,8 @@ export class ToolsComponent implements OnInit {
           remove: (value) => { this.tools.walls.options.remove = value },
           adjustTo: (value) => { this.tools.walls.options.adjustTo = value },
           visibility: (visibility) => { this.controller.send('game', 'wall', { value: parseFloat(visibility.value), action: 'visibility' }) },
-          size: (value) => { this.tools.walls.options.size = value }
+          size: (value) => { this.tools.walls.options.size = value },
+          type: (value) => { this.tools.walls.options.type = value }
         }
       },
       rule: {

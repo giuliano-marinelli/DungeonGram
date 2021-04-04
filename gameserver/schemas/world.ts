@@ -210,16 +210,21 @@ export class World extends Schema {
       },
       lookAt: {
         do: (client: string, data: any) => {
-          if (this.map != null && this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map) {
+          if (this.map != null &&
+            (this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map ||
+              this.map.mapId == this.characters[data.id]?.map)) {
             if (!this.users[client].addingModeCharacter &&
-              this.users[client].selectedCharacter &&
               data.x >= 0 && data.y >= 0 &&
               data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
-              this.characters[this.users[client].selectedCharacter].lookAt({ x: data.x, y: data.y });
+              if (data.id)
+                this.characters[data.id].lookAt({ x: data.x, y: data.y });
+              else if (this.users[client].selectedCharacter)
+                this.characters[this.users[client].selectedCharacter].lookAt({ x: data.x, y: data.y });
           }
         },
         validate: (client: string, data: any) => {
-          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number"
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" &&
+            (data.id == null || typeof data.id === "string")
         }
       },
       animation: {
@@ -250,17 +255,19 @@ export class World extends Schema {
           if (this.command.wall.state.wallFirstPoint != null &&
             (this.command.wall.state.wallFirstPoint.x != data.x
               || this.command.wall.state.wallFirstPoint.y != data.y)) {
-            var wallId = Utils.uuidv4();
-            this.map.walls[wallId] = new Wall(this.command.wall.state.wallFirstPoint, { x: data.x, y: data.y }, data.size);
-            this.map.walls[wallId].wallPhysics = this.map.worldPhysics.addEntity(wallId, 'wall',
-              { from: this.command.wall.state.wallFirstPoint, to: { x: data.x, y: data.y } }); //add physics wall
-            this.map.walls[wallId].updatePhysics();
+            this.map.addWall({
+              from: this.command.wall.state.wallFirstPoint,
+              to: { x: data.x, y: data.y },
+              size: data.size,
+              type: data.type
+            });
           }
           this.command.wall.state.wallFirstPoint = null;
         },
         validate: (client: string, data: any) => {
-          return this.map != null && data.x != null && data.y != null && data.size != null &&
-            typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string" && this.users[client].isDM
+          return this.map != null && data.x != null && data.y != null && data.size != null && data.type != null &&
+            typeof data.x === "number" && typeof data.y === "number" && typeof data.size === "string" && typeof data.type === "string" &&
+            this.users[client].isDM
         }
       },
       cancel: {
@@ -273,7 +280,7 @@ export class World extends Schema {
       },
       remove: {
         do: (client: string, data: any) => {
-          delete this.map.walls[data.id];
+          this.map.deleleWall(data.id);
           this.map.worldPhysics.removeEntity(data.id, 'wall'); //remove physics wall
         },
         validate: (client: string, data: any) => {
@@ -294,6 +301,28 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.value != null && typeof data.value === "boolean" && this.users[client].isDM
+        }
+      },
+      rotate: {
+        do: (client: string, data: any) => {
+          if (this.map.getWall(data.id).type == "door") {
+            this.map.getWall(data.id).rotateTo(data.target);
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && data.target != null &&
+            typeof data.id === "string" && typeof data.target.x === "number" && typeof data.target.y === "number"
+        }
+      },
+      endRotate: {
+        do: (client: string, data: any) => {
+          if (this.map.getWall(data.id).type == "door") {
+            this.worldPhysics.updateGrid();
+            this.map.getWall(data.id).updatePhysics();
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string"
         }
       }
     },

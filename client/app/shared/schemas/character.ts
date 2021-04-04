@@ -341,16 +341,19 @@ export class Character extends Schema {
     }));
     this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
       if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
+        var isShift = e.sourceEvent.shiftKey;
         this.parameters.controller.toggleAction('dragCharacter', true);
-        this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
+        if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
         var drag = () => {
           var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
           if (pick?.pickedPoint) {
-            this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+            if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+            else if (this.parameters.world.users[this.parameters.token].isDM)
+              this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'lookAt' });
           }
         }
         var drop = (e) => {
-          this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
+          if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
           this.parameters.canvas.removeEventListener("pointerup", drop, false);
           this.parameters.canvas.removeEventListener("pointermove", drag, false);
           setTimeout(() => {

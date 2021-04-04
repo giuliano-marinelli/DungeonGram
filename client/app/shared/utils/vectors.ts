@@ -31,6 +31,16 @@ export class Vectors {
     return -Math.atan2(pointB.y - pointA.y, pointB.x - pointA.x);
   }
 
+  static directedAngle(vector1, vector2) {
+    var angle = Math.atan2(vector2.y, vector2.x) - Math.atan2(vector1.y, vector1.x);
+    if (angle < 0) { angle += 2 * Math.PI; }
+    return angle;
+  }
+
+  static ratationDiff(pointA, pointB) {
+
+  }
+
   static directionToRotate(direction) {
     var dirX = Math.round(direction.x);
     var dirY = Math.round(direction.y);

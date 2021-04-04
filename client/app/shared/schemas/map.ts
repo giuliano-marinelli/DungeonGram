@@ -7,6 +7,7 @@ export class Map extends Schema {
   //schema
   mapId?: string;
   walls?: Wall[];
+  doors?: Wall[];
   tilemap?: TileMap;
   //game objects
   camera?: any;
@@ -18,6 +19,20 @@ export class Map extends Schema {
     this.synchronizeSchema(schema,
       {
         walls: {
+          type: Wall, datatype: Array, parameters: (key) => {
+            return {
+              world: parameters.world,
+              canvas: parameters.canvas,
+              scene: parameters.scene,
+              room: parameters.room,
+              token: parameters.token,
+              controller: parameters.controller,
+              assets: parameters.assets,
+              id: key
+            }
+          }
+        },
+        doors: {
           type: Wall, datatype: Array, parameters: (key) => {
             return {
               world: parameters.world,

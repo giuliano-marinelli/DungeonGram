@@ -120,7 +120,9 @@ export class TileMap extends Schema {
         var height = 2.55;
         if (this.parameters.controller.activeTool?.options?.size == 'medium')
           height = height / 2;
-        if (this.parameters.controller.activeTool?.options?.size == 'small' || this.parameters.controller.activeTool?.options?.size == 'collider')
+        if (this.parameters.controller.activeTool?.options?.size == 'small' ||
+          (this.parameters.controller.activeTool?.options?.size == 'collider' &&
+            this.parameters.controller.activeTool?.options?.type != 'door'))
           height = height / 4;
         this.temporalWallStartPoint = BABYLON.MeshBuilder.CreateBox('', { height: height, width: 0.1, depth: 0.1 }, this.parameters.scene);
         this.temporalWallStartPoint.position = new BABYLON.Vector3(adjustedPoint.x, height / 2 - 0.05, adjustedPoint.z);
@@ -198,13 +200,18 @@ export class TileMap extends Schema {
             } else {
               this.parameters.controller.send('game', 'character', { x: xToMove, y: zToMove, action: 'move' });
             }
-          } else if (this.parameters.controller.activeTool?.name == 'walls') {
+          } else if (this.parameters.controller.activeTool?.name == 'walls' && !e.shiftKey) {
             var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
               this.parameters.controller.activeTool?.options?.adjustTo);
             this.parameters.canvas.removeEventListener("pointermove", this.dragWall, false);
             this.parameters.canvas.removeEventListener("contextmenu", this.cancelWall, false);
             removeTemporalWall();
-            this.parameters.controller.send('game', 'wall', { x: adjustedPoint.x, y: adjustedPoint.z, size: this.parameters.controller.activeTool?.options?.size, action: 'end' });
+            this.parameters.controller.send('game', 'wall', {
+              x: adjustedPoint.x, y: adjustedPoint.z,
+              size: this.parameters.controller.activeTool?.options?.size,
+              type: this.parameters.controller.activeTool?.options?.type,
+              action: 'end'
+            });
           }
         }
       }

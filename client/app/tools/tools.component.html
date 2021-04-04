@@ -354,7 +354,7 @@
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-large" #walls_type_wall_large value="large"
-                      (change)="tool.actions.size(walls_type_wall_large.value)" checked>
+                      (change)="tool.actions.size(walls_type_wall_large.value); tool.actions.type('wall');" checked>
                     <img src="assets/images/tools/walls/wall_large.png" alt="Large" tippy="Large" placement="bottom"
                       [appendTo]="tool_walls_container">
                   </label>
@@ -363,7 +363,7 @@
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-medium" #walls_type_wall_medium value="medium"
-                      (change)="tool.actions.size(walls_type_wall_medium.value)">
+                      (change)="tool.actions.size(walls_type_wall_medium.value); tool.actions.type('wall');">
                     <img src="assets/images/tools/walls/wall_medium.png" alt="Medium" tippy="Medium" placement="bottom"
                       [appendTo]="tool_walls_container">
                   </label>
@@ -372,7 +372,7 @@
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-small" #walls_type_wall_small value="small"
-                      (change)="tool.actions.size(walls_type_wall_small.value)">
+                      (change)="tool.actions.size(walls_type_wall_small.value); tool.actions.type('wall');">
                     <img src="assets/images/tools/walls/wall_small.png" alt="Small" tippy="Small" placement="bottom"
                       [appendTo]="tool_walls_container">
                   </label>
@@ -381,9 +381,39 @@
                   <label>
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-wall-collider" #walls_type_wall_collider value="collider"
-                      (change)="tool.actions.size(walls_type_wall_collider.value)">
+                      (change)="tool.actions.size(walls_type_wall_collider.value); tool.actions.type('wall');">
                     <img src="assets/images/tools/walls/wall_collider.png" alt="Only Collider" tippy="Only Collider"
                       placement="bottom" [appendTo]="tool_walls_container">
+                  </label>
+                </div>
+
+                <h5>Doors</h5>
+
+                <div class="form-check form-check-inline">
+                  <label>
+                    <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                      id="tool-walls-size-door-large" #walls_type_door_large value="large"
+                      (change)="tool.actions.size(walls_type_door_large.value); tool.actions.type('door');">
+                    <img src="assets/images/tools/walls/door_large.png" alt="Large" tippy="Large" placement="bottom"
+                      [appendTo]="tool_walls_container">
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <label>
+                    <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                      id="tool-walls-size-door-medium" #walls_type_door_medium value="medium"
+                      (change)="tool.actions.size(walls_type_door_medium.value); tool.actions.type('door');">
+                    <img src="assets/images/tools/walls/door_medium.png" alt="Medium" tippy="Medium" placement="bottom"
+                      [appendTo]="tool_walls_container">
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <label>
+                    <input class="form-check-input check-image" type="radio" name="tool-walls-size"
+                      id="tool-walls-size-door-collider" #walls_type_door_collider value="collider"
+                      (change)="tool.actions.size(walls_type_door_collider.value); tool.actions.type('door');">
+                    <img src="assets/images/tools/walls/door_collider.png" alt="Only Collider" tippy="Only Collider" placement="bottom"
+                      [appendTo]="tool_walls_container">
                   </label>
                 </div>
 

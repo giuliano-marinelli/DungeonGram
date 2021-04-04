@@ -62,4 +62,30 @@ export class Utils {
     // Return the result
     return coordinatesArray;
   }
+
+  static distance(pointA, pointB) {
+    var a = pointA.x - pointB.x;
+    var b = pointA.y - pointB.y;
+
+    return Math.sqrt(a * a + b * b);
+  }
+
+  //gets a "from" and a "to" points that makes a line and
+  //return the new "to" point for rotate the line in the "point" direction
+  static rotateByPoint(from, to, point) {
+    var t = this.distance(from, to) / this.distance(from, point);
+    return {
+      x: ((1 - t) * from.x + t * point.x),
+      y: ((1 - t) * from.y + t * point.y)
+    }
+  }
+
+  static rotate(point1, point2, angle) {
+    // var radians = (Math.PI / 180) * angle,
+    var cos = Math.cos(angle),
+      sin = Math.sin(angle),
+      nx = (cos * (point2.x - point1.x)) + (sin * (point2.y - point1.y)) + point1.x,
+      ny = (cos * (point2.y - point1.y)) - (sin * (point2.x - point1.x)) + point1.y;
+    return { x: nx, y: ny };
+  }
 }
