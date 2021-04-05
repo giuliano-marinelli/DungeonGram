@@ -71,6 +71,11 @@
   width: 50px;
   height: 50px;
   border-radius: 25px;
+  -o-object-fit: cover;
+  object-fit: cover;
+  -o-object-position: top;
+  object-position: top;
+  overflow: hidden;
 }
 
 .chat-portrait-image.small {

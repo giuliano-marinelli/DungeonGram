@@ -16,6 +16,9 @@ export class User extends Schema {
   addingModeCharacter?: string;
   addingModeModel?: string;
   isDM?: boolean;
+  avatar?: string;
+  username?: string;
+  email?: string;
   //global actions registered
   actions: any = {};
 

@@ -713,6 +713,8 @@ export class World extends Schema {
     this.users[user.ref].tilemapShowGrid = user.settings.tilemapShowGrid;
     this.users[user.ref].selectedCharacter = user.settings.selectedCharacter;
     this.users[user.ref].isDM = user.settings.isDM;
+
+    if (user.ref) this.users[user.ref].load(user.ref); //load a specific user of db
   }
 
   async addCharacter(character) {

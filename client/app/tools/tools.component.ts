@@ -63,7 +63,8 @@ export class ToolsComponent implements OnInit {
     this.tools = {
       users: {
         options: {
-          isDM: this.controller.initSetting("isDM", false)
+          isDM: this.controller.initSetting("isDM", false),
+          users: this.controller.initSetting("usersOnCampaign", [])
         }
       },
       walls: {
@@ -365,5 +366,9 @@ export class ToolsComponent implements OnInit {
 
   getPlayers(campaign: Campaign): string[] {
     return campaign["invitations"]?.filter(invitation => invitation.accepted).map(invitation => invitation.recipient_info);
+  }
+
+  getUsersByCharacter(character: any) {
+    return Object.values(this.tools.users.options.users?.value).filter((u) => u.selectedCharacter == character.id)
   }
 }

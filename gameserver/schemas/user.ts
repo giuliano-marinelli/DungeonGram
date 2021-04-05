@@ -2,6 +2,8 @@ import { Schema, type } from '@colyseus/schema';
 import { Rule } from '../schemas/rule';
 import { Figure } from '../schemas/figure';
 
+import { default as UserDB } from '../../database/models/user';
+
 export class User extends Schema {
   @type("number")
   wallsVisibility: number;
@@ -23,6 +25,14 @@ export class User extends Schema {
   addingModeModel: string;
   @type("boolean")
   isDM: boolean;
+  @type("string")
+  username: string;
+  @type("string")
+  email: string;
+  @type("string")
+  avatar: string;
+
+  db: any;
 
   constructor(wallsVisibility: number = 0, wallsPickable: boolean = false,
     fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,
@@ -36,5 +46,14 @@ export class User extends Schema {
     this.figureDrawer = figureDrawer;
     this.selectedCharacter = selectedCharacter;
     this.isDM = isDM;
+  }
+
+  async load(userId: string) {
+    this.db = await UserDB.findOne({ _id: userId });
+    if (this.db) {
+      this.username = this.db.username;
+      this.email = this.db.email;
+      this.avatar = this.db.avatar;
+    }
   }
 }

@@ -199,6 +199,11 @@
                             *ngFor="let character of ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: tools.characters.options.selectedMap }"
                             class="col mb-2 p">
                             <div class="card h-100">
+                              <button *ngIf="getUsersByCharacter(character)?.length > 0" class="btn position-absolute"
+                                style="left: 0; z-index: 1;" [tippy]="character_users_menu"
+                                [appendTo]="tool_characters_container" [maxWidth]="300">
+                                <i class="fa fa-user"></i>
+                              </button>
                               <button class="btn position-absolute" style="right: 0; z-index: 1;"
                                 [tippy]="character_context_menu" interactive="true"
                                 [appendTo]="tool_characters_container" trigger="click" placement="right-start"
@@ -225,6 +230,17 @@
                                 </div>
                               </div>
                             </div>
+                            <ng-template #character_users_menu>
+                              <p *ngFor="let userAssigned of getUsersByCharacter(character)">
+                                <img class="user-portrait-image small" [src]="userAssigned.avatar"
+                                  [tippy]="character_users_submenu_user" [appendTo]="tool_characters_container"
+                                  onerror="this.src='assets/images/characters/default-preview.jpg'" />
+                                {{userAssigned.username}}&nbsp;
+                                <span class='badge badge-warning' [hidden]='!userAssigned.isDM'>
+                                  DM
+                                </span>
+                              </p>
+                            </ng-template>
                             <ng-template #character_context_menu>
                               <div class="list-group">
                                 <button type="button" class="list-group-item list-group-item-action p-2"
@@ -235,9 +251,10 @@
                                 </button>
                                 <ng-template #character_context_submenu_assign_to>
                                   <div class="list-group">
-                                    <button *ngFor="let player of getPlayers(campaign)" type="button"
-                                      class="list-group-item list-group-item-action p-2"
-                                      (click)="tool.actions.assignTo(character.id, player._id)">
+                                    <button
+                                      *ngFor="let player of ObjectValues(tools.users.options.users?.value) | filter: { isDM: false }"
+                                      type="button" class="list-group-item list-group-item-action p-2"
+                                      (click)="tool.actions.assignTo(character.id, player.id)">
                                       {{player.username}}
                                     </button>
                                   </div>
