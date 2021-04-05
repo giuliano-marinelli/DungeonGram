@@ -74,7 +74,7 @@ export class Map extends Schema {
 
   addWall(wall) {
     var randomId = Utils.uuidv4();
-    var wallObject = new Wall(wall.from, wall.to, wall.size, wall.type);
+    var wallObject = new Wall(wall.from, wall.to, wall.defaultTo ? wall.defaultTo : wall.to, wall.size, wall.type, wall.blocked);
     wallObject.wallPhysics = this.worldPhysics.addEntity(randomId, 'wall', {
       from: wall.from, to: wall.to
     }); //add physics wall
@@ -110,8 +110,13 @@ export class Map extends Schema {
           x: this.walls[wallId].to.x,
           y: this.walls[wallId].to.y
         },
+        defaultTo: {
+          x: this.walls[wallId].defaultTo.x,
+          y: this.walls[wallId].defaultTo.y
+        },
         size: this.walls[wallId].size,
-        type: this.walls[wallId].type
+        type: this.walls[wallId].type,
+        blocked: this.walls[wallId].blocked
       });
     }
 
@@ -125,8 +130,13 @@ export class Map extends Schema {
           x: this.doors[doorId].to.x,
           y: this.doors[doorId].to.y
         },
+        defaultTo: {
+          x: this.doors[doorId].defaultTo.x,
+          y: this.doors[doorId].defaultTo.y
+        },
         size: this.doors[doorId].size,
-        type: this.doors[doorId].type
+        type: this.doors[doorId].type,
+        blocked: this.doors[doorId].blocked
       });
     }
 

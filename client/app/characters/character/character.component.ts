@@ -44,7 +44,7 @@ export class CharacterComponent implements OnInit, OnDestroy {
   ]);
   visionRange = new FormControl(10, [
     Validators.required,
-    Validators.min(0),
+    Validators.min(1),
     Validators.max(200)
   ]);
   private = new FormControl(false, []);

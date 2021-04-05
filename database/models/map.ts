@@ -15,8 +15,13 @@ const mapSchema = new mongoose.Schema({
         x: Number,
         y: Number
       },
+      defaultTo: {
+        x: Number,
+        y: Number
+      },
       size: String,
-      type: String
+      type: String,
+      blocked: Boolean
     }
   },
   // characters: [

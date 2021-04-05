@@ -377,7 +377,7 @@ export class Character extends Schema {
       if (!this.visionLight && this.mesh && this.parameters.world.lights.characterLight) {
         //attach character light to this mesh
         this.visionLight = this.parameters.world.lights.characterLight;
-        this.visionLight.range = this.visionRange;
+        this.visionLight.range = this.parameters.world.adjustVisionRange(this.visionRange);
         this.visionLight.parent = this.mesh;
         this.visionLight.intensity = 100;
         //show selection mesh
@@ -476,7 +476,7 @@ export class Character extends Schema {
       this.visibleCharacters = [];
       var raysPoints = Vectors.getRadiusPoints({ x: 0, y: 0 }, 64);
       raysPoints.forEach(rayPoint => {
-        var ray = new BABYLON.Ray(new BABYLON.Vector3(this.x, 1, this.y), new BABYLON.Vector3(rayPoint.x, 0, rayPoint.y), this.visionRange);
+        var ray = new BABYLON.Ray(new BABYLON.Vector3(this.x, 1, this.y), new BABYLON.Vector3(rayPoint.x, 0, rayPoint.y), this.parameters.world.adjustVisionRange(this.visionRange));
         // this.visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
         var pickedMesh = this.parameters.scene.pickWithRay(ray)?.pickedMesh;
         if (pickedMesh?.name.indexOf('character') != -1)

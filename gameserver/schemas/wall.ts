@@ -8,10 +8,14 @@ export class Wall extends Schema {
   from: Point;
   @type(Point)
   to: Point;
+  @type(Point)
+  defaultTo: Point;
   @type("string")
   size = 'large';
   @type("string")
   type = 'wall';
+  @type("boolean")
+  blocked = false;
   //physics
   wallPhysics: WallPhysics;
   //shared physics attributes for test
@@ -22,12 +26,14 @@ export class Wall extends Schema {
   @type('boolean')
   destroy: boolean = false;
 
-  constructor(from: any, to: any, size: string, type: string) {
+  constructor(from: any, to: any, defaultTo: any, size: string, type: string, blocked: boolean) {
     super();
     this.from = new Point(from.x, from.y);
     this.to = new Point(to.x, to.y);
+    this.defaultTo = new Point(defaultTo.x, defaultTo.y);
     this.size = size;
     this.type = type;
+    this.blocked = blocked ? blocked : false;
   }
 
   updatePhysics() {

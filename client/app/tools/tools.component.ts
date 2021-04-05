@@ -84,7 +84,8 @@ export class ToolsComponent implements OnInit {
           adjustTo: (value) => { this.tools.walls.options.adjustTo = value },
           visibility: (visibility) => { this.controller.send('game', 'wall', { value: parseFloat(visibility.value), action: 'visibility' }) },
           size: (value) => { this.tools.walls.options.size = value },
-          type: (value) => { this.tools.walls.options.type = value }
+          type: (value) => { this.tools.walls.options.type = value },
+          closeAll: () => { this.controller.send('game', 'wall', { action: 'closeAll' }) },
         }
       },
       rule: {
@@ -131,10 +132,12 @@ export class ToolsComponent implements OnInit {
         options: {
           fogOfWarVisibility: this.controller.initSetting("fogOfWarVisibility", 0),
           fogOfWarVisibilityPlayers: this.controller.initSetting("fogOfWarVisibilityPlayers", 0),
+          fogOfWarVisionCharacters: this.controller.initSetting("fogOfWarVisionCharacters", 200),
         },
         actions: {
           visibility: (visibility) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibility.value), action: 'visibility' }) },
           visibilityPlayers: (visibilityPlayers) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibilityPlayers.value), action: 'visibilityPlayers' }) },
+          visionCharacters: (visionCharacters) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visionCharacters.value), action: 'visionCharacters' }) },
         }
       },
       maps: {

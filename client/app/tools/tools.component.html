@@ -412,12 +412,18 @@
                     <input class="form-check-input check-image" type="radio" name="tool-walls-size"
                       id="tool-walls-size-door-collider" #walls_type_door_collider value="collider"
                       (change)="tool.actions.size(walls_type_door_collider.value); tool.actions.type('door');">
-                    <img src="assets/images/tools/walls/door_collider.png" alt="Only Collider" tippy="Only Collider" placement="bottom"
-                      [appendTo]="tool_walls_container">
+                    <img src="assets/images/tools/walls/door_collider.png" alt="Only Collider" tippy="Only Collider"
+                      placement="bottom" [appendTo]="tool_walls_container">
                   </label>
                 </div>
 
                 <hr />
+
+                <div class="form-group">
+                  <button type="button" class="btn btn-sm btn-dark" (click)="tool.actions.closeAll()">
+                    <i class="fa fa-ban"></i> Close All Doors
+                  </button>
+                </div>
 
                 <div class="form-group">
                   <label>Visibility</label>
@@ -474,6 +480,17 @@
                     (change)="tool.actions.visibilityPlayers({ value: fogOfWar_visibilityPlayers.value })" min="0"
                     max="1" step="0.1" value="{{tool.options.fogOfWarVisibilityPlayers?.value}}" />
                   <small class="text-muted">(this will impact in all players)</small>
+                </div>
+
+                <hr />
+
+                <div class="form-group">
+                  <label style="font-size: 15px; width:150px;">Max Vision Range of Characters</label>
+                  <label style="float: right">{{fogOfWar_visionCharacters.value}}</label>
+                  <input type="range" class="form-control-range" #fogOfWar_visionCharacters
+                    (change)="tool.actions.visionCharacters({ value: fogOfWar_visionCharacters.value })" min="1"
+                    max="200" step="1" value="{{tool.options.fogOfWarVisionCharacters?.value}}" />
+                  <small class="text-muted" style="font-size: 12px;">(this will impact in all characters)</small>
                 </div>
               </div>
 

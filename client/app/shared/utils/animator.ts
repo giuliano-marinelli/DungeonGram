@@ -12,15 +12,18 @@ export class Animator {
   registeredChildrenUI: any = {};
   defaultVisibility: number = 1;
 
-  constructor(mesh: any, skeleton: any, options?: any) {
+  constructor(mesh: any, skeleton?: any, options?: any) {
     this.mesh = mesh;
     this.skeleton = skeleton;
     if (options?.rotationSpeed) this.rotationSpeed = options?.rotationSpeed;
     if (options?.transition) this.transition = options?.transition;
+    if (options?.defaultVisibility) this.defaultVisibility = options?.defaultVisibility;
 
-    this.skeleton.enableBlending(this.transition);
-    for (let anim in this.skeleton._ranges) {
-      this.skeleton._ranges[anim].from = this.skeleton._ranges[anim].from + 1;
+    if (this.skeleton) {
+      this.skeleton.enableBlending(this.transition);
+      for (let anim in this.skeleton._ranges) {
+        this.skeleton._ranges[anim].from = this.skeleton._ranges[anim].from + 1;
+      }
     }
 
     if (options?.actual) this.play(options?.actual);

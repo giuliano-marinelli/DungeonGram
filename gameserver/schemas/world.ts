@@ -22,7 +22,8 @@ export class World extends Schema {
   map: Map;
   @type("number")
   fogOfWarVisibilityPlayers: number;
-
+  @type("number")
+  maxVisionCharacters: number;
   //physics
   worldPhysics: WorldPhysics;
 
@@ -258,8 +259,10 @@ export class World extends Schema {
             this.map.addWall({
               from: this.command.wall.state.wallFirstPoint,
               to: { x: data.x, y: data.y },
+              defaultTo: { x: data.x, y: data.y },
               size: data.size,
-              type: data.type
+              type: data.type,
+              blocked: false
             });
           }
           this.command.wall.state.wallFirstPoint = null;
@@ -305,7 +308,7 @@ export class World extends Schema {
       },
       rotate: {
         do: (client: string, data: any) => {
-          if (this.map.getWall(data.id).type == "door") {
+          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
             this.map.getWall(data.id).rotateTo(data.target);
           }
         },
@@ -316,13 +319,44 @@ export class World extends Schema {
       },
       endRotate: {
         do: (client: string, data: any) => {
-          if (this.map.getWall(data.id).type == "door") {
+          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
             this.worldPhysics.updateGrid();
             this.map.getWall(data.id).updatePhysics();
           }
         },
         validate: (client: string, data: any) => {
           return this.map != null && data.id != null && typeof data.id === "string"
+        }
+      },
+      block: {
+        do: (client: string, data: any) => {
+          if (this.map.getWall(data.id)?.type == "door") {
+            this.map.getWall(data.id).blocked = data.block;
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && data.block != null &&
+            typeof data.id === "string" && typeof data.block === "boolean" && this.users[client].isDM
+        }
+      },
+      close: {
+        do: (client: string, data: any) => {
+          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
+            this.map.getWall(data.id).rotateTo(this.map.getWall(data.id).defaultTo);
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && typeof data.id === "string"
+        }
+      },
+      closeAll: {
+        do: (client: string, data: any) => {
+          for (var door in this.map?.doors) {
+            this.map.doors[door].rotateTo(this.map.doors[door].defaultTo);
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && this.users[client].isDM
         }
       }
     },
@@ -436,6 +470,14 @@ export class World extends Schema {
       visibilityPlayers: {
         do: (client: string, data: any) => {
           this.fogOfWarVisibilityPlayers = data.value;
+        },
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "number" && this.users[client].isDM
+        }
+      },
+      visionCharacters: {
+        do: (client: string, data: any) => {
+          this.maxVisionCharacters = data.value;
         },
         validate: (client: string, data: any) => {
           return data.value != null && typeof data.value === "number" && this.users[client].isDM
@@ -579,6 +621,9 @@ export class World extends Schema {
 
     this.fogOfWarVisibilityPlayers = campaign.settings?.fogOfWarVisibilityPlayers != null
       ? campaign.settings?.fogOfWarVisibilityPlayers : 0;
+
+    this.maxVisionCharacters = campaign.settings?.maxVisionCharacters != null
+      ? campaign.settings?.maxVisionCharacters : 200;
   }
 
   async persist() {
@@ -633,7 +678,8 @@ export class World extends Schema {
     campaign.users = usersOnCampaign;
     campaign.characters = charactersOnCampaign;
     campaign.settings = {
-      fogOfWarVisibilityPlayers: this.fogOfWarVisibilityPlayers
+      fogOfWarVisibilityPlayers: this.fogOfWarVisibilityPlayers,
+      maxVisionCharacters: this.maxVisionCharacters
     }
 
     await CampaignDB.findOneAndUpdate({ _id: campaign._id }, campaign);

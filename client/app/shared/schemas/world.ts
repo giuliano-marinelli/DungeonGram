@@ -16,6 +16,7 @@ export class World extends Schema {
   characters?: Character[];
   map?: Map;
   fogOfWarVisibilityPlayers?: number;
+  maxVisionCharacters?: number;
   //game objects
   camera?: any;
   lights?: any = {};
@@ -94,6 +95,12 @@ export class World extends Schema {
         case 'fogOfWarVisibilityPlayers':
           this.updateFogOfWar();
           this.parameters.controller.updateSetting('fogOfWarVisibilityPlayers', this.fogOfWarVisibilityPlayers);
+          break;
+        case 'maxVisionCharacters':
+          this.updateCharactersVisibility();
+          var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
+          if (this.characters[selectedCharacter] && this.lights.characterLight) this.lights.characterLight.range = this.adjustVisionRange(this.characters[selectedCharacter].visionRange);
+          this.parameters.controller.updateSetting('maxVisionCharacters', this.maxVisionCharacters);
           break;
       }
     });
@@ -197,6 +204,10 @@ export class World extends Schema {
     this.ui = AdvancedDynamicTexture.CreateFullscreenUI("UI");
   }
 
+  adjustVisionRange(visionRange) {
+    return !this.maxVisionCharacters || visionRange < this.maxVisionCharacters ? visionRange : this.maxVisionCharacters;
+  }
+
   updateFogOfWar() {
     setTimeout(() => {
       var user = this.users[this.parameters.token];
@@ -277,8 +288,8 @@ export class World extends Schema {
             }
             for (let door in this.map.doors) {
               if (this.map.doors[door].mesh) {
-                this.map.doors[door].mesh.visibility = this.map.doors[door].size == 'collider' ? 0.5 : 1;
                 this.map.doors[door].mesh.isPickable = true;
+                this.map.doors[door].animator.show();
               }
             }
           } else {
@@ -290,8 +301,8 @@ export class World extends Schema {
             }
             for (let door in this.map.doors) {
               if (this.map.doors[door].mesh) {
-                this.map.doors[door].mesh.visibility = 0;
                 this.map.doors[door].mesh.isPickable = false;
+                this.map.doors[door].animator.hide();
               }
             }
           }
@@ -310,7 +321,7 @@ export class World extends Schema {
       var ray = new BABYLON.Ray(
         origin,
         target,
-        this.characters[selectedCharacter].visionRange - 1
+        this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
       );
       // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
@@ -334,7 +345,7 @@ export class World extends Schema {
       var ray = new BABYLON.Ray(
         origin,
         target,
-        this.characters[selectedCharacter].visionRange - 1
+        this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
       );
       // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(0, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
@@ -343,14 +354,14 @@ export class World extends Schema {
       var distanceToDoor = Vectors.distance({ x: this.characters[selectedCharacter].mesh.position.x, y: this.characters[selectedCharacter].mesh.position.z }, { x: this.map.doors[door].to.x, y: this.map.doors[door].to.y });
       if ((pickedMesh && this.map.doors[door].id == pickedMesh.name) ||
         distanceToDoor < 3) {
-        this.map.doors[door].mesh.visibility = this.map.doors[door].size == 'collider' ? 0.5 : 1;
+        this.map.doors[door].animator.show();
         if (distanceToDoor <= 3) {
           this.map.doors[door].mesh.isPickable = true;
         } else if (this.parameters.controller.activeTool?.name != 'walls') {
           this.map.doors[door].mesh.isPickable = false;
         }
       } else {
-        this.map.doors[door].mesh.visibility = 0;
+        this.map.doors[door].animator.hide();
         if (this.parameters.controller.activeTool?.name != 'walls') this.map.doors[door].mesh.isPickable = false;
       }
       this.map.doors[door].collider.isPickable = false;
