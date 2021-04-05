@@ -266,7 +266,8 @@ export class World extends Schema {
               defaultTo: { x: data.x, y: data.y },
               size: data.size,
               type: data.type,
-              blocked: false
+              blocked: false,
+              hidden: false
             });
           }
           this.command.wall.state.wallFirstPoint = null;
@@ -312,7 +313,8 @@ export class World extends Schema {
       },
       rotate: {
         do: (client: string, data: any) => {
-          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
+          if (this.map.getWall(data.id)?.type == "door" &&
+            ((!this.map.getWall(data.id)?.blocked && !this.map.getWall(data.id)?.hidden) || this.users[client].isDM)) {
             this.map.getWall(data.id).rotateTo(data.target);
           }
         },
@@ -323,7 +325,8 @@ export class World extends Schema {
       },
       endRotate: {
         do: (client: string, data: any) => {
-          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
+          if (this.map.getWall(data.id)?.type == "door" &&
+            ((!this.map.getWall(data.id)?.blocked && !this.map.getWall(data.id)?.hidden) || this.users[client].isDM)) {
             this.worldPhysics.updateGrid();
             this.map.getWall(data.id).updatePhysics();
           }
@@ -343,9 +346,21 @@ export class World extends Schema {
             typeof data.id === "string" && typeof data.block === "boolean" && this.users[client].isDM
         }
       },
+      hide: {
+        do: (client: string, data: any) => {
+          if (this.map.getWall(data.id)?.type == "door") {
+            this.map.getWall(data.id).hidden = data.hide;
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && data.hide != null &&
+            typeof data.id === "string" && typeof data.hide === "boolean" && this.users[client].isDM
+        }
+      },
       close: {
         do: (client: string, data: any) => {
-          if (this.map.getWall(data.id)?.type == "door" && (!this.map.getWall(data.id)?.blocked || this.users[client].isDM)) {
+          if (this.map.getWall(data.id)?.type == "door" &&
+            ((!this.map.getWall(data.id)?.blocked && !this.map.getWall(data.id)?.hidden) || this.users[client].isDM)) {
             this.map.getWall(data.id).rotateTo(this.map.getWall(data.id).defaultTo);
           }
         },

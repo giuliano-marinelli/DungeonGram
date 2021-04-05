@@ -240,6 +240,7 @@ export class World extends Schema {
         for (let door in this.map?.doors) {
           this.updateWallVisibility(this.map.doors[door]);
         }
+        if (!this.users[this.parameters.token].wallsPickable) this.updateCharactersVisibility();
       }
     });
   }
@@ -262,13 +263,13 @@ export class World extends Schema {
           this.characters[selectedCharacter].collider.isCollible = false;
           if (!character || character == selectedCharacter) {
             for (let character in this.characters) {
-              this.updateCharacterVisibility(character, selectedCharacter)
+              this.updateCharacterVisibility(character, selectedCharacter);
             }
             for (let door in this.map.doors) {
-              this.updateDoorVisibility(door, selectedCharacter)
+              this.updateDoorVisibility(door, selectedCharacter);
             }
           } else {
-            this.updateCharacterVisibility(character, selectedCharacter)
+            this.updateCharacterVisibility(character, selectedCharacter);
           }
           this.characters[selectedCharacter].collider.isCollible = true;
           // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
@@ -352,8 +353,8 @@ export class World extends Schema {
         return (mesh.isCollible || mesh.isTranspasable) && ((!mesh.isCharacter && !mesh.isDoor) || mesh.name == this.map.doors[door].id)
       })?.pickedMesh;
       var distanceToDoor = Vectors.distance({ x: this.characters[selectedCharacter].mesh.position.x, y: this.characters[selectedCharacter].mesh.position.z }, { x: this.map.doors[door].to.x, y: this.map.doors[door].to.y });
-      if ((pickedMesh && this.map.doors[door].id == pickedMesh.name) ||
-        distanceToDoor < 3) {
+      if (((pickedMesh && this.map.doors[door].id == pickedMesh.name) ||
+        distanceToDoor < 3) && (!this.map.doors[door].hidden || this.users[this.parameters.token]?.isDM)) {
         this.map.doors[door].animator.show();
         if (distanceToDoor <= 3) {
           this.map.doors[door].mesh.isPickable = true;
@@ -361,7 +362,7 @@ export class World extends Schema {
           this.map.doors[door].mesh.isPickable = false;
         }
       } else {
-        this.map.doors[door].animator.hide();
+        this.map.doors[door].animator.hide(this.map.doors[door].hidden, false);
         if (this.parameters.controller.activeTool?.name != 'walls') this.map.doors[door].mesh.isPickable = false;
       }
       this.map.doors[door].collider.isPickable = false;

@@ -14,12 +14,14 @@ export class Wall extends Schema {
   size?: string;
   type?: string;
   blocked?: boolean;
+  hidden?: boolean;
   //game objects
   mesh?: any;
   animator?: any;
   height?: number;
   collider?: any;
   blockedSign?: any;
+  hiddenSign?: any;
   //physics
   tilesPhysics?: Point[];
   tilesPhysicsColliders?: any[] = [];
@@ -57,6 +59,10 @@ export class Wall extends Schema {
         }
         case 'blocked': {
           if (this.blockedSign) this.animator.toggleUI(this.blockedSign, this.blocked);
+        }
+        case 'hidden': {
+          if (this.hiddenSign) this.animator.toggleUI(this.hiddenSign, this.hidden);
+          this.parameters.world.updateCharactersVisibility();
         }
       }
     });
@@ -154,7 +160,17 @@ export class Wall extends Schema {
       this.blockedSign.linkWithMesh(this.mesh);
 
       this.animator.parentUI(this.blockedSign, 1, 0);
-      this.animator.toggleUI(this.blockedSign, this.blocked)
+      this.animator.toggleUI(this.blockedSign, this.blocked);
+
+      this.hiddenSign = new Image('hidden', 'assets/images/game/hidden.png');
+      this.hiddenSign.width = "30px";
+      this.hiddenSign.height = "30px";
+      this.hiddenSign.linkOffsetY = -20;
+      this.parameters.world.ui.addControl(this.hiddenSign);
+      this.hiddenSign.linkWithMesh(this.mesh);
+
+      this.animator.parentUI(this.hiddenSign, 1, 0);
+      this.animator.toggleUI(this.hiddenSign, this.hidden);
     }
   }
 
@@ -196,7 +212,7 @@ export class Wall extends Schema {
     }));
     if (this.type == 'door') {
       this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-        if ((!this.blocked || this.parameters.world.users[this.parameters.token].isDM) &&
+        if (((!this.blocked && !this.hidden) || this.parameters.world.users[this.parameters.token].isDM) &&
           !this.parameters.controller.activeTool && !this.parameters.controller.activeAction && e.sourceEvent.button == 0) {
           var pickDoor = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isDoor });
           var pickGround = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
@@ -231,8 +247,12 @@ export class Wall extends Schema {
         }
       }));
       this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
-        if (e.sourceEvent.shiftKey && !this.parameters.controller.activeTool) {
-          this.parameters.controller.send('game', 'wall', { id: this.id, block: !this.blocked, action: 'block' });
+        if (!this.parameters.controller.activeTool) {
+          if (e.sourceEvent.shiftKey) {
+            this.parameters.controller.send('game', 'wall', { id: this.id, block: !this.blocked, action: 'block' });
+          } else if (e.sourceEvent.altKey) {
+            this.parameters.controller.send('game', 'wall', { id: this.id, hide: !this.hidden, action: 'hide' });
+          }
         }
       }));
       this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, (e) => {
@@ -260,6 +280,8 @@ export class Wall extends Schema {
 
   removeSigns() {
     this.blockedSign?.dispose();
+    this.hiddenSign?.dispose();
     this.blockedSign = null;
+    this.hiddenSign = null;
   }
 }

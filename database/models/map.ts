@@ -21,7 +21,8 @@ const mapSchema = new mongoose.Schema({
       },
       size: String,
       type: String,
-      blocked: Boolean
+      blocked: Boolean,
+      hidden: Boolean
     }
   },
   // characters: [

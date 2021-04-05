@@ -115,6 +115,9 @@ export class Animator {
     for (let childId in this.registeredChildren) {
       this.registeredChildren[childId].setEnabled(value);
     }
+  }
+
+  enabledUI(value) {
     for (let childId in this.registeredChildrenUI) {
       this.registeredChildrenUI[childId].control.alpha = value
         ? (this.registeredChildrenUI[childId].active ? this.registeredChildrenUI[childId].alphaOn : this.registeredChildrenUI[childId].alphaOff)
@@ -122,14 +125,16 @@ export class Animator {
     }
   }
 
-  hide() {
+  hide(enabled?, enabledUI?) {
     this.visibility(0);
-    this.enabled(false);
+    this.enabled(enabled != null ? enabled : false);
+    this.enabledUI(enabledUI != null ? enabledUI : false)
   }
 
-  show() {
+  show(enabled?, enabledUI?) {
     this.visibility(this.defaultVisibility);
-    this.enabled(true);
+    this.enabled(enabled != null ? enabled : true);
+    this.enabledUI(enabledUI != null ? enabledUI : true)
   }
 
   rotate(direction?) {
