@@ -131,6 +131,22 @@ export class GameComponent implements OnInit, OnDestroy {
         });
       }
     }
+
+    //add wall mesh and material
+    this.assets.wall = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 });
+    this.assets.wall.setEnabled(false);
+    this.assets.wallMaterial = new BABYLON.StandardMaterial("wall", this.scene);
+    this.assets.wallMaterial.diffuseColor = BABYLON.Color3.Gray();
+    this.assets.wall.material = this.assets.wallMaterial;
+
+    //add door material
+    this.assets.door = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 });
+    this.assets.door.setEnabled(false);
+    this.assets.doorMaterial = new BABYLON.StandardMaterial("door", this.scene);
+    this.assets.doorTexture = new BABYLON.Texture('assets/images/game/door.png', this.scene);
+    this.assets.doorMaterial.diffuseTexture = this.assets.doorTexture;
+    this.assets.door.material = this.assets.doorMaterial;
+
   }
 
   //DESUSED

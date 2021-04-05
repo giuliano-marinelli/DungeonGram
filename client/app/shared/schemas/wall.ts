@@ -56,24 +56,27 @@ export class Wall extends Schema {
     this.height = 2.55;
     if (this.size == 'medium') this.height = this.height / 2;
     if (this.size == 'small' || (this.size == 'collider' && this.type != 'door')) this.height = this.height / 4;
-    this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: this.height, width: 1, depth: this.type == "door" ? 0.1 : 0.01 }, this.parameters.scene);
-    // this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.01 }, this.parameters.scene);
+    // this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 }, this.parameters.scene);
+    this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.clone();
+    this.mesh.setEnabled(true);
     this.mesh.scaling.x = Vectors.distance(this.from, this.to);
+    this.mesh.scaling.y = this.height;
+    this.mesh.scaling.z = this.type == "door" ? 0.1 : 0.01;
 
     //set material of base tile mesh
-    var material = new BABYLON.StandardMaterial("wall", this.parameters.scene);
-    if (this.type == "door") {
-      var texture = new BABYLON.Texture('assets/images/game/door.png', this.parameters.scene);
-      material.diffuseTexture = texture;
-    } else {
-      material.diffuseColor = BABYLON.Color3.Gray();
-    }
+    // var material = new BABYLON.StandardMaterial("wall", this.parameters.scene);
+    // if (this.type == "door") {
+    //   var texture = new BABYLON.Texture('assets/images/game/door.png', this.parameters.scene);
+    //   material.diffuseTexture = texture;
+    // } else {
+    //   material.diffuseColor = BABYLON.Color3.Gray();
+    // }
+    // this.mesh.material = this.type == "door" ? this.parameters.assets.doorMaterial : this.parameters.assets.wallMaterial;
     this.mesh.visibility = this.type == 'door' && this.size == 'collider' ? 0.5 : 1;
-    this.mesh.material = material;
     this.mesh.isPickable = false;
 
     //set semantic data to the mesh
-    this.mesh.isCollible = true;
+    this.mesh.isCollible = this.size != 'collider';
     this.mesh.isWall = true;
     this.mesh.isDoor = this.type == "door";
 

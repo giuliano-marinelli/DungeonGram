@@ -7,6 +7,7 @@ import {
   ShadowOnlyMaterial
 } from '@babylonjs/materials';
 import { Vectors } from '../utils/vectors';
+import { AdvancedDynamicTexture } from '@babylonjs/gui';
 
 export class World extends Schema {
   //schema
@@ -18,6 +19,7 @@ export class World extends Schema {
   //game objects
   camera?: any;
   lights?: any = {};
+  ui?: any;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -25,6 +27,8 @@ export class World extends Schema {
     this.initCamera();
 
     this.initGlobalLights();
+
+    this.initUI();
 
     this.synchronizeSchema(schema,
       {
@@ -187,6 +191,10 @@ export class World extends Schema {
     // box.material = new BABYLON.SkyMaterial('sky', this.parameters.scene);
     // box.material.inclination = -0.35;
     this.parameters.scene.clearColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+  }
+
+  initUI() {
+    this.ui = AdvancedDynamicTexture.CreateFullscreenUI("UI");
   }
 
   updateFogOfWar() {

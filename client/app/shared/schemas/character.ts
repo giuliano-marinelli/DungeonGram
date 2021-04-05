@@ -6,7 +6,7 @@ import { Schema } from './schema';
 import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
-import { AdvancedDynamicTexture, Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
+import { Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
 
 export class Character extends Schema {
   //schema
@@ -39,7 +39,6 @@ export class Character extends Schema {
   visionLight?: any;
   visionRays?: any = [];
   visibleCharacters?: any = [];
-  uiSigns?: any;
   nameSign?: any;
   nameSignText?: any;
   //physics
@@ -171,10 +170,8 @@ export class Character extends Schema {
   }
 
   removeSigns() {
-    this.uiSigns?.dispose();
     this.nameSign?.dispose();
     this.nameSignText?.dispose();
-    this.uiSigns = null;
     this.nameSign = null;
     this.nameSignText = null;
   }
@@ -302,8 +299,6 @@ export class Character extends Schema {
   }
 
   doSigns() {
-    this.uiSigns = AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
     this.nameSign = new Rectangle();
     this.nameSign.adaptWidthToChildren = true;
     this.nameSign.adaptHeightToChildren = true;
@@ -314,7 +309,7 @@ export class Character extends Schema {
     this.nameSign.thickness = 0;
     this.nameSign.background = "Black";
     this.nameSign.linkOffsetY = -55;
-    this.uiSigns.addControl(this.nameSign);
+    this.parameters.world.ui.addControl(this.nameSign);
     // this.nameSign.linkWithMesh(this.mesh);
 
     this.nameSignText = new TextBlock();
