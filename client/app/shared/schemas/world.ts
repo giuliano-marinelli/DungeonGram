@@ -98,9 +98,9 @@ export class World extends Schema {
           break;
         case 'maxVisionCharacters':
           this.updateCharactersVisibility();
+          this.parameters.controller.updateSetting('maxVisionCharacters', this.maxVisionCharacters);
           var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
           if (this.characters[selectedCharacter] && this.lights.characterLight) this.lights.characterLight.range = this.adjustVisionRange(this.characters[selectedCharacter].visionRange);
-          this.parameters.controller.updateSetting('maxVisionCharacters', this.maxVisionCharacters);
           break;
       }
     });

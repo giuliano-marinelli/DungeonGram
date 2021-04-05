@@ -386,6 +386,8 @@ export class Character extends Schema {
         this.selectionMesh.position.y = this.selectionMeshZ;
         // this.parameters.world.lights.highlightCharacter.addMesh(this.selectionMesh, BABYLON.Color3.Black(), true);
         // this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+        //focus the camera on the character
+        this.parameters.world.camera?.focusOnMesh(this.mesh);
       }
     } else {
       this.detachSelection();

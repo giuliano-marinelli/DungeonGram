@@ -89,10 +89,10 @@ export class User extends Schema {
                   setTimeout(() => { if (!this.selectedCharacter) this.parameters.controller.updateSetting('selectedCharacterObj', null) }, 800);
               }, 400);
 
-              if (change.value && this.parameters.world.characters)
+              if (change.value && this.parameters.world.characters) {
                 this.parameters.world.camera?.focusOnMesh(this.parameters.world.characters[change.value].mesh);
+              }
             }
-
             break;
           case 'addingModeCharacter':
             if (this.id == this.parameters.token) {

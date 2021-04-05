@@ -177,6 +177,10 @@ export class World extends Schema {
           await CharacterDB.findOneAndRemove({ _id: this.characters[data.id].dbId });
           //remove character from campaign
           delete this.characters[data.id];
+          //deselect the character on users
+          for (var user in this.users) {
+            if (this.users[user].selectedCharacter == data.id) this.users[user].selectedCharacter = null;
+          }
         },
         validate: (client: string, data: any) => {
           return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
@@ -353,6 +357,10 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           for (var door in this.map?.doors) {
             this.map.doors[door].rotateTo(this.map.doors[door].defaultTo);
+          }
+          this.worldPhysics.updateGrid();
+          for (var door in this.map?.doors) {
+            this.map.getWall(data.id).updatePhysics();
           }
         },
         validate: (client: string, data: any) => {

@@ -247,10 +247,19 @@ export class Wall extends Schema {
 
   remove() {
     super.remove();
-    this.mesh.dispose();
+    this.removeSigns();
+    this.mesh?.dispose();
+    this.collider?.dispose();
+    this.mesh = null;
+    this.collider = null;
     this.tilesPhysicsColliders.forEach((tilesPhysicsCollider) => {
       tilesPhysicsCollider.dispose();
     });
     this.parameters.world.updateCharactersVisibility();
+  }
+
+  removeSigns() {
+    this.blockedSign?.dispose();
+    this.blockedSign = null;
   }
 }

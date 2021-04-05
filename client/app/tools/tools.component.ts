@@ -132,7 +132,7 @@ export class ToolsComponent implements OnInit {
         options: {
           fogOfWarVisibility: this.controller.initSetting("fogOfWarVisibility", 0),
           fogOfWarVisibilityPlayers: this.controller.initSetting("fogOfWarVisibilityPlayers", 0),
-          fogOfWarVisionCharacters: this.controller.initSetting("fogOfWarVisionCharacters", 200),
+          fogOfWarVisionCharacters: this.controller.initSetting("maxVisionCharacters", 200),
         },
         actions: {
           visibility: (visibility) => { this.controller.send('game', 'fogOfWar', { value: parseFloat(visibility.value), action: 'visibility' }) },
