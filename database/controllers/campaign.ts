@@ -78,7 +78,7 @@ class CampaignCtrl extends BaseCtrl {
               maps_info: { "$first": "$maps_info" },
               openedMap: { "$first": "$openedMap" },
               users: { "$first": "$users" },
-              characters: { "$first": "$characters"},
+              characters: { "$first": "$characters" },
               settings: { "$first": "$settings" },
               banner: { "$first": "$banner" },
               invitations: { "$push": "$invitations" }
@@ -156,7 +156,7 @@ class CampaignCtrl extends BaseCtrl {
               maps_info: { "$first": "$maps_info" },
               openedMap: { "$first": "$openedMap" },
               users: { "$first": "$users" },
-              characters: { "$first": "$characters"},
+              characters: { "$first": "$characters" },
               settings: { "$first": "$settings" },
               banner: { "$first": "$banner" },
               invitations: { "$push": "$invitations" }
@@ -255,6 +255,7 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
+      delete req.body._id;
       req.body.owner = resu.user._id;
       if (req.file) req.body.banner = req.file.destination + req.file.filename;
 
@@ -332,7 +333,7 @@ class CampaignCtrl extends BaseCtrl {
             maps_info: { "$first": "$maps_info" },
             openedMap: { "$first": "$openedMap" },
             users: { "$first": "$users" },
-            characters: { "$first": "$characters"},
+            characters: { "$first": "$characters" },
             settings: { "$first": "$settings" },
             banner: { "$first": "$banner" },
             invitations: { "$push": "$invitations" }

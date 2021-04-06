@@ -11,12 +11,12 @@ export class MapService {
 
   constructor(private http: HttpClient) { }
 
-  getMaps(own?): Observable<Map[]> {
-    return this.http.get<Map[]>('/api/maps', { params: { ...own ? { own: own } : {} } });
+  getMaps(params?): Observable<Map[]> {
+    return this.http.get<Map[]>('/api/maps', { params: params });
   }
 
-  countMaps(): Observable<number> {
-    return this.http.get<number>('/api/maps/count');
+  countMaps(params?): Observable<number> {
+    return this.http.get<number>('/api/maps/count', { params: params });
   }
 
   addMap(map: Map, campaign: Campaign): Observable<Map> {

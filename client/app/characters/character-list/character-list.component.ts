@@ -45,7 +45,7 @@ export class CharacterListComponent implements OnInit {
         if (own) this.countOwnCharacters = data
         else this.countPublicCharacters = data
       },
-      error => iziToast.error({ message: 'There was an error, characeters can\'t be counted.' })
+      error => iziToast.error({ message: 'There was an error, characters can\'t be counted.' })
     );
   }
 
@@ -63,7 +63,7 @@ export class CharacterListComponent implements OnInit {
           if (own) this.ownCharacters = data
           else this.publicCharacters = data
         },
-        error => iziToast.error({ message: 'There was an error, characeters can\'t be getted.' }),
+        error => iziToast.error({ message: 'There was an error, characters can\'t be getted.' }),
         () => {
           if (own) this.isLoadingOwn = false
           else this.isLoadingPublic = false

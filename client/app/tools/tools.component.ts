@@ -29,6 +29,7 @@ export class ToolsComponent implements OnInit {
   campaign: Campaign;
   isLoadingCampaign = true;
 
+  //for characters list and their pagination
   pageOwnCharacters: number = 1;
   pagePublicCharacters: number = 1;
   pageSizeOwnCharacters: number = 4;
@@ -40,6 +41,19 @@ export class ToolsComponent implements OnInit {
   publicCharacters: Character[] = [];
   isLoadingOwnCharacters: boolean = true;
   isLoadingPublicCharacters: boolean = true;
+
+  //for maps list and their pagination
+  pageOwnMaps: number = 1;
+  pagePublicMaps: number = 1;
+  pageSizeOwnMaps: number = 4;
+  pageSizePublicMaps: number = 4;
+  countOwnMaps: number = 0;
+  countPublicMaps: number = 0;
+
+  ownMaps: Map[] = [];
+  publicMaps: Map[] = [];
+  isLoadingOwnMaps: boolean = true;
+  isLoadingPublicMaps: boolean = true;
 
   openedMap: Map;
   isLoadingOpenedMap: boolean = true;
@@ -59,6 +73,8 @@ export class ToolsComponent implements OnInit {
     if (this.campaignId) this.getCampaign(); else this.isLoadingCampaign = false;
     this.getCharacters(true);
     this.getCharacters(false);
+    this.getMaps(true);
+    this.getMaps(false);
 
     this.tools = {
       users: {
@@ -164,6 +180,9 @@ export class ToolsComponent implements OnInit {
           },
           update: () => {
             this.controller.send('game', 'map', { action: 'update' });
+          },
+          add: (map) => {
+            this.controller.send('game', 'map', { map: map._id, action: 'add' });
           }
         }
       },
@@ -215,6 +234,7 @@ export class ToolsComponent implements OnInit {
     });
   }
 
+  //general
   callTool(event, tool) {
     if (this.tools[tool]?.actions?.toggle) this.tools[tool].actions.toggle();
     event.stopPropagation(); //to stop dropdown work on click (only on hover)
@@ -246,6 +266,7 @@ export class ToolsComponent implements OnInit {
     );
   }
 
+  //for characters
   countCharacters(own: boolean): void {
     this.characterService.countCharacters({ own: own }).subscribe(
       data => {
@@ -269,7 +290,7 @@ export class ToolsComponent implements OnInit {
         if (own) this.ownCharacters = data
         else this.publicCharacters = data
       },
-      error => iziToast.error({ message: 'There was an error, characeters can\'t be getted.' }),
+      error => iziToast.error({ message: 'There was an error, characters can\'t be getted.' }),
       () => {
         if (own) this.isLoadingOwnCharacters = false
         else this.isLoadingPublicCharacters = false
@@ -299,6 +320,90 @@ export class ToolsComponent implements OnInit {
     );
   }
 
+  //for maps
+  countMaps(own: boolean): void {
+    this.mapService.countMaps({ own: own }).subscribe(
+      data => {
+        if (own) this.countOwnMaps = data
+        else this.countPublicMaps = data
+      },
+      error => iziToast.error({ message: 'There was an error, maps can\'t be counted.' })
+    );
+  }
+
+  getMaps(own: boolean): void {
+    this.countMaps(own);
+    this.mapService.getMaps(
+      {
+        own: own,
+        page: own ? this.pageOwnMaps : this.pagePublicMaps,
+        count: own ? this.pageSizeOwnMaps : this.pageSizePublicMaps
+      }
+    ).subscribe(
+      data => {
+        if (own) this.ownMaps = data
+        else this.publicMaps = data
+      },
+      error => iziToast.error({ message: 'There was an error, maps can\'t be getted.' }),
+      () => {
+        if (own) this.isLoadingOwnMaps = false
+        else this.isLoadingPublicMaps = false
+      }
+    );
+  }
+
+  openMap2(map?, instancedMap?) {
+    var modalRef = this.modalService.open(MapComponent, { size: 'xl', backdrop: 'static' });
+    if (map) modalRef.componentInstance.map = map;
+    modalRef.componentInstance.getMaps.subscribe(() => {
+      this.getMaps(true);
+      this.getMaps(false);
+      this.tools.maps.actions.update(instancedMap);
+    });
+  }
+
+  deleteMap2(map: Map): void {
+    this.mapService.deleteMap(map).subscribe(
+      data => iziToast.success({ message: 'Map deleted successfully.' }),
+      error => iziToast.error({ message: 'There was an error, map can\'t be deleted.' }),
+      () => {
+        this.getMaps(true);
+        this.getMaps(false);
+        this.tools.maps.actions.update();
+      }
+    );
+  }
+
+  openMap(map?) {
+    if (this.campaign) {
+      var modalRef = this.modalService.open(MapComponent);
+      if (map) modalRef.componentInstance.map = map;
+      modalRef.componentInstance.campaign = this.campaign;
+      modalRef.componentInstance.getMaps.subscribe(() => {
+        this.getCampaign();
+        this.tools.maps.actions.update();
+      });
+    }
+  }
+
+  deleteMap(map: Map) {
+    this.mapService.deleteMap(map).subscribe(
+      data => {
+        iziToast.success({ message: 'Map deleted successfully.' });
+        this.tools.maps.actions.update();
+        if (this.tools.maps.options.openedMap.value == map._id)
+          this.tools.maps.actions.discard();
+        if (this.tools.characters.options.selectedMap == map._id)
+          this.tools.characters.options.selectedMap = null;
+      },
+      error => iziToast.error({ message: 'There was an error, map can\'t be deleted.' }),
+      () => {
+        this.getCampaign();
+      }
+    );
+  }
+
+  //others
   onImageError($event, defaultImage?) {
     if (defaultImage) {
       this.imageExists(defaultImage, (exists) => {
@@ -333,35 +438,6 @@ export class ToolsComponent implements OnInit {
       this.openedMap = null;
       this.isLoadingOpenedMap = false;
     }
-  }
-
-  openMap(map?) {
-    if (this.campaign) {
-      var modalRef = this.modalService.open(MapComponent);
-      if (map) modalRef.componentInstance.map = map;
-      modalRef.componentInstance.campaign = this.campaign;
-      modalRef.componentInstance.getMaps.subscribe(() => {
-        this.getCampaign();
-        this.tools.maps.actions.update();
-      });
-    }
-  }
-
-  deleteMap(map: Map) {
-    this.mapService.deleteMap(map).subscribe(
-      data => {
-        iziToast.success({ message: 'Map deleted successfully.' });
-        this.tools.maps.actions.update();
-        if (this.tools.maps.options.openedMap.value == map._id)
-          this.tools.maps.actions.discard();
-        if (this.tools.characters.options.selectedMap == map._id)
-          this.tools.characters.options.selectedMap = null;
-      },
-      error => iziToast.error({ message: 'There was an error, map can\'t be deleted.' }),
-      () => {
-        this.getCampaign();
-      }
-    );
   }
 
   getPlayers(campaign: Campaign): string[] {

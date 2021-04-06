@@ -50,7 +50,8 @@ import { ColorSketchModule } from 'ngx-color/sketch'; // <color-sketch></color-s
 import { ColorSliderModule } from 'ngx-color/slider'; // <color-slider></color-slider>
 import { ColorSwatchesModule } from 'ngx-color/swatches'; // <color-swatches></color-swatches>
 import { ColorTwitterModule } from 'ngx-color/twitter'; // <color-twitter></color-twitter>
-import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></color-shade-picker>
+import { ColorShadeModule } from 'ngx-color/shade';
+import { MapListComponent } from './maps/map-list/map-list.component';// <color-shade-picker></color-shade-picker>
 @NgModule({
   declarations: [
     AppComponent,
@@ -70,7 +71,8 @@ import { ColorShadeModule } from 'ngx-color/shade';// <color-shade-picker></colo
     CampaignListComponent,
     CampaignComponent,
     MapComponent,
-    InviteComponent
+    InviteComponent,
+    MapListComponent
   ],
   imports: [
     AppRoutingModule,

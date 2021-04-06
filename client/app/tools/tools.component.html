@@ -13,7 +13,7 @@
           </button>
 
           <div *ngIf="tool.dropdown" class="dropdown-menu"
-            [style.width]="tool.name == 'maps' ? '250px' : (tool.name == 'characters' ? '510px' : '200px')">
+            [style.width]="tool.name == 'maps' ? '510px' : (tool.name == 'characters' ? '510px' : '200px')">
             <div [ngSwitch]="tool.name">
 
 
@@ -21,50 +21,142 @@
                 <h5>{{tool.label}}</h5>
                 <div id="maps-list">
 
-                  <div *ngIf="isLoadingCampaign">
-                    <app-loading [condition]="isLoadingCampaign"></app-loading>
-                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <div id="maps-list">
+                        <h6>Own</h6>
 
-                  <p *ngIf="!campaign || campaign.maps_info.length <= 0">
-                    <small class="text-muted">You have not created maps yet</small>
-                  </p>
-
-                  <div *ngIf="!isLoadingCampaign" class="row row-cols-2 maps">
-                    <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
-                      <div class="card h-100">
-                        <img src="{{map['terrain']}}" class="card-img-top map-img"
-                          onerror="this.src='assets/images/game/default_terrain.png'"
-                          tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
-                          [appendTo]="tool_maps_container">
-                        <div class="card-body p-0 map-btn">
-                          <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
-                              tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
-                              [appendTo]="tool_maps_container">
-                              <i class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
-                            </button>
-                            <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)" tippy="Edit"
-                              [appendTo]="tool_maps_container">
-                              <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" (confirm)="deleteMap(map)" confirmDoubleCheck="true"
-                              [confirmAppendTo]="tool_maps_container" tippy="Delete" [appendTo]="tool_maps_container">
-                              <i class="fa fa-trash"></i>
-                            </button>
+                        <div class="row row-cols-2 maps-add">
+                          <div class="col-12 mb-2">
+                            <div class="card" style="height: 20px;">
+                              <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
+                                style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Map"
+                                [appendTo]="tool_maps_container">
+                                <i class="fa fa-plus"></i>
+                              </button>
+                            </div>
                           </div>
                         </div>
+
+                        <app-loading [condition]="isLoadingOwnMaps"></app-loading>
+
+                        <p *ngIf="ownMaps.length <= 0" class="text-center">
+                          <small class="text-muted">You have not created maps yet</small>
+                        </p>
+
+                        <div *ngIf="!isLoadingOwnMaps" class="row row-cols-2 maps-own">
+                          <div *ngFor="let map of ownMaps" class="col mb-2 p">
+                            <div class="card">
+                              <img src="{{map['terrain']}}" class="card-img-top map-img"
+                                onerror="this.src='assets/images/game/default_terrain.png'"
+                                tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
+                                [appendTo]="tool_maps_container">
+                              <div class="card-body p-0 map-btn">
+                                <div class="btn-group" role="group">
+                                  <button class="btn btn-sm btn-primary campaign-btn-alt"
+                                    (click)="tool.actions.add(map)" tippy="Add to Campaign"
+                                    [appendTo]="tool_maps_container">
+                                    <i class="fa fa-plus"></i>
+                                  </button>
+                                  <!-- <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)"
+                                    tippy="Edit" [appendTo]="tool_maps_container">
+                                    <i class="fa fa-pencil"></i>
+                                  </button>
+                                  <button class="btn btn-sm btn-danger" (confirm)="deleteMap(map)"
+                                    confirmDoubleCheck="true" [confirmAppendTo]="tool_maps_container" tippy="Delete"
+                                    [appendTo]="tool_maps_container">
+                                    <i class="fa fa-trash"></i>
+                                  </button> -->
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <ngb-pagination *ngIf="countOwnMaps > 0" class="d-flex justify-content-center" size="sm"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pageOwnMaps"
+                          [pageSize]="pageSizeOwnMaps" [collectionSize]="countOwnMaps" (pageChange)="getMaps(true)">
+                        </ngb-pagination>
+
+                      </div>
+
+                      <div id="maps-list-public">
+                        <h6>Public</h6>
+
+                        <app-loading [condition]="isLoadingPublicMaps"></app-loading>
+
+                        <p *ngIf="publicMaps.length <= 0" class="text-center">
+                          <small class="text-muted">There are no public maps created yet</small>
+                        </p>
+
+                        <div *ngIf="!isLoadingPublicMaps" class="row row-cols-2 maps-public">
+                          <div *ngFor="let map of publicMaps" class="col mb-2 p">
+                            <div class="card">
+                              <img src="{{map['terrain']}}" class="card-img-top map-img"
+                                onerror="this.src='assets/images/game/default_terrain.png'"
+                                tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
+                                [appendTo]="tool_maps_container">
+                              <div class="card-body p-0 map-btn">
+                                <div class="btn-group" role="group">
+                                  <button class="btn btn-sm btn-primary campaign-btn-alt"
+                                    (click)="tool.actions.add(map)" tippy="Add to Campaign"
+                                    [appendTo]="tool_maps_container">
+                                    <i class="fa fa-plus"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <ngb-pagination *ngIf="countPublicMaps > 0" class="d-flex justify-content-center" size="sm"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pagePublicMaps"
+                          [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps"
+                          (pageChange)="getMaps(false)">
+                        </ngb-pagination>
+
                       </div>
                     </div>
-                  </div>
 
-                  <div class="row row-cols-2 maps-add">
-                    <div class="col-12 mb-2">
-                      <div class="card" style="height: 20px;">
-                        <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
-                          style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Map" placement="bottom"
-                          [appendTo]="tool_maps_container">
-                          <i class="fa fa-plus"></i>
-                        </button>
+                    <div class="col-6">
+                      <div id="maps-list-oncampaign" style="width: 225px">
+                        <h6>On Campaign</h6>
+
+                        <app-loading [condition]="isLoadingCampaign"></app-loading>
+
+                        <p *ngIf="!campaign || campaign.maps_info.length <= 0">
+                          <small class="text-muted">You have not created maps yet</small>
+                        </p>
+
+                        <div *ngIf="!isLoadingCampaign" class="row row-cols-2 maps">
+                          <div *ngFor="let map of campaign.maps_info" class="col mb-2 p">
+                            <div class="card h-100">
+                              <img src="{{map['terrain']}}" class="card-img-top map-img"
+                                onerror="this.src='assets/images/game/default_terrain.png'"
+                                tippy="<b>{{map['name']}}</b><br />{{map['description']}}" placement="right"
+                                [appendTo]="tool_maps_container">
+                              <div class="card-body p-0 map-btn">
+                                <div class="btn-group" role="group">
+                                  <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
+                                    tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
+                                    [appendTo]="tool_maps_container">
+                                    <i
+                                      class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
+                                  </button>
+                                  <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)"
+                                    tippy="Edit" [appendTo]="tool_maps_container">
+                                    <i class="fa fa-pencil"></i>
+                                  </button>
+                                  <button class="btn btn-sm btn-danger" (confirm)="deleteMap(map)"
+                                    confirmDoubleCheck="true" [confirmAppendTo]="tool_maps_container" tippy="Delete"
+                                    [appendTo]="tool_maps_container">
+                                    <i class="fa fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -98,9 +190,7 @@
                         </div>
                       </div>
 
-                      <div *ngIf="isLoadingOwnCharacters">
-                        <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
-                      </div>
+                      <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
 
                       <p *ngIf="ownCharacters.length <= 0" class="text-center">
                         <small class="text-muted">You have not created characters yet</small>
@@ -142,9 +232,7 @@
                     <div id="characters-list-public">
                       <h6>Public</h6>
 
-                      <div *ngIf="isLoadingPublicCharacters">
-                        <app-loading [condition]="isLoadingPublicCharacters"></app-loading>
-                      </div>
+                      <app-loading [condition]="isLoadingPublicCharacters"></app-loading>
 
                       <p *ngIf="publicCharacters.length <= 0" class="text-center">
                         <small class="text-muted">There are no public characters created yet</small>

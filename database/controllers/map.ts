@@ -13,9 +13,12 @@ class MapCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
+      const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
+      const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
 
       var docs;
-      if (req.query.own) {
+      if (own) {
         if (resu.status != 200) throw new Error('unauthorized');
         docs = await this.model.aggregate([
           {
@@ -37,13 +40,11 @@ class MapCtrl extends BaseCtrl {
           // },
           {
             $match: {
-              $or: [
-                { owner: resu.user._id },
-                { players: { $in: [resu.user._id] } }
-              ]
+              owner: resu.user._id,
+              copyOf: null
             }
           }
-        ]);
+        ]).skip(skip).limit(limit);;
       } else {
         docs = await this.model.aggregate([
           {
@@ -66,10 +67,11 @@ class MapCtrl extends BaseCtrl {
           {
             $match: {
               owner: { $ne: resu?.user?._id },
-              private: false
+              private: false,
+              copyOf: null
             }
           }
-        ]);
+        ]).skip(skip).limit(limit);;
       }
       res.status(200).json(docs);
     } catch (err) {
@@ -82,8 +84,22 @@ class MapCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
+      const own = req.query.own == 'true' ? true : false;
 
-      const count = await this.model.count({ $or: [{ owner: resu?.user?._id }, { private: false }] });
+      var count;
+      if (own) {
+        if (resu.status != 200) throw new Error('unauthorized');
+        count = await this.model.count({
+          owner: resu.user._id,
+          copyOf: null
+        });
+      } else {
+        count = await this.model.count({
+          owner: { $ne: resu?.user?._id },
+          private: false,
+          copyOf: null
+        });
+      }
       res.status(200).json(count);
     } catch (err) {
       return res.status(400).json({ error: err.message });

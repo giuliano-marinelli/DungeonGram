@@ -17,6 +17,7 @@ import { GameComponent } from './game/game.component';
 import { CharacterComponent } from './characters/character/character.component';
 import { CharacterListComponent } from './characters/character-list/character-list.component';
 import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
+import { MapListComponent } from './maps/map-list/map-list.component';
 
 const routes: Routes = [
   { path: '', component: AboutComponent },
@@ -30,6 +31,7 @@ const routes: Routes = [
   { path: 'game/:campaign', component: GameComponent },
   { path: 'campaigns', component: CampaignListComponent },
   { path: 'characters', component: CharacterListComponent },
+  { path: 'maps', component: MapListComponent },
   { path: '**', redirectTo: '/notfound' },
 ];
 

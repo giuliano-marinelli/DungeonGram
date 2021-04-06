@@ -31,7 +31,7 @@ export class AdminComponent implements OnInit {
   countUsers(): void {
     this.userService.countUsers().subscribe(
       data => this._countUsers = data,
-      error => iziToast.error({ message: 'There was an error, characeters can\'t be counted.' })
+      error => iziToast.error({ message: 'There was an error, users can\'t be counted.' })
     );
   }
 

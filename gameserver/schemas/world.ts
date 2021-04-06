@@ -10,6 +10,7 @@ import { WorldPhysics } from '../physics/world.physics';
 import mongoose from 'mongoose';
 import { default as CampaignDB } from '../../database/models/campaign';
 import { default as CharacterDB } from '../../database/models/character';
+import { default as MapDB } from '../../database/models/map';
 
 export class World extends Schema {
   @type("string")
@@ -152,7 +153,7 @@ export class World extends Schema {
               delete addingCharacterModel._id;
 
               console.log("addingCharacterModel", addingCharacterModel._id)
-              //add a copy of the model but onCampaign
+              //add a copy of the model but with copyOf
               var characterModel = await new CharacterDB(addingCharacterModel).save();
 
               console.log("characterModel", characterModel._id)
@@ -562,6 +563,29 @@ export class World extends Schema {
       update: {
         do: (client: string, data: any) => {
           data.roomRef?.broadcast('mapUpdate');
+        }
+      },
+      add: {
+        do: async (client: string, data: any) => {
+          //find the map model to add and transform toJSON (this last is for deleting the _id)
+          var mapModel = await MapDB.findOne({ _id: data.map });
+          mapModel = mapModel.toJSON();
+          if (mapModel) {
+            mapModel.copyOf = mapModel._id;
+            delete mapModel._id;
+
+            //add a copy of the model but with copyOf
+            const map = await new MapDB(mapModel).save();
+
+            //add map to the campaign
+            const campaign = await CampaignDB.findOne({ _id: this.campaignId });
+            campaign.maps.push(map._id);
+            await campaign.save();
+            data.roomRef?.broadcast('mapUpdate');
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.map != null && typeof data.map == "string" && this.users[client].isDM
         }
       }
     }

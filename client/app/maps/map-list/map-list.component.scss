@@ -1,0 +1,86 @@
+.map-description {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.map-img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  object-position: top;
+  overflow: hidden;
+}
+
+.map-card-body {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  opacity: 0.8;
+}
+
+.map-container {
+  border-radius: 0px !important;
+  border-color: #1b1616 !important;
+  border-bottom: 0px;
+}
+
+.map-container .card-body {
+  background-color: #212529 !important;
+}
+
+.map-container.own .card {
+  border-color: #1b1616 !important;
+}
+
+.map-container.own .card-body {
+  background-color: #211a1a !important;
+  border-color: #1b1616 !important;
+}
+
+.map-container.own > .card-body {
+  background-color: #2d2424 !important;
+  border-color: #1b1616 !important;
+}
+
+.map-container.own > .card-header {
+  background-color: #211a1a !important;
+  border-color: #1b1616 !important;
+}
+
+::ng-deep .map-container.own .page-link {
+  background-color: #211a1a !important;
+  border-color: #1b1616 !important;
+}
+
+::ng-deep .map-container.own .page-link:hover {
+  background-color: #292020 !important;
+}
+
+::ng-deep .map-container.own .page-item.active .page-link {
+  background-color: #2d2424 !important;
+  border-color: #3d3131 !important;
+}
+
+::ng-deep .map-container.own .page-item.active .page-link:hover {
+  background-color: #292020 !important;
+}
+
+.map-btn {
+  background-color: #211a1a !important;
+  border-color: #1b1616 !important;
+}
+
+.map-btn:hover {
+  background-color: #292020 !important;
+}
+
+.map-btn-alt {
+  background-color: #2d2424 !important;
+  border-color: #3d3131 !important;
+}
+
+.map-btn-alt:hover {
+  background-color: #292020 !important;
+}

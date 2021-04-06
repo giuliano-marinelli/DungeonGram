@@ -99,6 +99,7 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
+      delete req.body._id;
       req.body.owner = resu.user._id;
       const obj = await new this.model(req.body).save();
       res.status(201).json(obj);
