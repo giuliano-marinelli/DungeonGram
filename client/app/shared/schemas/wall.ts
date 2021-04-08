@@ -74,6 +74,7 @@ export class Wall extends Schema {
     if (this.size == 'small' || (this.size == 'collider' && this.type != 'door')) this.height = this.height / 4;
     // this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 }, this.parameters.scene);
     this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.clone();
+    // this.mesh = this.type == "door" ? this.parameters.assets.door.createInstance() : this.parameters.assets.wall.createInstance();
     this.mesh.setEnabled(true);
     this.mesh.scaling.x = Vectors.distance(this.from, this.to);
     this.mesh.scaling.y = this.height;
@@ -87,8 +88,8 @@ export class Wall extends Schema {
     // } else {
     //   material.diffuseColor = BABYLON.Color3.Gray();
     // }
-    this.mesh.material = this.type == "door" ? this.parameters.assets.doorMaterial.clone() : this.parameters.assets.wallMaterial.clone();
-    this.mesh.visibility = this.type == 'door' && this.size == 'collider' ? 0.5 : 1;
+    // this.mesh.material = this.type == "door" ? this.parameters.assets.doorMaterial.clone() : this.parameters.assets.wallMaterial.clone();
+    if (this.type == 'door' && this.size == 'collider') this.mesh.visibility = 0.5;
     this.mesh.isPickable = false;
 
     //set semantic data to the mesh
@@ -141,13 +142,18 @@ export class Wall extends Schema {
 
     this.doSigns();
 
-    this.initActions()
+    this.initActions();
 
     //cast shadows with character light (if it's not an only collider wall)
     if (this.size != 'collider')
       this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh, false);
     this.parameters.world.updateCharactersVisibility();
     this.parameters.world.updateWallVisibility(this);
+
+    if (this.type != "door") {
+      this.mesh.freezeWorldMatrix();
+      // this.mesh.convertToUnIndexedMesh();
+    }
   }
 
   doSigns() {
@@ -198,11 +204,14 @@ export class Wall extends Schema {
     //set action on mouse in/out/click
     this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
-      this.mesh.material.emissiveColor = BABYLON.Color3.Black();
+      // this.mesh.material.emissiveColor = BABYLON.Color3.Black();
+      this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
     }));
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
-      if (this.parameters.controller.activeTool?.name == 'walls')
-        this.mesh.material.emissiveColor = BABYLON.Color3.White();
+      if (this.parameters.controller.activeTool?.name == 'walls') {
+        // this.mesh.material.emissiveColor = BABYLON.Color3.White();
+        this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+      }
     }));
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
       if (this.parameters.controller.activeTool?.name == 'walls' &&

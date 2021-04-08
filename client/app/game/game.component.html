@@ -6,6 +6,7 @@
   <div id="tools-container" *ngIf="this.access">
     <app-tools [controller]="this.controller" [campaignId]="this.campaign"></app-tools>
   </div>
+  <div id="fps">{{engine.getFps().toFixed() + " fps"}}</div>
 </div>
 <div class="alert alert-light text-center w-50 mt-5" role="alert" style="margin: 0 auto;" *ngIf="this.access == false">
   <h4 class="alert-heading">Access Denied</h4>

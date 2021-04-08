@@ -19,6 +19,7 @@ export class GameComponent implements OnInit, OnDestroy {
   canvas: HTMLCanvasElement;
   engine: any;
   scene: any;
+  optimizer: any;
   assetsManager: any;
   assets: any = {};
 
@@ -47,8 +48,22 @@ export class GameComponent implements OnInit, OnDestroy {
       this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 
       this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true, doNotHandleContextLost: true });
+      //optimizations
       this.engine.enableOfflineSupport = false;
+
       this.scene = new BABYLON.Scene(this.engine);
+      //optimizations
+      // var options = new BABYLON.SceneOptimizerOptions();
+      // options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1));
+      // this.optimizer = new BABYLON.SceneOptimizer(this.scene, options);
+      // BABYLON.SceneOptimizer.OptimizeAsync(this.scene);
+      // this.scene.autoClear = false;
+      // this.scene.autoClearDepthAndStencil = false;
+      // this.scene.blockMaterialDirtyMechanism = true;
+      // this.scene.useGeometryIdsMap = true;
+      // this.scene.useMaterialMeshMap = true;
+      // this.scene.useClonedMeshMap  = true;
+
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
       this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
@@ -137,7 +152,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.assets.wall.setEnabled(false);
     this.assets.wallMaterial = new BABYLON.StandardMaterial("wall", this.scene);
     this.assets.wallMaterial.diffuseColor = BABYLON.Color3.Gray();
-    // this.assets.wall.material = this.assets.wallMaterial;
+    this.assets.wall.material = this.assets.wallMaterial;
 
     //add door material
     this.assets.door = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 });
@@ -145,7 +160,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.assets.doorMaterial = new BABYLON.StandardMaterial("door", this.scene);
     this.assets.doorTexture = new BABYLON.Texture('assets/images/game/door.png', this.scene);
     this.assets.doorMaterial.diffuseTexture = this.assets.doorTexture;
-    // this.assets.door.material = this.assets.doorMaterial;
+    this.assets.door.material = this.assets.doorMaterial;
 
   }
 

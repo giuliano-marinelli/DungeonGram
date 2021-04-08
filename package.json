@@ -1,12 +1,14 @@
 {
   "name": "dungeongram",
   "license": "MIT",
+  "main": "main.js",
   "engines": {
     "node": "12.16.1",
     "npm": "6.13.4"
   },
   "scripts": {
     "start": "npm run prod",
+    "build": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build\" \"tsc -p server\" \"tsc -p gameserver\"",
     "predev": "concurrently -n \"server(build),gameserver(build)\" -c \"yellow,magenta\" \"tsc -p server\" \"tsc -p gameserver\"",
     "dev": "concurrently -n \"mongodb,client,server,gameserver,server,gameserver\" -c \"green,blue,yellow,magenta,yellow,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p server \" \"tsc -w -p gameserver \" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\"",
     "preprod": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build --aot --prod\" \"tsc -p server\" \"tsc -p gameserver\"",
@@ -16,7 +18,9 @@
     "preonlygameserver": "concurrently -n \"gameserver(build)\" -c \"magenta\" \"tsc -p gameserver\"",
     "onlygameserver": "concurrently -n \"mongodb,client,gameserver,gameserver\" -c \"green,blue,magenta,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p gameserver \" \"nodemon dist/gameserver/app.js\"",
     "bgserver": "pm2 start dist/server/app.js",
-    "bggameserver": "pm2 start dist/gameserver/app.js"
+    "bggameserver": "pm2 start dist/gameserver/app.js",
+    "preelectron": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build --prod\" \"tsc -p server\" \"tsc -p gameserver\"",
+    "electron": "concurrently -n \"mongodb,electron,server,gameserver,server,gameserver\" -c \"green,blue,green,yellow,magenta,yellow,magenta\" \"mongod\" \"electron .\" \"tsc -w -p server \" \"tsc -w -p gameserver \" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\""
   },
   "private": true,
   "dependencies": {
@@ -99,6 +103,7 @@
     "codelyzer": "^6.0.0",
     "concurrently": "^5.3.0",
     "copyfiles": "^2.4.1",
+    "electron": "^12.0.2",
     "htmlhint": "^0.11.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
