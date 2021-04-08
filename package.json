@@ -8,19 +8,13 @@
   },
   "scripts": {
     "start": "npm run prod",
-    "build": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build\" \"tsc -p server\" \"tsc -p gameserver\"",
-    "predev": "concurrently -n \"server(build),gameserver(build)\" -c \"yellow,magenta\" \"tsc -p server\" \"tsc -p gameserver\"",
-    "dev": "concurrently -n \"mongodb,client,server,gameserver,server,gameserver\" -c \"green,blue,yellow,magenta,yellow,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p server \" \"tsc -w -p gameserver \" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\"",
-    "preprod": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build --aot --prod\" \"tsc -p server\" \"tsc -p gameserver\"",
-    "prod": "concurrently -n \"mongodb,server,gameserver\" -c \"green,yellow,magenta\" \"mongod\" \"node dist/server/app.js\" \"node dist/gameserver/app.js\"",
-    "preonlyserver": "concurrently -n \"server(build)\" -c \"yellow\" \"tsc -p server\"",
-    "onlyserver": "concurrently -n \"mongodb,client,server,server\" -c \"green,blue,yellow,yellow\" \"mongod\" \"ng build --watch\" \"tsc -w -p server \" \"nodemon dist/server/app.js\"",
-    "preonlygameserver": "concurrently -n \"gameserver(build)\" -c \"magenta\" \"tsc -p gameserver\"",
-    "onlygameserver": "concurrently -n \"mongodb,client,gameserver,gameserver\" -c \"green,blue,magenta,magenta\" \"mongod\" \"ng build --watch\" \"tsc -w -p gameserver \" \"nodemon dist/gameserver/app.js\"",
+    "predev": "concurrently -n \"server(build)\" -c \"yellow\" \"tsc -p server\"",
+    "dev": "concurrently -n \"client,server(build),server\" -c \"blue,yellow,yellow\" \"ng build --watch\" \"tsc -w -p server\" \"nodemon dist/server/app.js\"",
+    "preprod": "concurrently -n \"client(build),server(build)\" -c \"blue,yellow\" \"ng build --aot --prod\" \"tsc -p server\"",
+    "prod": "concurrently -n \"server\" -c \"yellow\" \"node dist/server/app.js\"",
     "bgserver": "pm2 start dist/server/app.js",
-    "bggameserver": "pm2 start dist/gameserver/app.js",
-    "preelectron": "concurrently -n \"client(build),server(build),gameserver(build)\" -c \"blue,yellow,magenta\" \"ng build --prod\" \"tsc -p server\" \"tsc -p gameserver\"",
-    "electron": "concurrently -n \"mongodb,electron,server,gameserver,server,gameserver\" -c \"green,blue,green,yellow,magenta,yellow,magenta\" \"mongod\" \"electron .\" \"tsc -w -p server \" \"tsc -w -p gameserver \" \"nodemon dist/server/app.js\" \"nodemon dist/gameserver/app.js\""
+    "preelectron": "concurrently -n \"client(build),server(build)\" -c \"blue,yellow,magenta\" \"ng build --aot --prod\" \"tsc -p server\"",
+    "electron": "concurrently -n \"electron,server,server\" -c \"blue,green,yellow,yellow\" \"electron .\" \"tsc -w -p server\" \"nodemon dist/server/app.js\""
   },
   "private": true,
   "dependencies": {
