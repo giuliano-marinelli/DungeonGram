@@ -7,7 +7,8 @@
     "npm": "6.13.4"
   },
   "scripts": {
-    "start": "npm run prod",
+    "start": "node dist/server/app.js",
+    "build": "concurrently -n \"client(build),server(build)\" -c \"blue,yellow\" \"ng build --aot --prod\" \"tsc -p server\"",
     "predev": "concurrently -n \"server(build)\" -c \"yellow\" \"tsc -p server\"",
     "dev": "concurrently -n \"client,server(build),server\" -c \"blue,yellow,yellow\" \"ng build --watch\" \"tsc -w -p server\" \"nodemon dist/server/app.js\"",
     "preprod": "concurrently -n \"client(build),server(build)\" -c \"blue,yellow\" \"ng build --aot --prod\" \"tsc -p server\"",
