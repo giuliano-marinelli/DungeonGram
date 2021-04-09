@@ -313,7 +313,7 @@ export class Character extends Schema {
     // this.nameSign.linkWithMesh(this.mesh);
 
     this.nameSignText = new TextBlock();
-    this.nameSignText.text = this.name;
+    this.nameSignText.text = this.name ? this.name : "";
     this.nameSignText.fontFamily = "Helvetica";
     this.nameSignText.fontSize = 14;
     this.nameSignText.width = "80px";
