@@ -39,7 +39,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.campaign) {
-      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + location.host);
+      console.log("Connecting chat to: ws//" + location.host);
+      var client = new Colyseus.Client("ws//" + location.host);
       client.joinOrCreate("chat", { campaign: this.campaign, token: localStorage.getItem('token') }).then((room: any) => {
         this.chatRoom = room;
         this.controller.rooms.chat = this.chatRoom;

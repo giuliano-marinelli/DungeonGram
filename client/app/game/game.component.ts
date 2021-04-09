@@ -69,8 +69,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
       this.controller = new Controller();
 
-      console.log("Connecting game to: " + location.protocol.replace("http", "ws") + "//" + location.host);
-      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + location.host);
+      console.log("Connecting game to: ws//" + location.host);
+      var client = new Colyseus.Client("ws//" + location.host);
       client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
         .then((room: any) => {
           this.gameRoom = room;
