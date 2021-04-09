@@ -242,8 +242,7 @@ class CampaignCtrl extends BaseCtrl {
           }
         ]);
       }
-      console.log(count);
-      res.status(200).json(count[0].count);
+      res.status(200).json(count[0]?.count);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

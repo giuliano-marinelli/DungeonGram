@@ -22,7 +22,7 @@ dotenv.config();
 // app.set('port', port);
 // app.use('/', express.static(path.join(__dirname, "static")));
 // app.use('/', serveIndex(path.join(__dirname, "static"), { 'icons': true }))
-app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folde public
+app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
