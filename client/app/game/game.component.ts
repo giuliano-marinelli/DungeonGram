@@ -69,15 +69,19 @@ export class GameComponent implements OnInit, OnDestroy {
 
       this.controller = new Controller();
 
-      console.log("Connecting game to: ws//" + location.host);
-      var client = new Colyseus.Client("ws//" + location.host);
+      var host = window.document.location.host.replace(/:.*/, '');
+      console.log("Connecting game to: " + location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
       client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
         .then((room: any) => {
+          console.log("Joined to game room", room);
           this.gameRoom = room;
           this.controller.rooms.game = this.gameRoom;
           this.access = true;
           this.initGame();
-        }).catch((err: any) => {
+        })
+        .catch((error: any) => {
+          console.log("Can't join game room", error);
           this.access = false;
         });
 
@@ -111,6 +115,7 @@ export class GameComponent implements OnInit, OnDestroy {
           token: this.auth.currentUser._id,
           assets: this.assets
         });
+        console.log("Initialized game world", this.world);
 
         //register a render loop to repeatedly render the scene
         this.engine.runRenderLoop(() => {

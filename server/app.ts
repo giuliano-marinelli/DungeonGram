@@ -4,6 +4,7 @@ import * as path from 'path';
 import express from 'express';
 import morgan from 'morgan';
 import serveIndex from 'serve-index';
+import cors from 'cors';
 //database
 import setMongo from '../database/mongo';
 import setRoutes from './routes';
@@ -11,24 +12,41 @@ import setRoutes from './routes';
 import { createServer } from 'http';
 import { Server } from 'colyseus';
 import { monitor } from '@colyseus/monitor';
-//import rooms
+//colyseus rooms
 import { ChatRoom } from "./rooms/chat";
 import { GameRoom } from "./rooms/game";
 
-const port = process.env.PORT || 3000;
+//define port based on enviroment variable or 3000 in case it is absent
+const port = Number(process.env.PORT || 3000) + Number(process.env.NODE_APP_INSTANCE || 0);
+
 const app = express();
 dotenv.config();
 
+//configure express paths and others (cors,...)
 // app.set('port', port);
-// app.use('/', express.static(path.join(__dirname, "static")));
-// app.use('/', serveIndex(path.join(__dirname, "static"), { 'icons': true }))
 app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
+
+//attach colyseus web socket server on http express server.
+const gameServer = new Server({
+  server: createServer(app),
+  express: app,
+  pingInterval: 0,
+});
+
+//define colyseus rooms
+gameServer.define("game", GameRoom).filterBy(["campaign"]);
+gameServer.define("chat", ChatRoom).enableRealtimeListing().filterBy(["campaign"]);
+
+//add colyseus paths to express app
+app.use('/', serveIndex(path.join(__dirname, "static"), {'icons': true}))
+app.use('/', express.static(path.join(__dirname, "static")));
 
 //(optional) attach web monitoring panel
 const basicAuth = require('express-basic-auth');
@@ -41,17 +59,11 @@ app.use('/colyseus', basicAuth({
   challenge: true
 }), monitor());
 
-//attach WebSocket Server on HTTP Server.
-const gameServer = new Server({
-  server: createServer(app),
-  express: app,
-  pingInterval: 0,
-});
-gameServer.define("game", GameRoom).filterBy(["campaign"]);
-gameServer.define("chat", ChatRoom).enableRealtimeListing().filterBy(["campaign"]);
+//set message on colyseus server shut down
 gameServer.onShutdown(function () {
   console.log(`DungeonGram gameserver is going down.`);
 });
+//colyseus listen on the defined port
 gameServer.listen(Number(port));
 
 async function main(): Promise<any> {
