@@ -39,7 +39,8 @@ if (process.env.NODE_ENV !== 'test') {
 const gameServer = new Server({
   server: createServer(app),
   express: app,
-  pingInterval: 0,
+  pingInterval: 5000,
+  pingMaxRetries: 240
 });
 
 //define colyseus rooms
