@@ -8,6 +8,7 @@ import { GlobalComponent } from '../shared/global/global.component';
 import { World } from '../shared/schemas/world';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { environment } from 'client/environments/environment';
 
 @Component({
   selector: 'app-game',
@@ -70,8 +71,11 @@ export class GameComponent implements OnInit, OnDestroy {
       this.controller = new Controller();
 
       var host = window.document.location.host.replace(/:.*/, '');
-      console.log("Connecting game to: " + location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
-      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+      var url = environment.production
+        ? "wss://dungeongram-gameserver.herokuapp.com"
+        : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      console.log("Connecting game to: " + url);
+      var client = new Colyseus.Client(url);
       client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
         .then((room: any) => {
           console.log("Joined to game room", room);

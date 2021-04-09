@@ -17,13 +17,17 @@ import { ChatRoom } from "./rooms/chat";
 import { GameRoom } from "./rooms/game";
 
 //define port based on enviroment variable or 3000 in case it is absent
-const port = Number(process.env.PORT || 3000) + Number(process.env.NODE_APP_INSTANCE || 0);
+console.log("process.env.PORT", process.env.PORT)
+console.log("process.env.GAMESERVER_MODE", process.env.GAMESERVER_MODE, process.env.GAMESERVER_MODE == "yes")
+const port = process.env.PORT || 3000
+const portServer = !process.env.GAMESERVER_MODE || process.env.GAMESERVER_MODE != "yes" ? port : null;
+const portGameServer = process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes" ? Number(port) : Number(port) + 1
 
 const app = express();
 dotenv.config();
 
 //configure express paths and others (cors,...)
-// app.set('port', port);
+if (portServer) app.set('port', portServer);
 app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(cors());
@@ -45,8 +49,10 @@ gameServer.define("game", GameRoom).filterBy(["campaign"]);
 gameServer.define("chat", ChatRoom).enableRealtimeListing().filterBy(["campaign"]);
 
 //add colyseus paths to express app
-app.use('/', serveIndex(path.join(__dirname, "static"), {'icons': true}))
-app.use('/', express.static(path.join(__dirname, "static")));
+if (process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes") {
+  app.use('/', serveIndex(path.join(__dirname, "static"), { 'icons': true }))
+  app.use('/', express.static(path.join(__dirname, "static")));
+}
 
 //(optional) attach web monitoring panel
 const basicAuth = require('express-basic-auth');
@@ -64,7 +70,7 @@ gameServer.onShutdown(function () {
   console.log(`DungeonGram gameserver is going down.`);
 });
 //colyseus listen on the defined port
-gameServer.listen(Number(port));
+gameServer.listen(portGameServer);
 
 async function main(): Promise<any> {
   try {
@@ -75,7 +81,7 @@ async function main(): Promise<any> {
       res.sendFile(path.join(__dirname, '../public/index.html'));
     });
     if (!module.parent) {
-      app.listen(app.get('port'), () => console.log(`DungeonGram server listening on port ${port}`));
+      app.listen(app.get('port'), () => console.log(`DungeonGram server listening on port ${app.get("port")}`));
     }
   } catch (err) {
     console.error(err);

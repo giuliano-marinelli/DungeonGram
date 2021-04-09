@@ -6,6 +6,7 @@ import { Controller } from '../shared/controller/controller';
 import { AngularResizeElementDirection, AngularResizeElementEvent } from 'angular-resize-element';
 import * as Colyseus from "colyseus.js";
 import * as moment from 'moment';
+import { environment } from 'client/environments/environment';
 
 declare var $;
 @Component({
@@ -40,8 +41,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.campaign) {
       var host = window.document.location.host.replace(/:.*/, '');
-      console.log("Connecting chat to: " + location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
-      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+      var url = environment.production
+        ? "wss://dungeongram-gameserver.herokuapp.com"
+        : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      console.log("Connecting chat to: " + url);
+      var client = new Colyseus.Client(url);
       client.joinOrCreate("chat", { campaign: this.campaign, token: localStorage.getItem('token') })
         .then((room: any) => {
           console.log("Joined to chat room", room);
@@ -72,6 +76,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         controller: this.controller,
         token: this.auth.currentUser._id
       });
+
+      console.log("Initialized chat messenger", this.messenger);
     });
     // listen to patches coming from the server
     // this.chatRoom.onMessage("messages", function (message) {
