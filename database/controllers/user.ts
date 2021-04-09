@@ -72,7 +72,7 @@ class UserCtrl extends BaseCtrl {
       const existent = await this.model.findOne({ email: req.body.email });
       if (!existent) {
         req.body.role = 'user';
-        if (req.file) req.body.avatar = req.file.destination + req.file.filename;
+        if (req.file) req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
         const obj = await new this.model(req.body).save();
         res.status(201).json(obj);
@@ -92,7 +92,7 @@ class UserCtrl extends BaseCtrl {
       const obj = await this.model.findOne({ _id: req.params.id });
       req.body.role = JSON.parse(JSON.stringify(obj)).role;
       req.body.email = resu.user.email;
-      if (req.file) req.body.avatar = req.file.destination + req.file.filename;
+      if (req.file) req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
       await this.model.findOneAndUpdate({ _id: req.params.id, email: resu.user.email }, req.body);
       res.sendStatus(200);

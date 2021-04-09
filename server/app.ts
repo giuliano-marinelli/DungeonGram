@@ -18,14 +18,13 @@ import { GameRoom } from "./rooms/game";
 
 //define port based on enviroment variable or 3000 in case it is absent
 const port = process.env.PORT || 3000
-// const portServer = !process.env.GAMESERVER_MODE || process.env.GAMESERVER_MODE != "yes" ? port : null;
-// const portGameServer = process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes" ? Number(port) : Number(port)
 
+//create express app
 const app = express();
 dotenv.config();
 
 //configure express paths and others (cors,...)
-// if (portServer) app.set('port', portServer);
+//app.set('port', port); //is not used because it is added by the gameserver
 app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(cors());
@@ -47,8 +46,8 @@ const gameServer = new Server({
 gameServer.define("game", GameRoom).filterBy(["campaign"]);
 gameServer.define("chat", ChatRoom).enableRealtimeListing().filterBy(["campaign"]);
 
-//add colyseus paths to express app
-if (process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes") {
+//add colyseus paths to express app (it brokes the express routes, so is not included by default)
+if (process.env.GAMESERVER_MODE == "yes") {
   app.use('/', serveIndex(path.join(__dirname, "static"), { 'icons': true }))
   app.use('/', express.static(path.join(__dirname, "static")));
 }
@@ -68,6 +67,7 @@ app.use('/colyseus', basicAuth({
 gameServer.onShutdown(function () {
   console.log(`DungeonGram gameserver is going down.`);
 });
+
 //colyseus listen on the defined port
 gameServer.listen(Number(port));
 
@@ -80,7 +80,7 @@ async function main(): Promise<any> {
       res.sendFile(path.join(__dirname, '../public/index.html'));
     });
     if (!module.parent) {
-      app.listen(app.get('port'), () => console.log(`DungeonGram server listening on port ${app.get("port")}`));
+      app.listen(app.get('port'), () => console.log(`DungeonGram server listening on port ${port}`));
     }
   } catch (err) {
     console.error(err);

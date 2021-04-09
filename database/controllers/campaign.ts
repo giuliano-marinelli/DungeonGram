@@ -256,7 +256,8 @@ class CampaignCtrl extends BaseCtrl {
 
       delete req.body._id;
       req.body.owner = resu.user._id;
-      if (req.file) req.body.banner = req.file.destination + req.file.filename;
+      if (req.file) req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+
 
       const obj = await new this.model(req.body).save();
       res.status(201).json(obj);
@@ -365,7 +366,7 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      if (req.file) req.body.banner = req.file.destination + req.file.filename;
+      if (req.file) req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
       await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);

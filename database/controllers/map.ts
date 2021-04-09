@@ -120,7 +120,7 @@ class MapCtrl extends BaseCtrl {
         req.body.tilemap = {
           width: 20, height: 20
         };
-        if (req.file) req.body.terrain = req.file.destination + req.file.filename;
+        if (req.file) req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
         const obj = await new this.model(req.body).save();
 
@@ -265,7 +265,7 @@ class MapCtrl extends BaseCtrl {
       if (resu.status != 200) throw new Error('unauthorized');
 
       console.log(req.file);
-      if (req.file) req.body.terrain = req.file.destination + req.file.filename;
+      if (req.file) req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
       await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);

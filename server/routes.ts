@@ -15,23 +15,51 @@ function setRoutes(app): void {
   const mapCtrl = new MapCtrl();
   const invitationCtrl = new InvitationCtrl();
 
+  //aws s3 configuration
+  const aws = require('aws-sdk');
+  // aws.config.setPromisesDependency();
+  aws.config.update({
+    accessKeyId: process.env.AWS_ACCESSKEYID,
+    secretAccessKey: process.env.AWS_SECRETACCESSKEY,
+    region: process.env.AWS_REGION
+  });
+  var s3 = new aws.S3();
+
   //multer configuration
   const multer = require('multer');
+  const multerS3 = require('multer-s3');
+
   //multer file upload settings
-  var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
-    }
-  })
+  var storage;
+  if (process.env.AWS_UPLOAD == "yes") {
+    storage = multerS3({
+      s3: s3,
+      bucket: 'dungeongram',
+      metadata: (req, file, cb) => {
+        cb(null, { fieldName: file.fieldname });
+      },
+      key: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix);
+      }
+    });
+  } else {
+    storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
+      }
+    });
+  }
+
   //multer mime type validation
   const upload = multer({
     storage: storage,
     limits: {
-      fileSize: 8192 * 8192 * 5
+      fileSize: 1048576 * 5 //5MB
     },
     fileFilter: (req, file, cb) => {
       if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
