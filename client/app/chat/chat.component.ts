@@ -41,9 +41,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.campaign) {
       var host = window.document.location.host.replace(/:.*/, '');
-      var url = environment.production
-        ? "wss://dungeongram-gameserver.herokuapp.com"
-        : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      // var url = environment.production
+      //   ? "wss://dungeongram-gameserver.herokuapp.com"
+      //   : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      var url = location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : '')
       console.log("Connecting chat to: " + url);
       var client = new Colyseus.Client(url);
       client.joinOrCreate("chat", { campaign: this.campaign, token: localStorage.getItem('token') })

@@ -71,9 +71,10 @@ export class GameComponent implements OnInit, OnDestroy {
       this.controller = new Controller();
 
       var host = window.document.location.host.replace(/:.*/, '');
-      var url = environment.production
-        ? "wss://dungeongram-gameserver.herokuapp.com"
-        : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      // var url = environment.production
+      //   ? "wss://dungeongram-gameserver.herokuapp.com"
+      //   : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+      var url = location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : '')
       console.log("Connecting game to: " + url);
       var client = new Colyseus.Client(url);
       client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })

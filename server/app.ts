@@ -17,17 +17,15 @@ import { ChatRoom } from "./rooms/chat";
 import { GameRoom } from "./rooms/game";
 
 //define port based on enviroment variable or 3000 in case it is absent
-console.log("process.env.PORT", process.env.PORT)
-console.log("process.env.GAMESERVER_MODE", process.env.GAMESERVER_MODE, process.env.GAMESERVER_MODE == "yes")
 const port = process.env.PORT || 3000
-const portServer = !process.env.GAMESERVER_MODE || process.env.GAMESERVER_MODE != "yes" ? port : null;
-const portGameServer = process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes" ? Number(port) : Number(port) + 1
+// const portServer = !process.env.GAMESERVER_MODE || process.env.GAMESERVER_MODE != "yes" ? port : null;
+// const portGameServer = process.env.GAMESERVER_MODE && process.env.GAMESERVER_MODE == "yes" ? Number(port) : Number(port)
 
 const app = express();
 dotenv.config();
 
 //configure express paths and others (cors,...)
-if (portServer) app.set('port', portServer);
+// if (portServer) app.set('port', portServer);
 app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(cors());
@@ -70,7 +68,7 @@ gameServer.onShutdown(function () {
   console.log(`DungeonGram gameserver is going down.`);
 });
 //colyseus listen on the defined port
-gameServer.listen(portGameServer);
+gameServer.listen(Number(port));
 
 async function main(): Promise<any> {
   try {
