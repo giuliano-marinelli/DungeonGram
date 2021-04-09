@@ -226,6 +226,8 @@ export class ToolsComponent implements OnInit {
 
     this.controller.recieve('game', 'mapUpdate', (message) => {
       this.getCampaign();
+      this.getMaps(true);
+      this.getMaps(false);
     });
 
     this.controller.recieve('game', 'characterUpdate', (message) => {
