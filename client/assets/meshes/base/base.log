@@ -78,15 +78,17 @@ Exporter version: 6.4.4, Blender version: 2.83.2
 		processing begun of bone:  mixamorig:RightFoot, index:  62
 		processing begun of bone:  mixamorig:RightToeBase, index:  63
 		processing begun of bone:  mixamorig:RightToe_End, index:  64
-		processing action Die:  in[1 - 133], out[0 - 133]
-		processing action Die.001:  in[1 - 79], out[140 - 219]
-		processing action Float:  in[1 - 109], out[230 - 339]
-		processing action Idle:  in[1 - 60], out[350 - 410]
-		processing action Run:  in[1 - 22], out[420 - 442]
-		processing action Sit:  in[1 - 130], out[450 - 580]
-		processing action Sleep:  in[1 - 52], out[590 - 642]
-		processing action TPose:  in[1 - 2], out[650 - 652]
-		processing action Walk:  in[1 - 32], out[660 - 692]
+		processing action Crouch.Idle:  in[1 - 51], out[0 - 51]
+		processing action Crouch.Walk:  in[1 - 38], out[60 - 98]
+		processing action Die:  in[1 - 133], out[110 - 243]
+		processing action Die.001:  in[1 - 79], out[250 - 329]
+		processing action Float:  in[1 - 109], out[340 - 449]
+		processing action Idle:  in[1 - 60], out[460 - 520]
+		processing action Run:  in[1 - 22], out[530 - 552]
+		processing action Sit:  in[1 - 130], out[560 - 690]
+		processing action Sleep:  in[1 - 52], out[700 - 752]
+		processing action TPose:  in[1 - 2], out[760 - 762]
+		processing action Walk:  in[1 - 32], out[770 - 802]
 	processing begun of mesh:  Mesh
 		animation processing begun
 			processing action TPose:  in[1 - 2], out[0 - 2]
@@ -108,4 +110,4 @@ Exporter version: 6.4.4, Blender version: 2.83.2
 	writing mesh:  Mesh
 ========= Writing of JSON file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 3.1939 secs
+elapsed time:  0 min, 3.3531 secs

@@ -11,6 +11,8 @@ export class Animator {
   registeredChildren: any = {};
   registeredChildrenUI: any = {};
   defaultVisibility: number = 1;
+  defaultIdleAnimation: any = { animation: "Idle", loop: true };
+  defaultMoveAnimation: any = { animation: "Run", loop: true };
 
   constructor(mesh: any, skeleton?: any, options?: any) {
     this.mesh = mesh;
@@ -18,6 +20,8 @@ export class Animator {
     if (options?.rotationSpeed) this.rotationSpeed = options?.rotationSpeed;
     if (options?.transition) this.transition = options?.transition;
     if (options?.defaultVisibility) this.defaultVisibility = options?.defaultVisibility;
+    if (options?.defaultIdleAnimation) this.defaultIdleAnimation = options?.defaultIdleAnimation;
+    if (options?.defaultMoveAnimation) this.defaultMoveAnimation = options?.defaultMoveAnimation;
 
     if (this.skeleton) {
       this.skeleton.enableBlending(this.transition);
@@ -44,6 +48,14 @@ export class Animator {
       this.actual.animation = animation;
       this.actual.loop = loop;
     }
+  }
+
+  playIdle() {
+    this.play(this.defaultIdleAnimation.animation, this.defaultIdleAnimation.loop);
+  }
+
+  playMove() {
+    this.play(this.defaultMoveAnimation.animation, this.defaultMoveAnimation.loop);
   }
 
   parent(mesh) {

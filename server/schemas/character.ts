@@ -21,6 +21,8 @@ export class Character extends Schema {
   direction: Point = new Point(1, 0);
   @type("string")
   animation;
+  @type("boolean")
+  stealth = false;
   @type(Path)
   movementPath: Path = new Path();
   @type("number")

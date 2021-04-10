@@ -217,6 +217,9 @@ export class ToolsComponent implements OnInit {
           },
           animation: (animation) => {
             this.controller.send('game', 'character', { action: 'animation', animation: animation });
+          },
+          stealth: (stealth) => {
+            this.controller.send('game', 'character', { action: 'stealth', stealth: stealth });
           }
         }
       }

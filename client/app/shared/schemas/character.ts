@@ -18,6 +18,7 @@ export class Character extends Schema {
   z?: number = 0.05;
   direction?: Point;
   animation?: string;
+  stealth?: boolean;
   movementPath?: Path;
   movementCooldown?: number;
   beignDragged?: boolean;
@@ -88,21 +89,21 @@ export class Character extends Schema {
           this.doMesh();
           break;
         case 'x':
-          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.play('Run');
+          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.playMove();
           BABYLON.Animation.CreateAndStartAnimation("moveX", this.mesh, "position.x",
             100, this.movementCooldown / 10, this.mesh?.position.x, this.x,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to && !this.beignDragged)
-                if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
+                if (!this.animation || this.animation == 'None') this.animator?.playIdle();
             });
           break;
         case 'y':
-          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.play('Run');
+          if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.playMove();
           BABYLON.Animation.CreateAndStartAnimation("moveZ", this.mesh, "position.z",
             100, this.movementCooldown / 10, this.mesh?.position.z, this.y,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, () => {
               if (!this.movementPath.to && !this.beignDragged)
-                if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
+                if (!this.animation || this.animation == 'None') this.animator?.playIdle();
             });
           break;
         case 'direction':
@@ -110,6 +111,9 @@ export class Character extends Schema {
           break;
         case 'animation':
           this.initAnimation();
+          break;
+        case 'stealth':
+          this.initStealth();
           break;
         case 'beignDragged':
           this.initBeignDragged();
@@ -127,7 +131,7 @@ export class Character extends Schema {
           if (this.colliderPhysics)
             this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
           if (this.isCollidingPhysics && !this.beignDragged) {
-            // this.animator?.play('Idle');
+            // this.animator?.playIdle();
           }
           break;
         case 'wears':
@@ -256,6 +260,7 @@ export class Character extends Schema {
 
         setTimeout(() => {
           this.initAnimation();
+          this.initStealth();
         }, 2000);
 
         this.update();
@@ -429,7 +434,7 @@ export class Character extends Schema {
       BABYLON.Animation.CreateAndStartAnimation("moveYSelection", this.selectionMesh, "position.y",
         10, 1, this.selectionMesh?.position.y, -0.45, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     } else {
-      if (!this.animation || this.animation == 'None') this.animator?.play('Idle');
+      if (!this.animation || this.animation == 'None') this.animator?.playIdle();
       if (this.collider) this.collider.isDragged = false;
       BABYLON.Animation.CreateAndStartAnimation("moveY", this.mesh, "position.y",
         10, 1, this.mesh?.position.y, this.z, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -459,12 +464,26 @@ export class Character extends Schema {
     }
     if (!this.beignDragged) {
       if (this.animation && this.animation != 'None') this.animator?.play(this.animation, loop);
-      else this.animator?.play('Idle');
+      else this.animator?.playIdle();
       if (this.mesh) {
         this.mesh.position.y = this.z;
         this.selectionMesh.position.y = this.selectionMeshZ;
         this.mesh.scaling.x = scaling;
         this.mesh.scaling.z = scaling;
+      }
+    }
+  }
+
+  initStealth() {
+    if (this.animator) {
+      if (this.stealth) {
+        this.animator.defaultIdleAnimation = { animation: 'Crouch.Idle' };
+        this.animator.defaultMoveAnimation = { animation: 'Crouch.Walk' };
+        if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.playIdle();
+      } else {
+        this.animator.defaultIdleAnimation = { animation: 'Idle' };
+        this.animator.defaultMoveAnimation = { animation: 'Run' };
+        if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.playIdle();
       }
     }
   }
