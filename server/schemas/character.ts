@@ -23,6 +23,8 @@ export class Character extends Schema {
   animation;
   @type("boolean")
   stealth = false;
+  @type("boolean")
+  hidden = false;
   @type(Path)
   movementPath: Path = new Path();
   @type("number")

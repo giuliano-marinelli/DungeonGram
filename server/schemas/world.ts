@@ -221,11 +221,12 @@ export class World extends Schema {
               this.map.mapId == this.characters[data.id]?.map)) {
             if (!this.users[client].addingModeCharacter &&
               data.x >= 0 && data.y >= 0 &&
-              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
+              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height) {
               if (data.id)
                 this.characters[data.id].lookAt({ x: data.x, y: data.y });
               else if (this.users[client].selectedCharacter)
                 this.characters[this.users[client].selectedCharacter].lookAt({ x: data.x, y: data.y });
+            }
           }
         },
         validate: (client: string, data: any) => {
@@ -259,6 +260,17 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.stealth != null && typeof data.stealth === "boolean"
+        }
+      },
+      hide: {
+        do: (client: string, data: any) => {
+          if (this.map.mapId == this.characters[data.id]?.map && !this.users[client].addingModeCharacter) {
+            this.characters[data.id].hidden = data.hide;
+          }
+        },
+        validate: (client: string, data: any) => {
+          return this.map != null && data.id != null && data.hide != null &&
+            typeof data.id === "string" && typeof data.hide === "boolean" && this.users[client].isDM
         }
       },
     },
@@ -731,6 +743,7 @@ export class World extends Schema {
           },
           animation: this.characters[characterId].animation,
           stealth: this.characters[characterId].stealth,
+          hidden: this.characters[characterId].hidden,
           // name: this.characters[characterId].name,
           // group: this.characters[characterId].group,
           // visionRange: this.characters[characterId].visionRange,
@@ -780,6 +793,7 @@ export class World extends Schema {
     if (!character.direction) character.direction = { x: 1, y: 0 };
     if (!character.animation) character.animation = "None";
     if (!character.stealth) character.stealth = false;
+    if (!character.hidden) character.hidden = false;
     // if (!character.visionRange) character.visionRange = 10;
     // if (!character.group) character.group = 'Ungrouped';
     // if (!character.name) {
@@ -799,6 +813,7 @@ export class World extends Schema {
     this.characters[character._id].direction = new Point(character.direction.x, character.direction.y);
     this.characters[character._id].animation = character.animation;
     this.characters[character._id].stealth = character.stealth;
+    this.characters[character._id].hidden = character.hidden;
     // this.characters[character._id].visionRange = character.visionRange;
     // this.characters[character._id].group = character.group;
     // this.characters[character._id].name = character.name;

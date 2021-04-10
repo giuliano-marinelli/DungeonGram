@@ -6,7 +6,7 @@ import { Schema } from './schema';
 import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
-import { Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
+import { Image, Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
 
 export class Character extends Schema {
   //schema
@@ -19,6 +19,7 @@ export class Character extends Schema {
   direction?: Point;
   animation?: string;
   stealth?: boolean;
+  hidden?: boolean;
   movementPath?: Path;
   movementCooldown?: number;
   beignDragged?: boolean;
@@ -42,6 +43,7 @@ export class Character extends Schema {
   visibleCharacters?: any = [];
   nameSign?: any;
   nameSignText?: any;
+  hiddenSign?: any;
   //physics
   xPhysics?: number;
   yPhysics?: number;
@@ -115,6 +117,10 @@ export class Character extends Schema {
         case 'stealth':
           this.initStealth();
           break;
+        case 'hidden': {
+          if (this.hiddenSign) this.animator.toggleUI(this.hiddenSign, this.hidden);
+          this.parameters.world.updateCharactersVisibility();
+        }
         case 'beignDragged':
           this.initBeignDragged();
           break;
@@ -176,8 +182,10 @@ export class Character extends Schema {
   removeSigns() {
     this.nameSign?.dispose();
     this.nameSignText?.dispose();
+    this.hiddenSign?.dispose();
     this.nameSign = null;
     this.nameSignText = null;
+    this.hiddenSign = null;
   }
 
   doMesh() {
@@ -328,47 +336,66 @@ export class Character extends Schema {
     this.nameSign.addControl(this.nameSignText);
 
     this.animator.parentUI(this.nameSign, 0.8, 0.2);
+
+    this.hiddenSign = new Image('hidden', 'assets/images/game/hidden.png');
+    this.hiddenSign.width = "30px";
+    this.hiddenSign.height = "30px";
+    this.hiddenSign.linkOffsetY = -20;
+    this.parameters.world.ui.addControl(this.hiddenSign);
+    this.hiddenSign.linkWithMesh(this.mesh);
+
+    this.animator.parentUI(this.hiddenSign, 1, 0);
+    this.animator.toggleUI(this.hiddenSign, this.hidden);
   }
 
   initActions() {
     //set action on mouse in/out/click
     this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-    this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
-      if (e.sourceEvent.button == 0 && e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
-        console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
-        this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
-      }
-    }));
-    this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-      if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !this.parameters.controller.activeTool) {
-        var isShift = e.sourceEvent.shiftKey;
-        this.parameters.controller.toggleAction('dragCharacter', true);
-        if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
-        var drag = () => {
-          var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
-          if (pick?.pickedPoint) {
-            if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
-            else if (this.parameters.world.users[this.parameters.token].isDM)
-              this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'lookAt' });
+    //add the actions when is not an adding mode character
+    if (!this.addingMode) {
+      //for drag, drop and lookAt (with shift + hold(click) on character) actions
+      this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+        if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !e.sourceEvent.altKey && !this.parameters.controller.activeTool) {
+          var isShift = e.sourceEvent.shiftKey;
+          this.parameters.controller.toggleAction('dragCharacter', true);
+          if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
+          var drag = () => {
+            var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
+            if (pick?.pickedPoint) {
+              if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+              else if (this.parameters.world.users[this.parameters.token].isDM)
+                this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'lookAt' });
+            }
+          }
+          var drop = (e) => {
+            if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
+            this.parameters.canvas.removeEventListener("pointerup", drop, false);
+            this.parameters.canvas.removeEventListener("pointermove", drag, false);
+            setTimeout(() => {
+              this.parameters.controller.toggleAction('dragCharacter', false);
+            }, 10);
+          };
+          this.parameters.canvas.addEventListener("pointermove", drag, false);
+          this.parameters.canvas.addEventListener("pointerup", drop, false);
+        }
+      }));
+      //for select and hide actions
+      this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (e) => {
+        if (e.sourceEvent.button == 0 && !this.parameters.controller.activeTool) {
+          console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
+          if (e.sourceEvent.ctrlKey) {
+            this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
+          } else if (e.sourceEvent.altKey) {
+            this.parameters.controller.send('game', 'character', { id: this.id, hide: !this.hidden, action: 'hide' });
           }
         }
-        var drop = (e) => {
-          if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
-          this.parameters.canvas.removeEventListener("pointerup", drop, false);
-          this.parameters.canvas.removeEventListener("pointermove", drag, false);
-          setTimeout(() => {
-            this.parameters.controller.toggleAction('dragCharacter', false);
-          }, 10);
-        };
-        this.parameters.canvas.addEventListener("pointermove", drag, false);
-        this.parameters.canvas.addEventListener("pointerup", drop, false);
-      }
-    }));
-    if (!this.addingMode) {
+      }));
+      //for show name sign and highlight the mesh
       this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, (e) => {
         this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
         this.animator.toggleUI(this.nameSign, true);
       }));
+      //for blur name sign and hide highlight
       this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, (e) => {
         this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
         this.animator.toggleUI(this.nameSign, false);

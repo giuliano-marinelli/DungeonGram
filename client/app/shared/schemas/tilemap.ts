@@ -187,7 +187,8 @@ export class TileMap extends Schema {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.button == 0 && !e.ctrlKey) {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-        if (pick.pickedPoint) {
+        var pickCharacter = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isCharacter });
+        if (pick.pickedPoint && !pickCharacter?.pickedPoint) {
           if (!this.parameters.controller.activeTool && !this.parameters.controller.activeAction) {
             var xToMove = pick.pickedPoint.x;
             var zToMove = pick.pickedPoint.z;

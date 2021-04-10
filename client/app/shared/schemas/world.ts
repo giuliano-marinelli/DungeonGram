@@ -328,10 +328,11 @@ export class World extends Schema {
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
         return mesh.isCollible && !mesh.isTranspasable && (!mesh.isCharacter || mesh.name == this.characters[character].id)
       })?.pickedMesh;
-      if (pickedMesh && this.characters[character].id == pickedMesh.name)
+      if ((pickedMesh && this.characters[character].id == pickedMesh.name)
+        && (!this.characters[character].hidden || this.users[this.parameters.token]?.isDM))
         this.characters[character].animator.show();
       else {
-        this.characters[character].animator.hide();
+        this.characters[character].animator.hide(this.characters[character].hidden, false);
         this.characters[character].collider.isPickable = false;
       }
     }
@@ -353,8 +354,8 @@ export class World extends Schema {
         return (mesh.isCollible || mesh.isTranspasable) && ((!mesh.isCharacter && !mesh.isDoor) || mesh.name == this.map.doors[door].id)
       })?.pickedMesh;
       var distanceToDoor = Vectors.distance({ x: this.characters[selectedCharacter].mesh.position.x, y: this.characters[selectedCharacter].mesh.position.z }, { x: this.map.doors[door].to.x, y: this.map.doors[door].to.y });
-      if (((pickedMesh && this.map.doors[door].id == pickedMesh.name) ||
-        distanceToDoor < 3) && (!this.map.doors[door].hidden || this.users[this.parameters.token]?.isDM)) {
+      if (((pickedMesh && this.map.doors[door].id == pickedMesh.name) || distanceToDoor < 3)
+        && (!this.map.doors[door].hidden || this.users[this.parameters.token]?.isDM)) {
         this.map.doors[door].animator.show();
         if (distanceToDoor <= 3) {
           this.map.doors[door].mesh.isPickable = true;
