@@ -78,12 +78,14 @@ export class ToolsComponent implements OnInit {
 
     this.tools = {
       users: {
+        name: 'users',
         options: {
           isDM: this.controller.initSetting("isDM", false),
           users: this.controller.initSetting("usersOnCampaign", [])
         }
       },
       walls: {
+        hotkey: 'e',
         name: 'walls', label: 'Walls', image: 'assets/images/tools/walls.png', dropdown: true,
         options: {
           remove: true,
@@ -106,6 +108,7 @@ export class ToolsComponent implements OnInit {
         }
       },
       rule: {
+        hotkey: 'r',
         name: 'rule', label: 'Rule', image: 'assets/images/tools/rule.png', dropdown: true,
         options: {
           adjustTo: 'half_grid',
@@ -119,6 +122,7 @@ export class ToolsComponent implements OnInit {
         }
       },
       figure: {
+        hotkey: 'f',
         name: 'figure', label: 'Draw Figures', image: 'assets/images/tools/figure.png', dropdown: true,
         options: {
           adjustTo: 'half_grid',
@@ -237,6 +241,8 @@ export class ToolsComponent implements OnInit {
       this.getCharacters(true);
       this.getCharacters(false);
     });
+
+    this.initHotkeys();
   }
 
   //general
@@ -269,6 +275,16 @@ export class ToolsComponent implements OnInit {
         this.tools.maps.actions.updateTilemap();
       }
     );
+  }
+
+  initHotkeys() {
+    document.addEventListener("keyup", event => {
+      console.log(event.key);
+      this.orderedTools.forEach(tool => {
+        console.log(event.key, tool.hotkey, event.key == tool.hotkey)
+        if (event.key == tool.hotkey) this.callTool(event, tool.name);
+      });
+    });
   }
 
   //for characters

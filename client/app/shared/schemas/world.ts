@@ -8,6 +8,7 @@ import {
 } from '@babylonjs/materials';
 import { Vectors } from '../utils/vectors';
 import { AdvancedDynamicTexture } from '@babylonjs/gui';
+import { Camera } from '../utils/camera';
 
 export class World extends Schema {
   //schema
@@ -107,6 +108,9 @@ export class World extends Schema {
   }
 
   initCamera() {
+    //set panning as the default camera movement
+    Camera.PanningAsDefaultCameraInput();
+
     //creates, angles, distances and targets the camera
     this.camera = new BABYLON.ArcRotateCamera("mainCamera", -1, 0.75, 30, new BABYLON.Vector3(3, 0, 3), this.parameters.scene);
     this.camera.wheelPrecision = 40;
@@ -122,7 +126,12 @@ export class World extends Schema {
     this.camera.lowerRadiusLimit = 8
     //for limit how much the camera zoom out
     this.camera.upperRadiusLimit = 150
-
+    //add camera inputs for move it with WASD
+    this.camera.inputs.attached.keyboard.keysUp.push(87);
+    this.camera.inputs.attached.keyboard.keysDown.push(83);
+    this.camera.inputs.attached.keyboard.keysLeft.push(65);
+    this.camera.inputs.attached.keyboard.keysRight.push(68);
+    // Camera.AddPanningCamera(this.camera);
 
     //detach left click from camera control
     this.camera.inputs.attached.pointers.buttons[0] = null;
