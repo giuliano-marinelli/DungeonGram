@@ -2,8 +2,7 @@
 
   <div id="main-tools">
     <div *ngFor="let tool of orderedTools">
-      <div *ngIf="tools.users.options.isDM?.value || ['grid', 'rule', 'figure'].includes(tool.name)"
-        class="tool-btn-container" id="tool-btn-container-{{tool.name}}">
+      <div class="tool-btn-container" id="tool-btn-container-{{tool.name}}">
         <div class="{{tool.dropdown ? 'dropright' : ''}}">
           <button
             class="btn btn-dark tool-btn {{tool.active ? 'active' : ''}} {{tool.dropdown ? 'dropdown-toggle' : ''}}"

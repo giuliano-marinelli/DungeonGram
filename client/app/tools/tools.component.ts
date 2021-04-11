@@ -80,7 +80,13 @@ export class ToolsComponent implements OnInit {
       users: {
         name: 'users',
         options: {
-          isDM: this.controller.initSetting("isDM", false),
+          isDM: this.controller.initSetting("isDM", false, (isDM) => {
+            if (isDM) {
+              this.orderedTools = [this.tools.maps, this.tools.characters, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
+            } else {
+              this.orderedTools = [this.tools.grid, this.tools.rule, this.tools.figure];
+            }
+          }),
           users: this.controller.initSetting("usersOnCampaign", [])
         }
       },
@@ -228,8 +234,6 @@ export class ToolsComponent implements OnInit {
         }
       }
     };
-
-    this.orderedTools = [this.tools.maps, this.tools.characters, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
 
     this.controller.recieve('game', 'mapUpdate', (message) => {
       this.getCampaign();
