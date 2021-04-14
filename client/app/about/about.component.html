@@ -1,17 +1,184 @@
-<div class="jumbotron jumbotron-fluid">
-  <div class="card-deck text-center">
-    <div class="card" style="max-width: 500px; margin: 0 auto;" routerLink="/characters">
-      <img class="card-img-top" src="assets/images/characters/logo.jpg">
-      <div class="card-body">
-        <h5 class="card-title">Characters</h5>
+<main role="main" class="pb-5">
+
+  <div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#myCarousel" data-slide-to="0"></li>
+      <li data-target="#myCarousel" data-slide-to="1" class="active"></li>
+      <li data-target="#myCarousel" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+      <div class="carousel-item">
+        <img class="first-slide adjusted-img" src="assets/images/about/about_app.jpg" alt="First slide">
+        <div class="container">
+          <div class="carousel-caption text-left">
+            <h1>Enter the Dungeon</h1>
+            <p>Join as a DM or Player on the created Campaigns. Enjoy creating unique maps, characters
+              and start your own epic adventures with your friends and the DG community.</p>
+            <p><a *ngIf="!auth.loggedIn" class="btn btn-lg btn-danger" role="button" (click)="openRegister()">Sign up
+                now</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item active">
+        <img class="second-slide adjusted-img" src="assets/images/about/about_maps.jpg" alt="Second slide">
+        <div class="container">
+          <div class="carousel-caption">
+            <h1>Create maps easy, fast and great</h1>
+            <p>Start creating your own campaign, adding maps and rappidly prepare they dynamic lighting with the walls
+              and doors tools for make your players enjoy an enigmatic and full of surprises scenario.</p>
+            <p><a class="btn btn-lg btn-dark" routerLink="/maps" role="button">See some examples</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <img class="third-slide adjusted-img" src="assets/images/about/about_characters.jpg" alt="Third slide">
+        <div class="container">
+          <div class="carousel-caption text-right">
+            <h1>Add unique chacters to your campaing</h1>
+            <p>You can use the character editor to customize your campaign characters, with 3D assets that will be added
+              periodically or using images to create simple 2D characters</p>
+            <p><a class="btn btn-lg btn-light" routerLink="/characters" role="button">Browse published characters</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+
+
+  <!-- Marketing messaging and featurettes
+  ================================================== -->
+  <!-- Wrap the rest of the page in another container to center all the content. -->
+
+  <div class="container marketing">
+
+    <!-- Three columns of text below the carousel -->
+    <div class="row">
+      <div class="col-lg-4">
+        <!-- <img class="rounded-circle"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+          alt="Generic placeholder image" width="140" height="140"> -->
+        <i class="fa fa-user-circle-o" style="font-size: 9em;"></i>
+        <h2>Characters</h2>
+        <p>Animated 3D/2D personalized characters models to become enemies or heroes of your maps.
+          <span class="text-muted">With more features soon!</span>
+        </p>
+        <p><a class="btn btn-secondary" routerLink="/characters" role="button">View characters »</a></p>
+      </div><!-- /.col-lg-4 -->
+      <div class="col-lg-4">
+        <i class="fa fa-map" style="font-size: 9em;"></i>
+        <h2>Maps</h2>
+        <p>Fast maps made by all the images that can be found on internet, with the plus of dynamic lighting made by
+          walls and interactive doors. <span class="text-muted">And more will be added!</span>
+        </p>
+        <p><a class="btn btn-secondary" routerLink="/maps" role="button">View maps »</a></p>
+      </div><!-- /.col-lg-4 -->
+      <div class="col-lg-4">
+        <i class="fa fa-book" style="font-size: 9em;"></i>
+        <h2>Campaigns</h2>
+        <p>Simple campaign management where you can organized the your maps and characters inside an awesome story and
+          invite
+          your friends to be part of the adventure.</p>
+        <p><a class="btn btn-secondary" routerLink="/campaigns" role="button">View campaigns »</a></p>
+      </div><!-- /.col-lg-4 -->
+    </div><!-- /.row -->
+
+
+    <!-- START THE FEATURETTES -->
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+      <div class="col-md-7">
+        <h2 class="featurette-heading">Shared content. <span class="text-muted">Be part of a community.</span>
+        </h2>
+        <p class="lead">All you create can be shared to all the DG community. Choose your role here: be a creator of
+          awesome maps and characters to grow up the assets of our community, or be a wise DM by creating awesome
+          campaigns using all the community content and
+          your own on it. <br>
+          <b>Together we can create more content, better and faster!</b>
+        </p>
+      </div>
+      <div class="col-md-5">
+        <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
+          style="width: 500px; height: 500px;"
+          src="assets/images/about/about_shared.jpg"
+          data-holder-rendered="true">
       </div>
     </div>
 
-    <div class="card" style="max-width: 500px; margin: 0 auto;" routerLink="/campaigns">
-      <img class="card-img-top" src="assets/images/campaigns/logo.jpg">
-      <div class="card-body">
-        <h5 class="card-title">Campaigns</h5>
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+      <div class="col-md-7 order-md-2">
+        <h2 class="featurette-heading">Dynamic Lighting. <span class="text-muted">Easyly make great playable
+            maps.</span></h2>
+        <p class="lead">Make some walls and doors to achieve the dynamic visibility for the players (also great
+          for dm use too). Add walls, windows or colliders, for fully or partially blocked vision or to make the
+          characters
+          movement avoid obstacles. You can also add interactive doors for make the players to open them slowly and see
+          if there
+          are enemies or not. Moreover you can lock or hide them to players to generate secret doors and hide some
+          tresures!</p>
+      </div>
+      <div class="col-md-5 order-md-1">
+        <img class="featurette-image img-fluid mx-auto adjusted-img" data-src="holder.js/500x500/auto" alt="500x500"
+          src="assets/images/about/about_visibility.jpg" data-holder-rendered="true"
+          style="width: 500px; height: 500px;">
       </div>
     </div>
-  </div>
-</div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+      <div class="col-md-7">
+        <h2 class="featurette-heading">Become a Patron. <span class="text-muted">More donations, more features.</span>
+        </h2>
+        <p class="lead">DungeonGram is a project created by only one indie developer as a hobbie project. So if you want
+          to see this project be more big and with a lot of new features, considere becoming a Patron. <br>
+          <b>This is a project made by personal wishes so i hope you enjoy it and make it more big than i can
+            imagine!</b>
+        </p>
+        <p class="text-center">
+          <a href="https://www.patreon.com/dungeongram" target="_blank" class="btn btn-danger btn-lg rounded-pill"
+            data-patreon-widget-type="become-patron-button">
+            <i class="fa fa-fw"><svg viewBox="0 0 569 546" xmlns="http://www.w3.org/2000/svg">
+                <g>
+                  <circle cx="362.589996" cy="204.589996" data-fill="1" id="Oval" r="204.589996" fill="white">
+                  </circle>
+                  <rect data-fill="2" height="545.799988" id="Rectangle" width="100" x="0" y="0"></rect>
+                </g>
+              </svg>
+            </i> Become a Patron!
+          </a>
+        </p>
+      </div>
+      <div class="col-md-5">
+        <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
+          src="assets/images/about/about_patreon.jpg" data-holder-rendered="true" style="width: 500px; height: 500px;">
+      </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <!-- /END THE FEATURETTES -->
+
+  </div><!-- /.container -->
+
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <p class="float-right">
+      <a href="#"><i class="fa fa-arrow-circle-up fa-2x" tippy="Back to top"></i></a>
+    </p>
+    <p>© 2021 DungeonGram · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+  </footer>
+</main>

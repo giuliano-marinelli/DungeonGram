@@ -32,6 +32,21 @@
       </ul>
       <ul class="navbar-nav navbar-right">
         <li class="nav-item">
+          <a href="https://www.patreon.com/dungeongram" target="_blank" class="nav-link p-0 pt-1 pr-1"
+            data-patreon-widget-type="become-patron-button">
+            <button class="btn btn-danger btn-sm rounded-pill">
+              <i class="fa fa-fw"><svg viewBox="0 0 569 546" xmlns="http://www.w3.org/2000/svg">
+                  <g>
+                    <circle cx="362.589996" cy="204.589996" data-fill="1" id="Oval" r="204.589996" fill="white">
+                    </circle>
+                    <rect data-fill="2" height="545.799988" id="Rectangle" width="100" x="0" y="0"></rect>
+                  </g>
+                </svg>
+              </i> Become a Patron!
+            </button>
+          </a>
+        </li>
+        <li class="nav-item">
           <a [routerLink]="" class="nav-link" *ngIf="!auth.loggedIn" (click)="openRegister()">
             <i class="fa fa-fw fa-user-plus"></i> Sign Up
           </a>
@@ -43,7 +58,8 @@
         </li>
         <li class="nav-item">
           <a routerLink="/account" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
-            <img class="profile-img" [src]="auth.currentUser.avatar" onerror="this.src='assets/images/characters/default-preview.jpg'" />
+            <img class="profile-img" [src]="auth.currentUser.avatar"
+              onerror="this.src='assets/images/characters/default-preview.jpg'" />
             {{auth.currentUser.username}}
           </a>
         </li>
