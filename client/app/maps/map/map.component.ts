@@ -6,6 +6,7 @@ import { MapService } from 'client/app/services/map.service';
 import { AuthService } from 'client/app/services/auth.service';
 import { Map } from 'client/app/shared/models/map.model';
 import { Campaign } from 'client/app/shared/models/campaign.model';
+import Compressor from 'compressorjs';
 
 declare var iziToast;
 
@@ -117,16 +118,23 @@ export class MapComponent implements OnInit {
     const reader = new FileReader();
     if (files && files.length) {
       const [file] = files;
-      this.mapForm.patchValue({
-        terrainFile: file
+      new Compressor(file, {
+        quality: 0.2,
+        mimeType: 'jpg',
+        convertSize: 1000000,
+        success: (compressedFile) => {
+          this.mapForm.patchValue({
+            terrainFile: compressedFile
+          });
+          reader.readAsDataURL(compressedFile);
+          reader.onload = () => {
+            //here the file can be showed (base 64 is on reader.result)
+            this.terrainImage.nativeElement.src = reader.result;
+            //need to run change detector since file load runs outside of zone
+            this.changeDetector.markForCheck();
+          };
+        }
       });
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        //here the file can be showed (base 64 is on reader.result)
-        this.terrainImage.nativeElement.src = reader.result;
-        //need to run change detector since file load runs outside of zone
-        this.changeDetector.markForCheck();
-      };
     }
   }
 }

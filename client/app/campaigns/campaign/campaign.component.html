@@ -23,7 +23,7 @@
             </div>
           </div>
         </label>
-        <input [hidden]="true" type="file" name="bannerFile" id="bannerFile"
+        <input [hidden]="true" type="file" name="bannerFile" id="bannerFile" accept="image/*"
           (change)="onChangeBanner($event.target?.files)">
       </div>
       <div class="mb-3">

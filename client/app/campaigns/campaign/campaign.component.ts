@@ -5,6 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CampaignService } from 'client/app/services/campaign.service';
 import { AuthService } from 'client/app/services/auth.service';
 import { Campaign } from 'client/app/shared/models/campaign.model';
+import Compressor from 'compressorjs';
 
 declare var iziToast;
 
@@ -110,16 +111,23 @@ export class CampaignComponent implements OnInit {
     const reader = new FileReader();
     if (files && files.length) {
       const [file] = files;
-      this.campaignForm.patchValue({
-        bannerFile: file
+      new Compressor(file, {
+        quality: 0.2,
+        mimeType: 'jpg',
+        convertSize: 1000000,
+        success: (compressedFile) => {
+          this.campaignForm.patchValue({
+            bannerFile: compressedFile
+          });
+          reader.readAsDataURL(compressedFile);
+          reader.onload = () => {
+            //here the file can be showed (base 64 is on reader.result)
+            this.bannerImage.nativeElement.src = reader.result;
+            //need to run change detector since file load runs outside of zone
+            this.changeDetector.markForCheck();
+          };
+        }
       });
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        //here the file can be showed (base 64 is on reader.result)
-        this.bannerImage.nativeElement.src = reader.result;
-        //need to run change detector since file load runs outside of zone
-        this.changeDetector.markForCheck();
-      };
     }
   }
 }

@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { User } from '../shared/models/user.model';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import Compressor from 'compressorjs';
 
 declare var iziToast;
 
@@ -92,16 +93,23 @@ export class AccountComponent implements OnInit {
     const reader = new FileReader();
     if (files && files.length) {
       const [file] = files;
-      this.accountForm.patchValue({
-        avatarFile: file
+      new Compressor(file, {
+        quality: 0.2,
+        mimeType: 'jpg',
+        convertSize: 1000000,
+        success: (compressedFile) => {
+          this.accountForm.patchValue({
+            avatarFile: compressedFile
+          });
+          reader.readAsDataURL(compressedFile);
+          reader.onload = () => {
+            //here the file can be showed (base 64 is on reader.result)
+            this.avatarImage.nativeElement.src = reader.result;
+            //need to run change detector since file load runs outside of zone
+            this.changeDetector.markForCheck();
+          };
+        }
       });
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        //here the file can be showed (base 64 is on reader.result)
-        this.avatarImage.nativeElement.src = reader.result;
-        //need to run change detector since file load runs outside of zone
-        this.changeDetector.markForCheck();
-      };
     }
   }
 

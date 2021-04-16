@@ -23,7 +23,7 @@
             </div>
           </div>
         </label>
-        <input [hidden]="true" type="file" name="terrainFile" id="terrainFile"
+        <input [hidden]="true" type="file" name="terrainFile" id="terrainFile" accept="image/*"
           (change)="onChangeTerrain($event.target?.files)">
       </div>
       <div class="mb-3">
