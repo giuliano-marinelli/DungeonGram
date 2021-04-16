@@ -43,7 +43,7 @@ class MapCtrl extends BaseCtrl {
             $match: {
               owner: resu.user._id,
               copyOf: null,
-              terrain: { $ne: null }
+              terrain: { $nin: [null, ""] }
             }
           }
         ]).skip(skip).limit(limit);;
@@ -71,7 +71,7 @@ class MapCtrl extends BaseCtrl {
               owner: { $ne: resu?.user?._id },
               private: false,
               copyOf: null,
-              terrain: { $ne: null }
+              terrain: { $nin: [null, ""] }
             }
           }
         ]).skip(skip).limit(limit);;
@@ -95,14 +95,14 @@ class MapCtrl extends BaseCtrl {
         count = await this.model.count({
           owner: resu.user._id,
           copyOf: null,
-          terrain: { $ne: null }
+          terrain: { $nin: [null, ""] }
         });
       } else {
         count = await this.model.count({
           owner: { $ne: resu?.user?._id },
           private: false,
           copyOf: null,
-          terrain: { $ne: null }
+          terrain: { $nin: [null, ""] }
         });
       }
       res.status(200).json(count);

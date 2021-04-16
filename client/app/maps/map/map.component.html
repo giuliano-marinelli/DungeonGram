@@ -11,7 +11,8 @@
       <app-loading [condition]="isLoading"></app-loading>
     </div>
     <div class="modal-body" *ngIf="!isLoading">
-      <label>Terrain</label>
+      <label>Terrain <small class="text-muted">(maps without terrain image will not be showed on
+          searches)</small></label>
       <div class="map-img-container">
         <img class="mb-3 map-img" [src]="terrain.value" #terrain_img
           onerror="this.src='assets/images/game/default_terrain.png'" />
@@ -28,8 +29,8 @@
       </div>
       <div class="mb-3">
         <label for="name">Name <small class="text-muted">*</small></label>
-        <input class="form-control" type="text" name="name" formControlName="name"
-          placeholder="My Map Name" [ngClass]="setValid('name')" autocomplete="off">
+        <input class="form-control" type="text" name="name" formControlName="name" placeholder="My Map Name"
+          [ngClass]="setValid('name')" autocomplete="off">
         <div class="invalid-feedback">
           <div *ngIf="name.errors && name.errors.required">
             Name is required
@@ -45,8 +46,7 @@
       <div class="mb-3">
         <label for="description">Description</label>
         <textarea class="form-control" type="text" name="description" formControlName="description" rows="8"
-          placeholder="Here goes the description of my map..."
-          [ngClass]="setValid('description')"></textarea>
+          placeholder="Here goes the description of my map..." [ngClass]="setValid('description')"></textarea>
         <div class="invalid-feedback">
           <div *ngIf="description.errors && description.errors.required">
             Description is required.
@@ -71,7 +71,8 @@
       </div> -->
       <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="private" formControlName="private">
-        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can see it)</small></label>
+        <label class="custom-control-label" for="private">Private <small class="text-muted">(only you can see
+            it)</small></label>
       </div>
     </div>
     <div class="modal-footer">
