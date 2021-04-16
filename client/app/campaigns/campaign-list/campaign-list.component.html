@@ -7,11 +7,19 @@
     <p class="card-text">
       <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
         [isEnabled]="!auth.loggedIn">
-        <button type="button" class="btn btn-dark campaign-btn" (click)="openCampaign()" [disabled]="!auth.loggedIn"
-          attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
-          <i class="fa fa-plus"></i> New Campaign
-        </button>
+        <span class="d-inline-block" interactive="true" [tippy]="not_verified" placement="right"
+          [isEnabled]="!auth.isVerified">
+          <button type="button" class="btn btn-dark campaign-btn" (click)="openCampaign()"
+            [disabled]="!auth.loggedIn || !auth.isVerified"
+            attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
+            <i class="fa fa-plus"></i> New Campaign
+          </button>
+        </span>
       </span>
+      <ng-template #not_verified>
+        You need to <span class='text-warning'>verify your email</span> to enable campaign creation. <br><br>
+        Go to your <a routerLink="/account">Profile</a> to do it<br>
+      </ng-template>
     </p>
     <p *ngIf="ownCampaigns.length <= 0" class="card-text">
       You have not created campaigns yet

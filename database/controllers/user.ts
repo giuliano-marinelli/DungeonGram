@@ -171,7 +171,9 @@ class UserCtrl extends BaseCtrl {
             <a href="${url}">${url}</a><br><br>
             If you did NOT request to verify this email address on DungeonGram,
             do not click on the link. Please note that many times, the situation isn't a phishing attempt,
-            but either a misunderstanding.<br><br>
+            but either a misunderstanding.<br>
+            If you are still concerned, please forward this notification to <a href="mailto: dungeongram.noreply@gmail.com">dungeongram.noreply@gmail.com</a>
+            and let us know in the forward that you did not request the verification.<br><br>
             <b>DungeonGram<b>`;
 
           let info = await transporter.sendMail({
@@ -184,14 +186,14 @@ class UserCtrl extends BaseCtrl {
             text: text,
             html: html
           });
+
+          res.sendStatus(200);
         } else {
           throw new Error('Need to wait ' + (timeNeed > 60 ? Math.floor(timeNeed / 60) + ' minutes' : timeNeed + ' seconds') + ' to send email again.');
         }
       } else {
         throw new Error('Email is already verified.');
       }
-
-      res.sendStatus(200);
     } catch (err) {
       return res.status(400).send(err.message);
     }
@@ -205,13 +207,13 @@ class UserCtrl extends BaseCtrl {
         if (!user.verified) {
           user.verified = true;
           await this.model.updateOne({ _id: req.params.id }, user);
+          res.sendStatus(200);
         } else {
           throw new Error('Email is already verified.');
         }
       } else {
         throw new Error('Invalid or expired verification code.');
       }
-      res.sendStatus(200);
     } catch (err) {
       return res.status(400).send(err.message);
     }

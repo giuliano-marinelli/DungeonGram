@@ -9,6 +9,7 @@ import { MapComponent } from '../maps/map/map.component';
 import { Character } from 'client/app/shared/models/character.model';
 import { CharacterService } from 'client/app/services/character.service';
 import { CharacterComponent } from '../characters/character/character.component';
+import { AuthService } from '../services/auth.service';
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 
 declare var $;
@@ -65,6 +66,7 @@ export class ToolsComponent implements OnInit {
   ObjectValues = Object.values; //for get values of object
 
   constructor(
+    public auth: AuthService,
     private campaignService: CampaignService,
     private mapService: MapService,
     private characterService: CharacterService,

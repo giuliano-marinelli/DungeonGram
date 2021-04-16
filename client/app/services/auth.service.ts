@@ -14,6 +14,7 @@ declare var iziToast;
 export class AuthService {
   loggedIn = false;
   isAdmin = false;
+  isVerified = false;
 
   currentUser: User = new User();
 
@@ -51,6 +52,7 @@ export class AuthService {
     localStorage.removeItem('token');
     this.loggedIn = false;
     this.isAdmin = false;
+    this.isVerified = false;
     this.currentUser = new User();
     this.router.navigate(['/']);
   }
@@ -66,6 +68,7 @@ export class AuthService {
     this.currentUser.role = decodedUser.role;
     this.currentUser.avatar = decodedUser.avatar;
     this.isAdmin = decodedUser.role === 'admin';
+    this.isVerified = decodedUser.verified;
     delete decodedUser.role;
   }
 

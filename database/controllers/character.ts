@@ -98,6 +98,7 @@ class CharacterCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
+      if (!resu.user.verified) throw new Error('not verified email');
 
       delete req.body._id;
       req.body.owner = resu.user._id;

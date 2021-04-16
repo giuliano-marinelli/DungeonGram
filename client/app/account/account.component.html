@@ -44,6 +44,19 @@
             </div>
           </div>
         </div>
+        <div class="input-group" *ngIf="auth.loggedIn && auth.isAdmin">
+          <div class="input-group-prepend" tippy="Role">
+            <span class="input-group-text">
+              <i class="fa fa-fw fa-black-tie"></i>
+            </span>
+          </div>
+          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')"
+            disabled>
+            <option value="" disabled>Role</option>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
         <div class="input-group">
           <div class="input-group-prepend" tippy="Email">
             <span class="input-group-text">
@@ -64,19 +77,9 @@
             </div>
           </div>
         </div>
-        <div class="input-group" *ngIf="auth.loggedIn && auth.isAdmin">
-          <div class="input-group-prepend" tippy="Role">
-            <span class="input-group-text">
-              <i class="fa fa-fw fa-black-tie"></i>
-            </span>
-          </div>
-          <select class="form-control custom-select" name="role" formControlName="role" [ngClass]="setValid('role')"
-            disabled>
-            <option value="" disabled>Role</option>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
+        <p class="text-{{this.verified.value ? 'success' : 'danger'}} text-left ml-4">
+          {{this.verified.value ? '* Your email was verified' : '* Your email is not verified'}}
+        </p>
         <button class="btn btn-dark pull-right" type="submit" (click)="save()">
           <i class="fa fa-save"></i> Save
         </button>
@@ -84,7 +87,6 @@
           (click)="sendVerificationEmail()">
           <i class="fa fa-envelope"></i> Verify Email
         </button>
-        <h2 *ngIf="this.verified.value"><span class="badge badge-success pull-right mr-2">Email Verified</span></h2>
       </form>
     </div>
   </div>
