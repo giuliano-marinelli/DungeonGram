@@ -42,4 +42,12 @@ export class UserService {
     return this.http.delete(`/api/user/${user._id}`, { responseType: 'text' });
   }
 
+  verificationUser(user: User): Observable<any> {
+    return this.http.get(`/api/user/verification/${user._id}`, { responseType: 'text' });
+  }
+
+  verifyUser(user: string, code: string): Observable<any> {
+    return this.http.get(`/api/user/verify/${user}/${code}`, { responseType: 'text' });
+  }
+
 }

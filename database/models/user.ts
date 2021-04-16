@@ -13,7 +13,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, lowercase: true, trim: true },
   password: String,
   role: String,
-  avatar: String
+  avatar: String,
+  verified: Boolean,
+  lastVerifyDate: Date,
+  verificationCode: String
 });
 
 //before saving the user, hash the password
@@ -42,6 +45,7 @@ userSchema.methods.comparePassword = function (candidatePassword, callback): voi
 userSchema.set('toJSON', {
   transform: (doc, ret, options) => {
     delete ret.password;
+    delete ret.verificationCode;
     delete ret.__v;
     return ret;
   }

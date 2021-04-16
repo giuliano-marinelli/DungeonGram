@@ -4,6 +4,7 @@ import { UserService } from '../services/user.service';
 import { User } from '../shared/models/user.model';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 import Compressor from 'compressorjs';
+import { ActivatedRoute } from '@angular/router';
 
 declare var iziToast;
 
@@ -13,8 +14,12 @@ declare var iziToast;
   styleUrls: ['./account.component.scss']
 })
 export class AccountComponent implements OnInit {
-
   @ViewChild("avatar_img") avatarImage: ElementRef;
+
+  user: string;
+  code: string;
+  verify: boolean = null;
+  verifyMessage: string;
 
   isLoading = true;
   accountForm: FormGroup;
@@ -35,24 +40,34 @@ export class AccountComponent implements OnInit {
   ]);
   avatar = new FormControl('', []);
   avatarFile = new FormControl('', []);
+  verified = new FormControl(false, []);
 
   constructor(
+    private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     public auth: AuthService,
     private userService: UserService,
     private changeDetector: ChangeDetectorRef
-  ) { }
+  ) {
+    this.route.params.subscribe(params => {
+      this.user = params.user;
+      this.code = params.code;
+    });
+  }
 
   ngOnInit(): void {
+
     this.accountForm = this.formBuilder.group({
       _id: this._id,
       username: this.username,
       email: this.email,
       role: this.role,
       avatar: this.avatar,
-      avatarFile: this.avatarFile
+      avatarFile: this.avatarFile,
+      verified: this.verified
     });
     this.getUser();
+    this.sendVerify();
   }
 
   setValid(control): object {
@@ -63,15 +78,19 @@ export class AccountComponent implements OnInit {
   }
 
   getUser(): void {
-    this.userService.getUser(this.auth.currentUser).subscribe(
-      data => {
-        this.accountForm.patchValue(data);
-        this.auth.currentUser = data;
-        this.auth.isAdmin = data.role === 'admin';
-      },
-      error => console.log(error),
-      () => this.isLoading = false
-    );
+    if (this.auth.loggedIn) {
+      this.userService.getUser(this.auth.currentUser).subscribe(
+        data => {
+          this.accountForm.patchValue(data);
+          this.auth.currentUser = data;
+          this.auth.isAdmin = data.role === 'admin';
+        },
+        error => console.log(error),
+        () => this.isLoading = false
+      );
+    } else {
+      this.isLoading = false
+    }
   }
 
   save(): void {
@@ -82,10 +101,40 @@ export class AccountComponent implements OnInit {
           iziToast.success({ message: 'Account settings saved.' });
           this.getUser();
         },
-        error => iziToast.error({ message: 'Email already exists.' })
+        error => {
+          iziToast.error({ message: "Account settings can't be saved." + (error.error ? "<br>" + error.error : "") })
+        }
       );
     } else {
       iziToast.error({ message: 'Some values are invalid, please check.' });
+    }
+  }
+
+  sendVerificationEmail(): void {
+    this.userService.verificationUser(this.accountForm.value).subscribe(
+      res => {
+        iziToast.info({ message: "Verification email sended." });
+        this.getUser();
+      },
+      error => {
+        iziToast.error({ message: "Verification email can't be sended." + (error.error ? "<br>" + error.error : "") });
+      }
+    );
+  }
+
+  sendVerify(): void {
+    if (this.user && this.code) {
+      this.userService.verifyUser(this.user, this.code).subscribe(
+        res => {
+          this.verify = true;
+          this.verifyMessage = "Email verified successfully!";
+        },
+        error => {
+          this.verify = false;
+          this.verifyMessage = error.error;
+        },
+        () => this.getUser()
+      );
     }
   }
 

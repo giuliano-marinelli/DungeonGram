@@ -74,6 +74,8 @@ function setRoutes(app): void {
   router.route('/user/:id').get(userCtrl.get);
   router.route('/user/:id').post(upload.single("avatarFile"), userCtrl.update);
   router.route('/user/:id').delete(userCtrl.delete);
+  router.route('/user/verification/:id').get(userCtrl.verification);
+  router.route('/user/verify/:id/:code').get(userCtrl.verify);
 
   //campaign
   router.route('/campaigns').get(campaignCtrl.getAll);

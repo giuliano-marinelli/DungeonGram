@@ -5,4 +5,7 @@ export class User {
   email?: string;
   role?: string;
   avatar?: string;
+  verified?: boolean;
+  lastVerifyDate?: Date;
+  verificationCode?: string;
 }

@@ -288,7 +288,7 @@ class MapCtrl extends BaseCtrl {
       await this.model.updateOne({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).send(err.message);
     }
   }
 
@@ -301,7 +301,7 @@ class MapCtrl extends BaseCtrl {
       await this.model.deleteOne({ _id: req.params.id, owner: resu.user._id });
       res.sendStatus(200);
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).send(err.message);
     }
   }
 

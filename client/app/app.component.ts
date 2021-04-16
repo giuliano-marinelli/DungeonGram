@@ -21,8 +21,8 @@ export class AppComponent implements AfterViewChecked {
 
   ngOnInit() {
     iziToast.settings({
-      position: 'topRight',
-      maxWidth: '30%'
+      position: 'topRight'
+      // maxWidth: '30%'
     });
   }
 

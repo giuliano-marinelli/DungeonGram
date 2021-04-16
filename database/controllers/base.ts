@@ -48,7 +48,7 @@ abstract class BaseCtrl {
       await this.model.updateOne({ _id: req.params.id }, req.body);
       res.sendStatus(200);
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).send(err.message);
     }
   }
 
@@ -58,7 +58,7 @@ abstract class BaseCtrl {
       await this.model.deleteOne({ _id: req.params.id });
       res.sendStatus(200);
     } catch (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).send(err.message);
     }
   }
 }

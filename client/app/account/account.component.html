@@ -1,7 +1,11 @@
 <app-loading [condition]="isLoading"></app-loading>
 
-<div class="jumbotron text-center" *ngIf="!isLoading">
-  <div class="card">
+<div class="jumbotron text-center">
+  <div *ngIf="verify != null" class="alert alert-{{verify ? 'success': 'danger'}} mb-5" role="alert"
+    style="max-width: 400px; margin: auto;">
+    <h5>{{verifyMessage}}</h5>
+  </div>
+  <div class="card" *ngIf="!isLoading && username.value">
     <h4 class="card-header">Account settings</h4>
     <div class="card-body">
       <div class="profile-img-container">
@@ -11,14 +15,15 @@
           <div class="profile-img-upload">
             <div class="profile-img-upload-text">
               <i class="fa fa-upload fa-4x"></i><br>
-              Change Avatar
+              Change Avatar<br>
+              (2MB max)
             </div>
           </div>
         </label>
         <input [hidden]="true" type="file" name="avatarFile" id="avatarFile" accept="image/*"
           (change)="onChangeAvatar($event.target?.files)">
       </div>
-      <form [formGroup]="accountForm" (ngSubmit)="save()" autocomplete="off" enctype="multipart/form-data">
+      <form [formGroup]="accountForm" autocomplete="off" enctype="multipart/form-data">
         <div class="input-group">
           <div class="input-group-prepend" tippy="Username">
             <span class="input-group-text">
@@ -72,9 +77,14 @@
             <option value="admin">Admin</option>
           </select>
         </div>
-        <button class="btn btn-dark pull-right" type="submit">
+        <button class="btn btn-dark pull-right" type="submit" (click)="save()">
           <i class="fa fa-save"></i> Save
         </button>
+        <button *ngIf="!this.verified.value" class="btn btn-danger pull-right mr-2" tippy="Send verification email"
+          (click)="sendVerificationEmail()">
+          <i class="fa fa-envelope"></i> Verify Email
+        </button>
+        <h2 *ngIf="this.verified.value"><span class="badge badge-success pull-right mr-2">Email Verified</span></h2>
       </form>
     </div>
   </div>

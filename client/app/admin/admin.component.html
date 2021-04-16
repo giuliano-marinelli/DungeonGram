@@ -7,7 +7,7 @@
     <p *ngIf="users.length <= 0" class="card-text">
       There are no registered users
     </p>
-    <div *ngIf="users.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+    <div *ngIf="users.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
       <div *ngFor="let user of users" class="col mb-4">
         <ng-container [ngTemplateOutlet]="userCard" [ngTemplateOutletContext]="{ user: user }">
         </ng-container>
@@ -24,8 +24,13 @@
     <img class="card-img-top user-img" [src]="user.avatar"
       onerror="this.src='assets/images/characters/default-preview.jpg'" alt="{{user.username}}">
     <div class="card-body user-card-body">
-      <h5 class="card-title">{{user.username}} <span
-          class="badge badge-{{user.role == 'admin' ? 'warning': 'light' }}">{{user.role}}</span>
+      <h5 class="card-title">{{user.username}}&nbsp;
+        <span class="badge badge-{{user.role == 'admin' ? 'warning': 'light' }}">
+          {{user.role}}
+        </span>&nbsp;
+        <span class="badge badge-{{user.verified ? 'success': 'danger' }}">
+          {{user.verified ? 'verified': 'not verified' }}
+        </span>
       </h5>
       <p class="card-text user-description mb-4" tippy="{{user.email}}" [maxWidth]="300" placement="right">
         {{user.email}}
