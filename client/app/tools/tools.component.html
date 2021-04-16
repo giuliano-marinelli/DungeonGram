@@ -25,25 +25,26 @@
                       <div id="maps-list">
                         <h6>Own</h6>
 
-                        <div class="row row-cols-2 maps-add">
-                          <div class="col-12 mb-2">
-                            <div class="card" style="height: 20px;">
-                              <span class="d-inline-block" interactive="true" [tippy]="not_verified_map"
-                                placement="right" [isEnabled]="!auth.isVerified" [appendTo]="tool_maps_container">
+                        <span class="d-inline-block" interactive="true" [tippy]="not_verified_map" placement="top"
+                          [isEnabled]="!auth.isVerified" [appendTo]="tool_maps_container">
+                          <div class="row row-cols-2 maps-add">
+                            <div class="col-12 mb-2">
+                              <div class="card" style="height: 20px;">
                                 <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openMap()"
                                   style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Map"
                                   [appendTo]="tool_maps_container" [disabled]="!auth.isVerified">
                                   <i class="fa fa-plus"></i>
                                 </button>
-                              </span>
-                              <ng-template #not_verified_map>
-                                You need to <span class='text-warning'>verify your email</span> to enable map
-                                creation. <br><br>
-                                Go to your <a routerLink="/account">Profile</a> to do it<br>
-                              </ng-template>
+                                <ng-template #not_verified_map>
+                                  You need to <span class='text-warning'>verify your email</span> to enable map
+                                  creation. <br><br>
+                                  Go to your <a routerLink="/account">Profile</a> to do it<br>
+                                </ng-template>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </span>
+
 
                         <app-loading [condition]="isLoadingOwnMaps"></app-loading>
 
@@ -185,25 +186,25 @@
                     <div id="characters-list">
                       <h6>Own</h6>
 
-                      <div class="row row-cols-2 characters-add">
-                        <div class="col-12 mb-2">
-                          <div class="card" style="height: 20px;">
-                            <span class="d-inline-block" interactive="true" [tippy]="not_verified_character"
-                              placement="right" [isEnabled]="!auth.isVerified" [appendTo]="tool_characters_container">
+                      <span class="d-inline-block" interactive="true" [tippy]="not_verified_character" placement="top"
+                        [isEnabled]="!auth.isVerified" [appendTo]="tool_characters_container">
+                        <div class="row row-cols-2 characters-add">
+                          <div class="col-12 mb-2">
+                            <div class="card" style="height: 20px;">
                               <button type="button" class="card-img-top btn btn-dark mb-2 p-0" (click)="openCharacter()"
                                 style="width: 100%; height: 100%; font-size: 10px;" tippy="Add Character"
                                 [appendTo]="tool_characters_container" [disabled]="!auth.isVerified">
                                 <i class="fa fa-plus"></i>
                               </button>
-                            </span>
-                            <ng-template #not_verified_character>
-                              You need to <span class='text-warning'>verify your email</span> to enable character
-                              creation. <br><br>
-                              Go to your <a routerLink="/account">Profile</a> to do it<br>
-                            </ng-template>
+                              <ng-template #not_verified_character>
+                                You need to <span class='text-warning'>verify your email</span> to enable character
+                                creation. <br><br>
+                                Go to your <a routerLink="/account">Profile</a> to do it<br>
+                              </ng-template>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </span>
 
                       <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
 
