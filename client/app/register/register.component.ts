@@ -78,7 +78,9 @@ export class RegisterComponent implements OnInit {
           iziToast.success({ message: 'You successfully registered.' });
           // this.router.navigate(['/login']);
           this.modalService.dismissAll();
-          this.modalService.open(LoginComponent);
+          this.auth.login(this.registerForm.value,
+            () => this.sendVerificationEmail(res)
+          );
         },
         error => iziToast.error({ message: 'Email already exists.' })
       );
@@ -86,7 +88,20 @@ export class RegisterComponent implements OnInit {
       iziToast.error({ message: 'Some values are invalid, please check.' });
     }
   }
+
+  sendVerificationEmail(user): void {
+    console.log(user);
+    this.userService.verificationUser(user).subscribe(
+      res => {
+        iziToast.info({ message: "A verification email has been sent, please check your inbox and SPAM." });
+      },
+      error => {
+        iziToast.error({ message: "Verification email can't be sended." + (error.error ? "<br>" + error.error : "") });
+      }
+    );
+  }
 }
+
 
 export function equalsValidator(anotherControl: FormControl): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {

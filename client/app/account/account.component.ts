@@ -84,6 +84,7 @@ export class AccountComponent implements OnInit {
           this.accountForm.patchValue(data);
           this.auth.currentUser = data;
           this.auth.isAdmin = data.role === 'admin';
+          this.auth.isVerified = data.verified;
         },
         error => console.log(error),
         () => this.isLoading = false
