@@ -66,6 +66,7 @@ export class AuthService {
     this.userService.getUser(decodedUser).subscribe(
       data => {
         this.isVerified = data.verified;
+        this.currentUser.avatar = data.avatar;
       },
       error => console.log(error),
     );
