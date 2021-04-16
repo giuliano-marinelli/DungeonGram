@@ -142,7 +142,7 @@ export class Map extends Schema {
       });
     }
 
-    var res = await MapDB.findOneAndUpdate({ _id: this.mapId }, map);
+    var res = await MapDB.updateOne({ _id: this.mapId }, map);
   }
 
   async updateTilemap() {

@@ -82,7 +82,7 @@ export class Rule extends Schema {
     }, false);
 
     this.parameters.canvas.addEventListener("pointerup", (e) => {
-      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'rule') {
+      if (e.button == 0 /*&& this.parameters.controller.activeTool?.name == 'rule'*/) {
         this.parameters.canvas.removeEventListener("pointermove", dragRule, false);
         this.parameters.canvas.removeEventListener("contextmenu", addRule, false);
         this.parameters.controller.send('game', 'rule', { action: 'end' });

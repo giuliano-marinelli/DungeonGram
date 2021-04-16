@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import BaseCtrl from './base';
+import Campaign from '../models/campaign';
+import Map from '../models/map';
+import Character from '../models/character';
+import Invitation from '../models/invitation';
+
+import mongoose from 'mongoose';
+import getS3 from '../aws';
 
 class UserCtrl extends BaseCtrl {
   model = User;
@@ -89,12 +96,37 @@ class UserCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200 || (resu?.user?.role != 'admin' && resu?.user?._id != req.params.id)) throw new Error('unauthorized');
 
-      const obj = await this.model.findOne({ _id: req.params.id });
-      req.body.role = JSON.parse(JSON.stringify(obj)).role;
+      const user = await this.model.findOne({ _id: req.params.id });
+      req.body.role = JSON.parse(JSON.stringify(user)).role;
       req.body.email = resu.user.email;
-      if (req.file) req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      if (req.file) {
+        if (user.avatar) {
+          const s3 = getS3();
+          const fs = require('fs');
 
-      await this.model.findOneAndUpdate({ _id: req.params.id, email: resu.user.email }, req.body);
+          try {
+            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: user.avatar.split('/').pop() }).promise();
+            else fs.unlinkSync(user.avatar);
+          } catch (err) {
+            console.log("Not found file to delete");
+          }
+        }
+        req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      }
+
+      await this.model.updateOne({ _id: req.params.id, email: resu.user.email }, req.body);
+      res.sendStatus(200);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  delete = async (req, res) => {
+    try {
+      const resu = await User.findByAuthorization(req);
+      if (resu.status != 200 || (resu?.user?.role != 'admin' && resu?.user?._id != req.params.id)) throw new Error('unauthorized');
+
+      await this.model.deleteOne({ _id: req.params.id });
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });

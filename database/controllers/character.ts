@@ -127,7 +127,7 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      await this.model.findOneAndUpdate({ _id: req.params.id, $or: [{ owner: resu.user._id }, { copyOf: { $ne: null } }] }, req.body);
+      await this.model.updateOne({ _id: req.params.id, $or: [{ owner: resu.user._id }, { copyOf: { $ne: null } }] }, req.body);
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -140,7 +140,7 @@ class CharacterCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      await this.model.findOneAndRemove({ _id: req.params.id, owner: resu.user._id });
+      await this.model.deleteOne({ _id: req.params.id, owner: resu.user._id });
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });

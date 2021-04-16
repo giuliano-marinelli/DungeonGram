@@ -204,9 +204,6 @@ export class TileMap extends Schema {
           } else if (this.parameters.controller.activeTool?.name == 'walls' && !e.shiftKey) {
             var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
               this.parameters.controller.activeTool?.options?.adjustTo);
-            this.parameters.canvas.removeEventListener("pointermove", this.dragWall, false);
-            this.parameters.canvas.removeEventListener("contextmenu", this.cancelWall, false);
-            removeTemporalWall();
             this.parameters.controller.send('game', 'wall', {
               x: adjustedPoint.x, y: adjustedPoint.z,
               size: this.parameters.controller.activeTool?.options?.size,
@@ -214,6 +211,10 @@ export class TileMap extends Schema {
               action: 'end'
             });
           }
+          //clear wall events and temporal meshes
+          this.parameters.canvas.removeEventListener("pointermove", this.dragWall, false);
+          this.parameters.canvas.removeEventListener("contextmenu", this.cancelWall, false);
+          removeTemporalWall();
         }
       }
     });

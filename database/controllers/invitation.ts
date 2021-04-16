@@ -74,7 +74,7 @@ class InvitationCtrl extends BaseCtrl {
       } else if (existentInvitation.accepted == false) {
         console.log(existentInvitation);
         existentInvitation.accepted = null;
-        obj = await this.model.findOneAndUpdate({ _id: existentInvitation._id }, existentInvitation);
+        obj = await this.model.updateOne({ _id: existentInvitation._id }, existentInvitation);
       }
       res.status(201).json(obj);
     } catch (err) {

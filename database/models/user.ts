@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import getS3 from '../aws';
+
+import Campaign from '../models/campaign';
+import Map from '../models/map';
+import Character from '../models/character';
+import Invitation from '../models/invitation';
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -40,6 +46,49 @@ userSchema.set('toJSON', {
     return ret;
   }
 });
+
+//before deleteOne hook (only for query, ex: User.deleteOne)
+userSchema.pre('deleteOne', { query: true, document: false }, async function () {
+  const user = await this.model.findOne(this.getQuery());
+  await user._delete();
+});
+
+//before deleteMany hook (only for query, ex: User.deleteMany)
+userSchema.pre('deleteMany', { query: true, document: false }, async function () {
+  const users = await this.model.find(this.getQuery());
+  for (const user of users) {
+    await user._delete();
+  }
+});
+
+userSchema.methods._delete = async function () {
+  console.log("DELETE User: ", this.username, this.email);
+
+  const s3 = getS3();
+  const fs = require('fs');
+
+  //delete invitations
+  await Invitation.deleteMany({ $or: [{ recipient: this._id }, { sender: this._id }] });
+
+  //delete campaigns
+  await Campaign.deleteMany({ owner: this._id });
+
+  //delete characters
+  await Character.deleteMany({ owner: this._id });
+
+  //delete maps
+  await Map.deleteMany({ owner: this._id });
+
+  //delete avatar file
+  if (this.avatar) {
+    try {
+      if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: this.avatar.split('/').pop() }).promise();
+      else fs.unlinkSync(this.avatar);
+    } catch (err) {
+      console.log("not found file " + this.avatar + " to delete");
+    }
+  }
+}
 
 //decode the header authorization of a request in a User object (it's the actual logged user)
 userSchema.statics.findByAuthorization = async function (req) {

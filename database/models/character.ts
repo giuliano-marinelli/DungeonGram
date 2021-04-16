@@ -28,6 +28,24 @@ characterSchema.set('toJSON', {
   }
 });
 
+//before deleteOne hook (only for query, ex: Character.deleteOne)
+characterSchema.pre('deleteOne', { query: true, document: false }, async function () {
+  const character = await this.model.findOne(this.getQuery());
+  await character._delete();
+});
+
+//before deleteMany hook (only for query, ex: Character.deleteMany)
+characterSchema.pre('deleteMany', { query: true, document: false }, async function () {
+  const characters = await this.model.find(this.getQuery());
+  for (const character of characters) {
+    await character._delete();
+  }
+});
+
+characterSchema.methods._delete = async function () {
+  console.log("DELETE Character: ", this.name);
+}
+
 const Character = mongoose.model('Character', characterSchema);
 
 export default Character;

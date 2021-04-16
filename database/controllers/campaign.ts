@@ -3,6 +3,7 @@ import User from '../models/user';
 import BaseCtrl from './base';
 
 import mongoose from 'mongoose';
+import getS3 from '../aws';
 
 class CampaignCtrl extends BaseCtrl {
   model = Campaign;
@@ -366,9 +367,23 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      if (req.file) req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      const campaign = await this.model.findOne({ _id: req.params.id, owner: resu.user._id });
+      if (req.file) {
+        if (campaign.banner) {
+          const s3 = getS3();
+          const fs = require('fs');
 
-      await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
+          try {
+            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: campaign.banner.split('/').pop() }).promise();
+            else fs.unlinkSync(campaign.banner);
+          } catch (err) {
+            console.log("Not found file to delete");
+          }
+        }
+        req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      }
+
+      await this.model.updateOne({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -381,7 +396,7 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      await this.model.findOneAndRemove({ _id: req.params.id, owner: resu.user._id });
+      await this.model.deleteOne({ _id: req.params.id, owner: resu.user._id });
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });

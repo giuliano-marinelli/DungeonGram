@@ -4,6 +4,7 @@ import Campaign from '../models/campaign';
 import BaseCtrl from './base';
 
 import mongoose from 'mongoose';
+import getS3 from '../aws';
 
 class MapCtrl extends BaseCtrl {
   model = Map;
@@ -41,7 +42,8 @@ class MapCtrl extends BaseCtrl {
           {
             $match: {
               owner: resu.user._id,
-              copyOf: null
+              copyOf: null,
+              terrain: { $ne: null }
             }
           }
         ]).skip(skip).limit(limit);;
@@ -68,7 +70,8 @@ class MapCtrl extends BaseCtrl {
             $match: {
               owner: { $ne: resu?.user?._id },
               private: false,
-              copyOf: null
+              copyOf: null,
+              terrain: { $ne: null }
             }
           }
         ]).skip(skip).limit(limit);;
@@ -91,13 +94,15 @@ class MapCtrl extends BaseCtrl {
         if (resu.status != 200) throw new Error('unauthorized');
         count = await this.model.count({
           owner: resu.user._id,
-          copyOf: null
+          copyOf: null,
+          terrain: { $ne: null }
         });
       } else {
         count = await this.model.count({
           owner: { $ne: resu?.user?._id },
           private: false,
-          copyOf: null
+          copyOf: null,
+          terrain: { $ne: null }
         });
       }
       res.status(200).json(count);
@@ -264,10 +269,23 @@ class MapCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      console.log(req.file);
-      if (req.file) req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      const map = await this.model.findOne({ _id: req.params.id, owner: resu.user._id });
+      if (req.file) {
+        if (map.terrain) {
+          const s3 = getS3();
+          const fs = require('fs');
 
-      await this.model.findOneAndUpdate({ _id: req.params.id, owner: resu.user._id }, req.body);
+          try {
+            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: map.terrain.split('/').pop() }).promise();
+            else fs.unlinkSync(map.terrain);
+          } catch (err) {
+            console.log("Not found file to delete");
+          }
+        }
+        req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
+      }
+
+      await this.model.updateOne({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -280,13 +298,7 @@ class MapCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
-      await this.model.findOneAndRemove({ _id: req.params.id, owner: resu.user._id });
-
-      await Campaign.update(
-        { maps: { $in: [mongoose.Types.ObjectId(req.params.id)] }, owner: resu.user._id },
-        { $pullAll: { maps: [mongoose.Types.ObjectId(req.params.id)] } }
-      );
-
+      await this.model.deleteOne({ _id: req.params.id, owner: resu.user._id });
       res.sendStatus(200);
     } catch (err) {
       return res.status(400).json({ error: err.message });

@@ -4,7 +4,7 @@
     <app-chat [controller]="this.controller" [campaign]="this.campaign"></app-chat>
   </div>
   <div id="tools-container" *ngIf="this.access">
-    <app-tools [controller]="this.controller" [campaignId]="this.campaign"></app-tools>
+    <app-tools [controller]="this.controller" [campaignId]="this.campaign" [gameScene]="this.scene"></app-tools>
   </div>
   <div id="fps">{{engine.getFps().toFixed() + " fps"}}</div>
 </div>

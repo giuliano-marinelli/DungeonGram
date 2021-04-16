@@ -76,7 +76,7 @@ export class Figure extends Schema {
     }, false);
 
     this.parameters.canvas.addEventListener("pointerup", (e) => {
-      if (e.button == 0 && this.parameters.controller.activeTool?.name == 'figure') {
+      if (e.button == 0 /*&& this.parameters.controller.activeTool?.name == 'figure'*/) {
         this.parameters.canvas.removeEventListener("pointermove", dragFigure, false);
         this.parameters.controller.send('game', 'figure', { action: 'end' });
       }

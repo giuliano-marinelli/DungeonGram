@@ -9,6 +9,7 @@ import { MapComponent } from '../maps/map/map.component';
 import { Character } from 'client/app/shared/models/character.model';
 import { CharacterService } from 'client/app/services/character.service';
 import { CharacterComponent } from '../characters/character/character.component';
+import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 
 declare var $;
 declare var iziToast;
@@ -22,6 +23,7 @@ declare var Object;
 export class ToolsComponent implements OnInit {
   @Input() controller: Controller;
   @Input() campaignId: any;
+  @Input() gameScene: any;
 
   tools: any;
   orderedTools: any[];
@@ -86,6 +88,7 @@ export class ToolsComponent implements OnInit {
             } else {
               this.orderedTools = [this.tools.grid, this.tools.rule, this.tools.figure];
             }
+            this.initHotkeys();
           }),
           users: this.controller.initSetting("usersOnCampaign", [])
         }
@@ -193,6 +196,9 @@ export class ToolsComponent implements OnInit {
           },
           add: (map) => {
             this.controller.send('game', 'map', { map: map._id, action: 'add' });
+          },
+          remove: (map) => {
+            this.controller.send('game', 'map', { map: map._id, action: 'remove' });
           }
         }
       },
@@ -222,7 +228,7 @@ export class ToolsComponent implements OnInit {
           assignTo: (character, user) => {
             this.controller.send('game', 'character', { action: 'assignTo', character: character, user: user });
           },
-          moveToMap: (character, map) => {
+          moveToMap: (character, map?) => {
             this.controller.send('game', 'character', { action: 'moveToMap', character: character, map: map });
           },
           animation: (animation) => {
@@ -245,14 +251,12 @@ export class ToolsComponent implements OnInit {
       this.getCharacters(true);
       this.getCharacters(false);
     });
-
-    this.initHotkeys();
   }
 
   //general
-  callTool(event, tool) {
+  callTool(tool, event?) {
     if (this.tools[tool]?.actions?.toggle) this.tools[tool].actions.toggle();
-    event.stopPropagation(); //to stop dropdown work on click (only on hover)
+    event?.stopPropagation(); //to stop dropdown work on click (only on hover)
   }
 
   toggleActiveTool(tool, toggle) {
@@ -282,13 +286,25 @@ export class ToolsComponent implements OnInit {
   }
 
   initHotkeys() {
-    document.addEventListener("keyup", event => {
-      console.log(event.key);
-      this.orderedTools.forEach(tool => {
-        console.log(event.key, tool.hotkey, event.key == tool.hotkey)
-        if (event.key == tool.hotkey) this.callTool(event, tool.name);
-      });
+    this.orderedTools.forEach(tool => {
+      if (tool.hotkey) {
+        this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+          {
+            trigger: BABYLON.ActionManager.OnKeyUpTrigger,
+            parameter: tool.hotkey
+          },
+          () => { this.callTool(tool.name); }
+        ));
+      }
     });
+
+    // document.addEventListener("keyup", event => {
+    //   // console.log(event.key);
+    //   this.orderedTools.forEach(tool => {
+    //     // console.log(event.key, tool.hotkey, event.key == tool.hotkey)
+    //     if (event.key == tool.hotkey) this.callTool(tool.name, event);
+    //   });
+    // });
   }
 
   //for characters
@@ -415,6 +431,7 @@ export class ToolsComponent implements OnInit {
     this.mapService.deleteMap(map).subscribe(
       data => {
         iziToast.success({ message: 'Map deleted successfully.' });
+        this.tools.maps.actions.remove(map);
         this.tools.maps.actions.update();
         if (this.tools.maps.options.openedMap.value == map._id)
           this.tools.maps.actions.discard();

@@ -133,7 +133,7 @@ export class GameRoom extends Room<State> {
     // campaign.state = serialijse.serialize(this.state);
     // console.log(this.state);
 
-    // await CampaignDB.findOneAndUpdate({ _id: this.campaignId }, campaign);
+    // await CampaignDB.updateOne({ _id: this.campaignId }, campaign);
     // console.log('GameRoom-', this.roomId, '-: finish saving state');
   }
 

@@ -108,7 +108,7 @@ export class World extends Schema {
         do: async (client: string, data: any) => {
           if (!this.users[client].addingModeCharacter) {
             //add adding mode character
-            var id = await this.addCharacter({ model: data.model })
+            var id = await this.addCharacter({ model: data.model, map: this.map?.mapId })
             this.characters[id].addingMode = true;
 
             //activate adding mode on user with the created characeter
@@ -143,7 +143,7 @@ export class World extends Schema {
       add: {
         do: async (client: string, data: any) => {
           if (this.users[client].addingModeCharacter) {
-            console.log("addingModeCharacter.dbId", this.characters[this.users[client].addingModeCharacter].dbId)
+            // console.log("addingModeCharacter.dbId", this.characters[this.users[client].addingModeCharacter].dbId)
 
             //find the character model of the character to add and transform toJSON (this last is for deleting the _id)
             var addingCharacterModel = await CharacterDB.findOne({ _id: this.characters[this.users[client].addingModeCharacter].dbId });
@@ -156,12 +156,13 @@ export class World extends Schema {
               //add a copy of the model but with copyOf
               var characterModel = await new CharacterDB(addingCharacterModel).save();
 
-              console.log("characterModel", characterModel._id)
+              // console.log("characterModel", characterModel._id)
 
               //add character to the map
               this.addCharacter({
                 model: characterModel._id,
-                position: { x: data.x, y: data.y }
+                position: { x: data.x, y: data.y },
+                map: this.map?.mapId
               });
             }
           }
@@ -173,9 +174,9 @@ export class World extends Schema {
       remove: {
         do: async (client: string, data: any) => {
           //remove character physics
-          this.worldPhysics.removeEntity(data.id, 'character');
+          this.worldPhysics?.removeEntity(data.id, 'character');
           //remove character model from db
-          await CharacterDB.findOneAndRemove({ _id: this.characters[data.id].dbId });
+          await CharacterDB.deleteOne({ _id: this.characters[data.id].dbId });
           //remove character from campaign
           delete this.characters[data.id];
           //deselect the character on users
@@ -184,7 +185,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isDM
+          return data.id != null && typeof data.id === "string" && this.users[client].isDM
         }
       },
       update: {
@@ -208,10 +209,10 @@ export class World extends Schema {
       },
       moveToMap: {
         do: (client: string, data: any) => {
-          this.characters[data.character].map = data.map;
+          this.characters[data.character].map = data.map ? data.map : null;
         },
         validate: (client: string, data: any) => {
-          return data.character != null && typeof data.character === "string" && data.map != null && typeof data.map === "string" && this.users[client].isDM
+          return data.character != null && typeof data.character === "string" && (!data.map || typeof data.map === "string") && this.users[client].isDM
         }
       },
       lookAt: {
@@ -615,6 +616,18 @@ export class World extends Schema {
         validate: (client: string, data: any) => {
           return data.map != null && typeof data.map == "string" && this.users[client].isDM
         }
+      },
+      remove: {
+        do: async (client: string, data: any) => {
+          //nullify map on characters on that map
+          for (var id in this.characters) {
+            if (this.characters[id].map == data.map)
+              this.characters[id].map = null;
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.map != null && typeof data.map == "string" && this.users[client].isDM
+        }
       }
     }
   }
@@ -732,7 +745,7 @@ export class World extends Schema {
       if (!this.characters[characterId].addingMode) {
         charactersOnCampaign.push({
           _id: characterId,
-          map: this.characters[characterId].map,
+          map: this.characters[characterId].map ? mongoose.Types.ObjectId(this.characters[characterId].map) : null,
           position: {
             x: this.characters[characterId].x,
             y: this.characters[characterId].y
@@ -759,7 +772,7 @@ export class World extends Schema {
       maxVisionCharacters: this.maxVisionCharacters
     }
 
-    await CampaignDB.findOneAndUpdate({ _id: campaign._id }, campaign);
+    await CampaignDB.updateOne({ _id: campaign._id }, campaign);
 
     //persist actual map before dispose room
     this.map?.persist();
@@ -788,7 +801,7 @@ export class World extends Schema {
 
   async addCharacter(character) {
     if (!character._id) character._id = Utils.uuidv4();
-    if (!character.map) character.map = this.map?.mapId;
+    if (!character.map) character.map = "";
     if (!character.position) character.position = { x: 0, y: 0 };
     if (!character.direction) character.direction = { x: 1, y: 0 };
     if (!character.animation) character.animation = "None";
@@ -807,7 +820,7 @@ export class World extends Schema {
     // }
 
     this.characters[character._id] = new Character();
-    this.characters[character._id].map = character.map;
+    this.characters[character._id].map = character.map.toString();
     this.characters[character._id].x = character.position.x;
     this.characters[character._id].y = character.position.y;
     this.characters[character._id].direction = new Point(character.direction.x, character.direction.y);
@@ -819,7 +832,7 @@ export class World extends Schema {
     // this.characters[character._id].name = character.name;
     if (character.model) this.characters[character._id].load(character.model); //load a specific character of db
 
-    if (this.characters[character._id].map == this.map?.mapId) {
+    if (this.map && this.characters[character._id].map == this.map?.mapId) {
       this.characters[character._id].characterPhysics = this.worldPhysics.addEntity(character._id, 'character', {
         x: this.characters[character._id].x, y: this.characters[character._id].y
       });

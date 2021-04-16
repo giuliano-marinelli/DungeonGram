@@ -6,6 +6,8 @@ import CharacterCtrl from '../database/controllers/character';
 import MapCtrl from '../database/controllers/map';
 import InvitationCtrl from '../database/controllers/invitation';
 
+import getS3 from '../database/aws';
+
 function setRoutes(app): void {
   //router and controllers initialization
   const router = express.Router();
@@ -15,15 +17,8 @@ function setRoutes(app): void {
   const mapCtrl = new MapCtrl();
   const invitationCtrl = new InvitationCtrl();
 
-  //aws s3 configuration
-  const aws = require('aws-sdk');
-  // aws.config.setPromisesDependency();
-  aws.config.update({
-    accessKeyId: process.env.AWS_ACCESSKEYID,
-    secretAccessKey: process.env.AWS_SECRETACCESSKEY,
-    region: process.env.AWS_REGION
-  });
-  var s3 = new aws.S3();
+  //get aws s3
+  const s3 = getS3();
 
   //multer configuration
   const multer = require('multer');
@@ -59,7 +54,7 @@ function setRoutes(app): void {
   const upload = multer({
     storage: storage,
     limits: {
-      fileSize: 1048576 * 5 //5MB
+      fileSize: 1048576 * 2 //2MB
     },
     fileFilter: (req, file, cb) => {
       if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
