@@ -9,7 +9,6 @@ export class Path extends Schema {
   points?: Point[];
   //game objects
   meshTo?: any;
-  meshPoints?: any[] = [];
   rays?: any[] = [];
 
   constructor(schema, parameters) {
@@ -38,69 +37,48 @@ export class Path extends Schema {
 
   remove() {
     super.remove();
+    this.removeMeshTo();
+    this.removeRays();
+  }
+
+  removeMeshTo() {
     this.meshTo?.dispose();
-    this.meshPoints?.forEach(meshPoint => {
-      meshPoint.dispose();
-    });
+    this.meshTo = null;
+  }
+
+  removeRays() {
     this.rays?.forEach(ray => {
       ray.dispose();
     });
+    this.rays = [];
   }
 
   doMeshTo() {
-    if (this.meshTo) {
-      this.meshTo.dispose();
-      delete this.meshTo;
-    }
+    this.removeMeshTo();
 
     if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.to) {
       //create mesh
-      this.meshTo = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.4 }, this.parameters.scene);
-
-      //set material
-      var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-      material.emissiveColor = BABYLON.Color3.White();
-      material.alpha = 1;
-      this.meshTo.material = material;
+      this.meshTo = this.parameters.assets.pathPoint.createInstance();
 
       //positioning mesh
       this.meshTo.position.y = 0.1;
       this.meshTo.position.x = this.to.x;
       this.meshTo.position.z = this.to.y;
+
+      //enable mesh
+      this.meshTo.setEnabled(true);
     }
   }
 
   doMeshPoints() {
-    if (this.meshPoints) {
-      this.meshPoints.forEach(meshPoint => {
-        meshPoint.dispose();
-      });
-      this.meshPoints = [];
-
-      this.rays.forEach(ray => {
-        ray.dispose();
-      });
-      this.rays = [];
-    }
+    this.removeRays();
 
     if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.points.length) {
       for (let i = 0; i < this.points.length; i++) {
         var point = this.points[i];
-        //create mesh
-        // this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
 
-        // //set material
-        // var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-        // material.diffuseColor = BABYLON.Color3.White();
-        // material.alpha = 0.8;
-        // this.meshPoints[this.meshPoints.length - 1].material = material;
-
-        // //positioning mesh
-        // this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-        // this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-        // this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
         if (i > 0) {
           var origin = new BABYLON.Vector3(this.points[i - 1].x, 0.1, this.points[i - 1].y);
           var target = new BABYLON.Vector3(point.x, 0.1, point.y);

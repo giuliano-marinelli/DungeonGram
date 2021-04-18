@@ -16,18 +16,21 @@ export class Figure extends Schema {
   shared?: boolean;
   normalizeUnit?: boolean;
   //game objects
+  meshFigure?: any;
   meshPoints?: any[] = [];
   rays?: any[] = [];
   sumSign?: any;
-  sumSignRectangle?: any;
-  sumSignLabel?: any;
+  sumSignText?: any;
   sum?: number = 0;
-  figureMesh?: any;
+  //global actions registered
+  actions: any = {};
 
   constructor(schema, parameters) {
     super(parameters);
 
     this.initActions();
+
+    this.initSigns();
 
     this.synchronizeSchema(schema,
       {
@@ -48,18 +51,59 @@ export class Figure extends Schema {
     });
   }
 
+  remove() {
+    super.remove();
+    this.removeActions();
+    this.removeMeshFigure();
+    this.removeMeshPoints();
+    this.removeRays();
+    this.removeSigns();
+  }
+
+  removeActions() {
+    Object.entries(this.actions)?.forEach(([key, value]) => {
+      this.parameters.canvas?.removeEventListener("pointermove", value, false);
+      this.parameters.canvas?.removeEventListener("pointerup", value, false);
+      this.parameters.canvas?.removeEventListener("pointerdown", value, false);
+    });
+  }
+
+  removeMeshFigure() {
+    this.meshFigure?.dispose();
+    this.meshFigure = null;
+  }
+
+  removeMeshPoints() {
+    this.meshPoints?.forEach(meshPoint => {
+      meshPoint.dispose();
+    });
+    this.meshPoints = [];
+  }
+
+  removeRays() {
+    this.rays?.forEach(ray => {
+      ray.dispose();
+    });
+    this.rays = [];
+  }
+
+  removeSigns() {
+    this.sumSign?.dispose();
+    this.sumSignText?.dispose();
+    this.sumSign = null;
+    this.sumSignText = null;
+  }
+
   initActions() {
-    this.parameters.canvas.removeEventListener("pointermove", dragFigure, false);
-    var dragFigure;
-    this.parameters.canvas.addEventListener("pointerdown", (e) => {
+    //action for start the figure drawing
+    this.actions.startFigure = (e) => {
       if (e.button == 0 && this.parameters.controller.activeTool?.name == 'figure') {
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick?.pickedPoint) {
           var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
             this.parameters.controller.activeTool?.options?.adjustTo);
 
-
-          dragFigure = () => {
+          this.actions.dragFigure = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
             if (pick?.pickedPoint) {
               var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
@@ -67,132 +111,117 @@ export class Figure extends Schema {
 
               this.parameters.controller.send('game', 'figure', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'move' });
             }
-          }
-          this.parameters.canvas.addEventListener("pointermove", dragFigure, false);
+          };
+          this.parameters.canvas.addEventListener("pointermove", this.actions.dragFigure, false);
           this.parameters.controller.send('game', 'figure', { x: adjustedPoint.x, y: adjustedPoint.z, action: 'start' });
           e.stopImmediatePropagation();
         }
       }
-    }, false);
+    };
+    this.parameters.canvas.addEventListener("pointerdown", this.actions.startFigure, false);
 
-    this.parameters.canvas.addEventListener("pointerup", (e) => {
+    //action for stop the figure drawing
+    this.actions.stopFigure = (e) => {
       if (e.button == 0 /*&& this.parameters.controller.activeTool?.name == 'figure'*/) {
-        this.parameters.canvas.removeEventListener("pointermove", dragFigure, false);
+        this.parameters.canvas.removeEventListener("pointermove", this.actions.dragFigure, false);
         this.parameters.controller.send('game', 'figure', { action: 'end' });
       }
-    }, false);
+    }
+    this.parameters.canvas.addEventListener("pointerup", this.actions.stopFigure, false);
+  }
+
+  initSigns() {
+    this.sumSign = new Rectangle();
+    this.sumSign.width = "80px";
+    this.sumSign.height = "55px";
+    this.sumSign.cornerRadius = 5;
+    this.sumSign.color = "White";
+    this.sumSign.thickness = 0;
+    this.sumSign.background = "Black";
+    this.sumSign.linkOffsetY = -55;
+    this.parameters.world.ui.addControl(this.sumSign);
+
+    this.sumSignText = new TextBlock();
+    this.sumSignText.text = "0ft\n0sq";
+    this.sumSign.addControl(this.sumSignText);
+
+    this.sumSign.alpha = 0;
   }
 
   doMeshPoints() {
-    if (this.meshPoints) {
-      this.meshPoints.forEach(meshPoint => {
-        meshPoint.dispose();
-      });
-      this.meshPoints = [];
-
-      this.rays.forEach(ray => {
-        ray.dispose();
-      });
-      this.rays = [];
-
-      this.figureMesh?.dispose();
-      this.figureMesh = null;
-
-      this.sum = 0;
-    }
-
-    for (let i = 0; i < this.points.length; i++) {
-      var point = this.points[i];
-      //create mesh
-      this.meshPoints.push(BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.parameters.scene));
-
-      //set material
-      var material = new BABYLON.StandardMaterial("ground", this.parameters.scene);
-      material.diffuseColor = BABYLON.Color3.Yellow();
-      material.alpha = 1;
-      this.meshPoints[this.meshPoints.length - 1].material = material;
-
-      //positioning mesh
-      this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-      this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-      this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
-
-      if (i > 0) {
-        var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
-        var target = new BABYLON.Vector3(point.x, 0, point.y);
-        var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
-        var distance = BABYLON.Vector3.Distance(origin, target);
-        var ray = new BABYLON.Ray(
-          origin,
-          targetNormalized,
-          distance
-        );
-        this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Yellow()));
-
-        if (this.normalizeUnit) {
-          var xDistance = Math.abs(origin.x - target.x);
-          var zDistance = Math.abs(origin.z - target.z);
-          this.sum += xDistance > zDistance ? xDistance : zDistance;
-        } else {
-          this.sum += distance;
-        }
-
-        this.figureMesh?.dispose();
-
-        switch (this.type) {
-          case 'triangle':
-            this.figureMesh = Shapes.createTriangle("triangle", this.parameters.scene);
-            this.figureMesh.position = origin;
-            this.figureMesh.rotation.y = Vectors.Vector3.Angle(origin, target);
-            this.figureMesh.scaling.x = this.sum;
-            this.figureMesh.scaling.z = this.sum;
-            break;
-          case 'circle': default:
-            this.figureMesh = BABYLON.MeshBuilder.CreateDisc("circle", { radius: this.sum }, this.parameters.scene);
-            this.figureMesh.position = origin;
-            this.figureMesh.rotation.x = Math.PI * 2 / 4;
-            break;
-          case 'square':
-            this.figureMesh = BABYLON.MeshBuilder.CreatePlane("square", { size: this.sum * 2 }, this.parameters.scene);
-            this.figureMesh.position = origin;
-            this.figureMesh.rotation.x = Math.PI * 2 / 4;
-            this.sum = this.sum * 2;
-            break;
-        }
-
-        var material = new BABYLON.StandardMaterial("figure", this.parameters.scene);
-        material.diffuseColor = BABYLON.Color3.Red();
-        material.emissiveColor = BABYLON.Color3.Red();
-        material.alpha = 0.5;
-        this.figureMesh.material = material;
-      }
-    }
+    this.removeMeshFigure();
+    this.removeMeshPoints();
+    this.removeRays();
+    this.sum = 0;
 
     if (this.points.length) {
-      if (!this.sumSign) {
-        this.sumSign = AdvancedDynamicTexture.CreateFullscreenUI("UI");
+      for (let i = 0; i < this.points.length; i++) {
+        var point = this.points[i];
+        //create mesh
+        this.meshPoints.push(this.parameters.assets.rulePoint.createInstance());
 
-        this.sumSignRectangle = new Rectangle();
-        this.sumSignRectangle.width = "80px";
-        this.sumSignRectangle.height = "55px";
-        this.sumSignRectangle.cornerRadius = 5;
-        this.sumSignRectangle.color = "White";
-        this.sumSignRectangle.thickness = 0;
-        this.sumSignRectangle.background = "Black";
-        this.sumSign.addControl(this.sumSignRectangle);
-        this.sumSignRectangle.linkWithMesh(this.meshPoints[this.meshPoints.length - 1]);
-        this.sumSignRectangle.linkOffsetY = -55;
+        //positioning mesh
+        this.meshPoints[this.meshPoints.length - 1].position.y = 0;
+        this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
+        this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
 
-        this.sumSignLabel = new TextBlock();
-        this.sumSignLabel.text = "0ft\n0sq";
-        this.sumSignRectangle.addControl(this.sumSignLabel);
-      } else {
-        this.sumSignLabel.text = Math.round(this.sum * 5 * 10) / 10 + ' ft\n ' + Math.round(this.sum * 10) / 10 + 'sq';
-        this.sumSignRectangle.linkWithMesh(this.meshPoints[this.meshPoints.length - 1]);
+        //enable mesh
+        this.meshPoints[this.meshPoints.length - 1].setEnabled(true);
+
+        if (i > 0) {
+          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
+          var target = new BABYLON.Vector3(point.x, 0, point.y);
+          var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
+          var distance = BABYLON.Vector3.Distance(origin, target);
+          var ray = new BABYLON.Ray(
+            origin,
+            targetNormalized,
+            distance
+          );
+          this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Yellow()));
+
+          if (this.normalizeUnit) {
+            var xDistance = Math.abs(origin.x - target.x);
+            var zDistance = Math.abs(origin.z - target.z);
+            this.sum += xDistance > zDistance ? xDistance : zDistance;
+          } else {
+            this.sum += distance;
+          }
+        }
       }
+
+      switch (this.type) {
+        case 'triangle': default:
+          this.meshFigure = this.parameters.assets.triangleFigure.createInstance();
+          this.meshFigure.position = origin;
+          this.meshFigure.rotation.y = Vectors.Vector3.Angle(origin, target);
+          this.meshFigure.scaling.x = this.sum;
+          this.meshFigure.scaling.z = this.sum;
+          break;
+        case 'circle':
+          this.meshFigure = this.parameters.assets.circleFigure.createInstance();
+          this.meshFigure.position = origin;
+          this.meshFigure.rotation.x = Math.PI * 2 / 4;
+          this.meshFigure.scaling.x = this.sum;
+          this.meshFigure.scaling.y = this.sum;
+          break;
+        case 'square':
+          this.sum = this.sum * 2;
+
+          this.meshFigure = this.parameters.assets.squareFigure.createInstance();
+          this.meshFigure.position = origin;
+          this.meshFigure.rotation.x = Math.PI * 2 / 4;
+          this.meshFigure.scaling.x = this.sum;
+          this.meshFigure.scaling.y = this.sum;
+          break;
+      }
+      this.meshFigure.setEnabled(true);
+
+      this.sumSignText.text = Math.round(this.sum * 5 * 10) / 10 + ' ft\n ' + Math.round(this.sum * 10) / 10 + 'sq';
+      this.sumSign.linkWithMesh(this.meshPoints[this.meshPoints.length - 1]);
+      this.sumSign.alpha = 1;
     } else {
-      this.sumSign?.dispose();
-      this.sumSign = null;
+      this.sumSign.alpha = 0;
     }
   }
 }

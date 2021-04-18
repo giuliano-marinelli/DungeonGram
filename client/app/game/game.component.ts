@@ -9,6 +9,7 @@ import { World } from '../shared/schemas/world';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { environment } from 'client/environments/environment';
+import { Shapes } from '../shared/utils/shapes';
 
 @Component({
   selector: 'app-game',
@@ -137,10 +138,14 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   assetsTasks() {
+    var collidersVisibility = 0; //all the colliders are not visible by default
+
     //add base mesh for characters
     this.assetsManager.addMeshTask("base task", "", "assets/meshes/base/", "base.babylon").onSuccess = (task) => {
       task.loadedMeshes[0].setEnabled(false);
       this.assets.base = task.loadedMeshes[0];
+      this.assets.baseMaterial = new BABYLON.StandardMaterial("base", this.scene);
+      this.assets.base.material = this.assets.baseMaterial;
     };
 
     //add each wear mesh for characters
@@ -152,26 +157,116 @@ export class GameComponent implements OnInit, OnDestroy {
             if (!this.assets[category]) this.assets[category] = {};
             if (!this.assets[category][subcategory]) this.assets[category][subcategory] = {};
             this.assets[category][subcategory][wear] = task.loadedMeshes[0];
+            this.assets[category][subcategory][wear + 'Material'] = new BABYLON.StandardMaterial(wear + "Material", this.scene);
+            this.assets[category][subcategory][wear].material = this.assets[category][subcategory][wear + 'Material'];
           };
         });
       }
     }
 
+    //add character selection mesh and material
+    this.assets.characterSelection = BABYLON.MeshBuilder.CreateCylinder('', { height: 0.05, diameter: 1.75 }, this.scene);
+    this.assets.characterSelection.setEnabled(false);
+    this.assets.characterSelectionMaterial = new BABYLON.StandardMaterial("characterSelection", this.scene);
+    this.assets.characterSelectionTexture = new BABYLON.Texture("assets/images/game/selection_circle.png", this.scene);
+    this.assets.characterSelectionMaterial.diffuseTexture = this.assets.characterSelectionTexture;
+    this.assets.characterSelectionMaterial.diffuseTexture.hasAlpha = true;
+    this.assets.characterSelectionMaterial.useAlphaFromDiffuseTexture = true;
+    this.assets.characterSelectionMaterial.alpha = 0.5;
+    this.assets.characterSelection.material = this.assets.characterSelectionMaterial;
+
+    //add character collider mesh (and material if testing)
+    this.assets.characterCollider = BABYLON.MeshBuilder.CreateCylinder('', { height: 1.5, diameter: 0.5 }, this.scene);
+    this.assets.characterCollider.setEnabled(false);
+    this.assets.characterCollider.visibility = collidersVisibility;
+    if (collidersVisibility > 0) {
+      this.assets.characterColliderMaterial = new BABYLON.StandardMaterial("characterCollider", this.scene);
+      this.assets.characterColliderMaterial.diffuseColor = BABYLON.Color3.Blue();
+      this.assets.characterCollider.material = this.assets.characterColliderMaterial;
+    }
+
+    //add character collider physics mesh and material (if testing)
+    if (collidersVisibility > 0) {
+      this.assets.characterColliderPhysics = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 0.9, depth: 0.9 }, this.scene);
+      this.assets.characterColliderPhysics.setEnabled(false);
+      this.assets.characterColliderPhysics.visibility = collidersVisibility;
+      this.assets.characterColliderPhysicsMaterial = new BABYLON.StandardMaterial("characterColliderPhysics", this.scene);
+      this.assets.characterColliderPhysicsMaterial.diffuseColor = BABYLON.Color3.Gray();
+      this.assets.characterColliderPhysics.material = this.assets.characterColliderPhysicsMaterial;
+    }
+
     //add wall mesh and material
-    this.assets.wall = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 });
+    this.assets.wall = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.01 });
     this.assets.wall.setEnabled(false);
     this.assets.wallMaterial = new BABYLON.StandardMaterial("wall", this.scene);
     this.assets.wallMaterial.diffuseColor = BABYLON.Color3.Gray();
     this.assets.wall.material = this.assets.wallMaterial;
 
-    //add door material
-    this.assets.door = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 });
+    //add wall collider physics mesh and material (if testing)
+    if (collidersVisibility > 0) {
+      this.assets.wallCollider = BABYLON.MeshBuilder.CreateBox('', { height: 0.1, width: 0.5, depth: 0.5 }, this.scene)
+      this.assets.wallCollider.setEnabled(false);
+      this.assets.wallCollider.visibility = collidersVisibility;
+      this.assets.wallColliderMaterial = new BABYLON.StandardMaterial("wallCollider", this.scene);
+      this.assets.wallColliderMaterial.diffuseColor = BABYLON.Color3.Red();
+      this.assets.wallCollider.material = this.assets.wallColliderMaterial;
+    }
+
+    //add door mesh and material
+    this.assets.door = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.1 });
     this.assets.door.setEnabled(false);
     this.assets.doorMaterial = new BABYLON.StandardMaterial("door", this.scene);
-    this.assets.doorTexture = new BABYLON.Texture('assets/images/game/door.png', this.scene);
+    this.assets.doorTexture = new BABYLON.Texture("assets/images/game/door.png", this.scene);
     this.assets.doorMaterial.diffuseTexture = this.assets.doorTexture;
     this.assets.door.material = this.assets.doorMaterial;
 
+    //add door collider mesh (and material if testing)
+    this.assets.doorCollider = BABYLON.MeshBuilder.CreateCylinder('', { height: 1, diameter: 2 }, this.scene);
+    this.assets.doorCollider.setEnabled(false);
+    this.assets.doorCollider.visibility = collidersVisibility;
+    if (collidersVisibility > 0) {
+      this.assets.doorColliderMaterial = new BABYLON.StandardMaterial("doorCollider", this.scene);
+      this.assets.doorColliderMaterial.diffuseColor = BABYLON.Color3.Red();
+      this.assets.doorCollider.material = this.assets.doorColliderMaterial;
+    }
+
+    //add temporal wall mesh and material
+    this.assets.temporalWall = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 0.1, depth: 0.1 }, this.scene);
+    this.assets.temporalWall.setEnabled(false);
+    this.assets.temporalWallMaterial = new BABYLON.StandardMaterial("temporalWall", this.scene);
+    this.assets.temporalWallMaterial.diffuseColor = BABYLON.Color3.Yellow();
+    this.assets.temporalWall.material = this.assets.temporalWallMaterial;
+
+    //add path mesh and material
+    this.assets.pathPoint = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.4 }, this.scene);
+    this.assets.pathPoint.setEnabled(false);
+    this.assets.pathPointMaterial = new BABYLON.StandardMaterial("pathPoint", this.scene);
+    this.assets.pathPointMaterial.emissiveColor = BABYLON.Color3.White();
+    this.assets.pathPoint.material = this.assets.pathPointMaterial;
+
+    //add rule mesh and material
+    this.assets.rulePoint = BABYLON.MeshBuilder.CreateSphere('', { segments: 16, diameter: 0.2 }, this.scene);
+    this.assets.rulePoint.setEnabled(false);
+    this.assets.rulePointMaterial = new BABYLON.StandardMaterial("rulePoint", this.scene);
+    this.assets.rulePointMaterial.diffuseColor = BABYLON.Color3.Yellow();
+    this.assets.rulePoint.material = this.assets.rulePointMaterial;
+
+    //add figures meshes and materials
+    this.assets.triangleFigure = Shapes.createTriangle("triangle", this.scene);
+    this.assets.circleFigure = BABYLON.MeshBuilder.CreateDisc("circle", { radius: 1 }, this.scene);
+    this.assets.squareFigure = BABYLON.MeshBuilder.CreatePlane("square", { size: 1 }, this.scene);
+    this.assets.triangleFigure.setEnabled(false);
+    this.assets.circleFigure.setEnabled(false);
+    this.assets.squareFigure.setEnabled(false);
+
+    this.assets.figureMaterial = new BABYLON.StandardMaterial("figure", this.scene);
+    this.assets.figureMaterial.diffuseColor = BABYLON.Color3.Red();
+    this.assets.figureMaterial.emissiveColor = BABYLON.Color3.Red();
+    this.assets.figureMaterial.alpha = 0.5;
+
+    this.assets.triangleFigure.material = this.assets.figureMaterial;
+    this.assets.circleFigure.material = this.assets.figureMaterial;
+    this.assets.squareFigure.material = this.assets.figureMaterial;
   }
 
   //DESUSED

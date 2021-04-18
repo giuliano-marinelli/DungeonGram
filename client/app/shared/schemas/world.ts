@@ -22,6 +22,8 @@ export class World extends Schema {
   camera?: any;
   lights?: any = {};
   ui?: any;
+  //test (activate physics colliders and other testing elements)
+  test?: boolean = false;
 
   constructor(schema, parameters) {
     super(parameters);
@@ -265,10 +267,10 @@ export class World extends Schema {
     if (selectedCharacter && this.characters[selectedCharacter]?.mesh && this.characters[selectedCharacter]?.collider) {
       setTimeout(() => {
         if (this.map) {
+          //for testing
+          if (this.test) this.characters[selectedCharacter].removeVisionRays();
+
           this.characters[selectedCharacter].animator.show();
-          // this.characters[selectedCharacter].visionRays.forEach(visionRay => {
-          //   visionRay?.dispose();
-          // });
           this.characters[selectedCharacter].collider.isCollible = false;
           if (!character || character == selectedCharacter) {
             for (let character in this.characters) {
@@ -312,7 +314,7 @@ export class World extends Schema {
             for (let door in this.map.doors) {
               if (this.map.doors[door].mesh) {
                 this.map.doors[door].mesh.isPickable = false;
-                this.map.doors[door].animator.hide();
+                this.map.doors[door].animator.hide(true);
               }
             }
           }
@@ -333,7 +335,6 @@ export class World extends Schema {
         target,
         this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
       );
-      // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
         return mesh.isCollible && !mesh.isTranspasable && (!mesh.isCharacter || mesh.name == this.characters[character].id)
       })?.pickedMesh;
@@ -344,21 +345,23 @@ export class World extends Schema {
         this.characters[character].animator.hide(this.characters[character].hidden, false);
         this.characters[character].collider.isPickable = false;
       }
+
+      //for testing
+      if (this.test) this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Blue()));
     }
   }
 
   updateDoorVisibility(door, selectedCharacter) {
     if (this.map.doors[door] && this.map.doors[door].mesh) {
       this.map.doors[door].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].mesh.position.y + 1.65 * this.characters[selectedCharacter].height, this.characters[selectedCharacter].mesh.position.z);
+      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].mesh.position.y + 1.65 * this.characters[selectedCharacter].height - 0.1, this.characters[selectedCharacter].mesh.position.z);
       var middlePoint = Vectors.middlePoint(this.map.doors[door].from, this.map.doors[door].to);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(middlePoint.x, this.map.doors[door].height, middlePoint.y).subtract(origin));
+      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(middlePoint.x, this.map.doors[door].height - 0.1, middlePoint.y).subtract(origin));
       var ray = new BABYLON.Ray(
         origin,
         target,
         this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
       );
-      // this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(0, 1, 0.1)));
       var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
         return (mesh.isCollible || mesh.isTranspasable) && ((!mesh.isCharacter && !mesh.isDoor) || mesh.name == this.map.doors[door].id)
       })?.pickedMesh;
@@ -372,10 +375,13 @@ export class World extends Schema {
           this.map.doors[door].mesh.isPickable = false;
         }
       } else {
-        this.map.doors[door].animator.hide(this.map.doors[door].hidden, false);
+        this.map.doors[door].animator.hide(true, false);
         if (this.parameters.controller.activeTool?.name != 'walls') this.map.doors[door].mesh.isPickable = false;
       }
       this.map.doors[door].collider.isPickable = false;
+
+      //for testing
+      if (this.test) this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Green()));
     }
   }
 }

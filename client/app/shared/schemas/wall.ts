@@ -25,6 +25,8 @@ export class Wall extends Schema {
   //physics
   tilesPhysics?: Point[];
   tilesPhysicsColliders?: any[] = [];
+  //global actions registered
+  actions: any = {};
 
   constructor(schema, parameters) {
     super(parameters);
@@ -47,8 +49,9 @@ export class Wall extends Schema {
     changes?.forEach((change) => {
       switch (change.field) {
         case 'tilesPhysics':
-          //for testing purposes
-          // this.doTilesPhysics();
+          if (this.parameters.world.test) {
+            this.doTilesPhysics();
+          }
           break;
         case 'to': {
           if (this.mesh) {
@@ -68,136 +71,40 @@ export class Wall extends Schema {
     });
   }
 
-  doMesh() {
-    this.height = 2.55;
-    if (this.size == 'medium') this.height = this.height / 2;
-    if (this.size == 'small' || (this.size == 'collider' && this.type != 'door')) this.height = this.height / 4;
-    // this.mesh = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 1 }, this.parameters.scene);
-    this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.clone();
-    // this.mesh = this.type == "door" ? this.parameters.assets.door.createInstance() : this.parameters.assets.wall.createInstance();
-    this.mesh.setEnabled(true);
-    this.mesh.scaling.x = Vectors.distance(this.from, this.to);
-    this.mesh.scaling.y = this.height;
-    this.mesh.scaling.z = this.type == "door" ? 0.1 : 0.01;
+  remove() {
+    super.remove();
+    this.removeActions();
+    this.removeSigns();
+    this.removeTilesPhysics();
+    this.mesh?.dispose();
+    this.collider?.dispose();
+    this.mesh = null;
+    this.collider = null;
 
-    //set material of base tile mesh
-    // var material = new BABYLON.StandardMaterial("wall", this.parameters.scene);
-    // if (this.type == "door") {
-    //   var texture = new BABYLON.Texture('assets/images/game/door.png', this.parameters.scene);
-    //   material.diffuseTexture = texture;
-    // } else {
-    //   material.diffuseColor = BABYLON.Color3.Gray();
-    // }
-    // this.mesh.material = this.type == "door" ? this.parameters.assets.doorMaterial.clone() : this.parameters.assets.wallMaterial.clone();
-    if (this.type == 'door' && this.size == 'collider') this.mesh.visibility = 0.5;
-    this.mesh.isPickable = false;
-
-    //set semantic data to the mesh
-    this.mesh.isCollible = this.size != 'collider';
-    this.mesh.isWall = true;
-    this.mesh.isDoor = this.type == "door";
-
-    //set pivot point and position at this.from
-    this.mesh.setPivotPoint(new BABYLON.Vector3(-0.5, 0, 0));
-    this.mesh.position.x = this.from.x + 0.5;
-    this.mesh.position.z = this.from.y;
-    this.mesh.position.y = this.height / 2 - 0.05;
-
-    //rotate by the angle between this.from and this.to
-    this.mesh.rotation.y = Vectors.angle(this.from, this.to);
-
-    if (this.type == "door") {
-      //set collider mesh
-      this.collider = BABYLON.MeshBuilder.CreateCylinder('', { height: this.height, diameter: 2 }, this.parameters.scene);
-      this.collider.parent = this.mesh;
-      this.collider.name = this.id;
-      this.collider.position = new BABYLON.Vector3(-0.5, 0, 0);
-      this.collider.visibility = 0;
-      this.collider.isCollible = true;
-      this.collider.isTranspasable = true;
-      this.collider.isDoor = true;
-      this.collider.isPickable = false;
-    }
-
-    //create the animator to manage visibility of doors
-    if (this.type == "door") this.animator = new Animator(this.mesh, null, { defaultVisibility: this.size == 'collider' ? 0.5 : 1 });
-
-    //positioning mesh (old way)
-    // var middlePoint = Vectors.middlePoint(this.from, this.to);
-    // this.mesh.position.y = height / 2 - 0.05;
-    // // this.mesh.position.y = 0.45;
-    // this.mesh.position.x = middlePoint.x;
-    // this.mesh.position.z = middlePoint.y;
-
-    //for visualize pivot point
-    // var spherePivot = BABYLON.MeshBuilder.CreateSphere("sphereP", { diameter: .5 }, this.parameters.scene);
-    // var spherePivotmaterial = new BABYLON.StandardMaterial("pivot", this.parameters.scene);
-    // spherePivotmaterial.diffuseColor = BABYLON.Color3.Blue();
-    // spherePivot.material = spherePivotmaterial;
-    // spherePivot.parent = this.mesh;
-    // spherePivot.position = new BABYLON.Vector3(-0.5, 0, 0);
-
-    //for visualize or test collision tiles
-    // this.doTilesPhysics();
-
-    this.doSigns();
-
-    this.initActions();
-
-    //cast shadows with character light (if it's not an only collider wall)
-    if (this.size != 'collider')
-      this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh, false);
-    this.parameters.world.updateCharactersVisibility();
-    this.parameters.world.updateWallVisibility(this);
-
-    if (this.type != "door") {
-      this.mesh.freezeWorldMatrix();
-      // this.mesh.convertToUnIndexedMesh();
-    }
+    this.parameters.world.updateCharactersVisibility(); //update visibility
   }
 
-  doSigns() {
-    if (this.type == "door") {
-      this.blockedSign = new Image('blocked', 'assets/images/game/blocked.png');
-      this.blockedSign.width = "30px";
-      this.blockedSign.height = "30px";
-      // this.blockedSign.linkOffsetY = -55;
-      this.parameters.world.ui.addControl(this.blockedSign);
-      this.blockedSign.linkWithMesh(this.mesh);
-
-      this.animator.parentUI(this.blockedSign, 1, 0);
-      this.animator.toggleUI(this.blockedSign, this.blocked);
-
-      this.hiddenSign = new Image('hidden', 'assets/images/game/hidden.png');
-      this.hiddenSign.width = "30px";
-      this.hiddenSign.height = "30px";
-      this.hiddenSign.linkOffsetY = -20;
-      this.parameters.world.ui.addControl(this.hiddenSign);
-      this.hiddenSign.linkWithMesh(this.mesh);
-
-      this.animator.parentUI(this.hiddenSign, 1, 0);
-      this.animator.toggleUI(this.hiddenSign, this.hidden);
-    }
-  }
-
-  doTilesPhysics() {
-    this.tilesPhysicsColliders.forEach((tilesPhysicsCollider) => {
-      tilesPhysicsCollider.dispose();
+  removeActions() {
+    Object.entries(this.actions)?.forEach(([key, value]) => {
+      this.parameters.canvas?.removeEventListener("pointermove", value, false);
+      this.parameters.canvas?.removeEventListener("pointerup", value, false);
     });
-    this.tilesPhysicsColliders = [];
-    setTimeout(() => {
-      this.tilesPhysics.forEach((tile) => {
-        var tileCollider = BABYLON.MeshBuilder.CreateBox('', { height: 0.1, width: 0.5, depth: 0.5 }, this.parameters.scene);
-        this.tilesPhysicsColliders.push(tileCollider);
-        var material = new BABYLON.StandardMaterial('', this.parameters.scene);
-        material.diffuseColor = BABYLON.Color3.Red();
-        tileCollider.material = material;
-        tileCollider.visibility = 1;
-        tileCollider.position.x = tile.x;
-        tileCollider.position.z = tile.y;
-        tileCollider.position.y = 0.05;
+  }
+
+  removeSigns() {
+    this.blockedSign?.dispose();
+    this.hiddenSign?.dispose();
+    this.blockedSign = null;
+    this.hiddenSign = null;
+  }
+
+  removeTilesPhysics() {
+    if (this.parameters.world.test) {
+      this.tilesPhysicsColliders?.forEach((tilePhysicsCollider) => {
+        tilePhysicsCollider.dispose();
       });
-    }, 1000);
+      this.tilesPhysicsColliders = [];
+    }
   }
 
   initActions() {
@@ -232,7 +139,7 @@ export class Wall extends Schema {
               x: pickDoor.pickedPoint.x - pickGround.pickedPoint.x,
               z: pickDoor.pickedPoint.z - pickGround.pickedPoint.z,
             }
-            var drag = (e) => {
+            this.actions.drag = (e) => {
               var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
               if (pick?.pickedPoint) {
                 this.parameters.controller.send('game', 'wall', {
@@ -242,16 +149,16 @@ export class Wall extends Schema {
                 });
               }
             }
-            var drop = (e) => {
-              this.parameters.canvas.removeEventListener("pointerup", drop, false);
-              this.parameters.canvas.removeEventListener("pointermove", drag, false);
+            this.actions.drop = (e) => {
+              this.parameters.canvas.removeEventListener("pointerup", this.actions.drop, false);
+              this.parameters.canvas.removeEventListener("pointermove", this.actions.drag, false);
               setTimeout(() => {
                 this.parameters.controller.toggleAction('dragDoor', false);
                 this.parameters.controller.send('game', 'wall', { id: this.id, action: 'endRotate' });
               }, 10);
             };
-            this.parameters.canvas.addEventListener("pointermove", drag, false);
-            this.parameters.canvas.addEventListener("pointerup", drop, false);
+            this.parameters.canvas.addEventListener("pointermove", this.actions.drag, false);
+            this.parameters.canvas.addEventListener("pointerup", this.actions.drop, false);
           }
         }
       }));
@@ -274,23 +181,134 @@ export class Wall extends Schema {
     }
   }
 
-  remove() {
-    super.remove();
-    this.removeSigns();
-    this.mesh?.dispose();
-    this.collider?.dispose();
-    this.mesh = null;
-    this.collider = null;
-    this.tilesPhysicsColliders.forEach((tilesPhysicsCollider) => {
-      tilesPhysicsCollider.dispose();
-    });
+  doMesh() {
+    this.height = 2.55;
+    if (this.size == 'medium') this.height = this.height / 2;
+    if (this.size == 'small' || (this.size == 'collider' && this.type != 'door')) this.height = this.height / 4;
+
+    //set mesh
+    // this.mesh = this.type == "door" ? this.parameters.assets.door.createInstance() : this.parameters.assets.wall.createInstance();
+    this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.clone();
+    this.mesh.setEnabled(true);
+
+    //scaling mesh
+    this.mesh.scaling.x = Vectors.distance(this.from, this.to);
+    this.mesh.scaling.y = this.height;
+
+    //set mesh visibility in case it was a door on "collider only" mode
+    if (this.type == 'door' && this.size == 'collider') this.mesh.visibility = 0.5;
+
+    //set pivot point and position at this.from
+    this.mesh.setPivotPoint(new BABYLON.Vector3(-0.5, 0, 0));
+    this.mesh.position.x = this.from.x + 0.5;
+    this.mesh.position.z = this.from.y;
+    this.mesh.position.y = this.height / 2 - 0.05;
+
+    //rotate by the angle between this.from and this.to
+    this.mesh.rotation.y = Vectors.angle(this.from, this.to);
+
+    //set semantic data to the mesh
+    this.mesh.isPickable = false;
+    this.mesh.isCollible = this.size != 'collider';
+    this.mesh.isWall = true;
+    this.mesh.isDoor = this.type == "door";
+
+    //create a collider and animator in case it's a door, for interact with it
+    if (this.type == "door") {
+      //set collider
+      this.collider = this.parameters.assets.doorCollider.createInstance();
+      this.collider.setEnabled(true);
+      this.collider.scaling.z = Vectors.distance(this.from, this.to);
+
+      //parent collider to mesh
+      this.collider.parent = this.mesh;
+
+      //set collider position
+      this.collider.position = new BABYLON.Vector3(-0.5, 0, 0);
+
+      //set semantic data to the collider
+      this.collider.name = this.id;
+      this.collider.isCollible = true;
+      this.collider.isTranspasable = true;
+      this.collider.isDoor = true;
+      this.collider.isPickable = false;
+
+      //create the animator to manage visibility of doors
+      this.animator = new Animator(this.mesh, null, { defaultVisibility: this.size == 'collider' ? 0.5 : 1 });
+    }
+
+    //positioning mesh (old way)
+    // var middlePoint = Vectors.middlePoint(this.from, this.to);
+    // this.mesh.position.y = height / 2 - 0.05;
+    // // this.mesh.position.y = 0.45;
+    // this.mesh.position.x = middlePoint.x;
+    // this.mesh.position.z = middlePoint.y;
+
+    //for visualize pivot point
+    // var spherePivot = BABYLON.MeshBuilder.CreateSphere("sphereP", { diameter: .5 }, this.parameters.scene);
+    // var spherePivotmaterial = new BABYLON.StandardMaterial("pivot", this.parameters.scene);
+    // spherePivotmaterial.diffuseColor = BABYLON.Color3.Blue();
+    // spherePivot.material = spherePivotmaterial;
+    // spherePivot.parent = this.mesh;
+    // spherePivot.position = new BABYLON.Vector3(-0.5, 0, 0);
+
+    //set collider phyics mesh (if testing)
+    if (this.parameters.world.test) this.doTilesPhysics();
+
+    this.doSigns();
+
+    this.initActions();
+
+    //cast shadows with character light (if it's not an only collider wall)
+    if (this.size != 'collider')
+      this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh, false);
     this.parameters.world.updateCharactersVisibility();
+    this.parameters.world.updateWallVisibility(this);
+
+    //optimization for static walls
+    if (this.type != "door") {
+      this.mesh.freezeWorldMatrix();
+      // this.mesh.convertToUnIndexedMesh();
+    }
   }
 
-  removeSigns() {
-    this.blockedSign?.dispose();
-    this.hiddenSign?.dispose();
-    this.blockedSign = null;
-    this.hiddenSign = null;
+  doSigns() {
+    if (this.type == "door") {
+      this.blockedSign = new Image('blocked', 'assets/images/game/blocked.png');
+      this.blockedSign.width = "30px";
+      this.blockedSign.height = "30px";
+      // this.blockedSign.linkOffsetY = -55;
+      this.parameters.world.ui.addControl(this.blockedSign);
+      this.blockedSign.linkWithMesh(this.mesh);
+
+      this.animator.parentUI(this.blockedSign, 1, 0);
+      this.animator.toggleUI(this.blockedSign, this.blocked);
+
+      this.hiddenSign = new Image('hidden', 'assets/images/game/hidden.png');
+      this.hiddenSign.width = "30px";
+      this.hiddenSign.height = "30px";
+      this.hiddenSign.linkOffsetY = -20;
+      this.parameters.world.ui.addControl(this.hiddenSign);
+      this.hiddenSign.linkWithMesh(this.mesh);
+
+      this.animator.parentUI(this.hiddenSign, 1, 0);
+      this.animator.toggleUI(this.hiddenSign, this.hidden);
+    }
+  }
+
+  //this is for testing purposes
+  doTilesPhysics() {
+    if (this.parameters.world.test) {
+      this.removeTilesPhysics();
+      setTimeout(() => {
+        this.tilesPhysics.forEach((tilePhysics) => {
+          this.tilesPhysicsColliders.push(this.parameters.assets.wallCollider.createInstance());
+          this.tilesPhysicsColliders[this.tilesPhysicsColliders.length - 1].setEnabled(true);
+          this.tilesPhysicsColliders[this.tilesPhysicsColliders.length - 1].position.x = tilePhysics.x;
+          this.tilesPhysicsColliders[this.tilesPhysicsColliders.length - 1].position.z = tilePhysics.y;
+          this.tilesPhysicsColliders[this.tilesPhysicsColliders.length - 1].position.y = 0.05;
+        });
+      }, 1000);
+    }
   }
 }

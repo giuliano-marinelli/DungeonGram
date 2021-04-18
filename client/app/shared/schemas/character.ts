@@ -39,8 +39,6 @@ export class Character extends Schema {
   collider?: any;
   animator?: any;
   visionLight?: any;
-  visionRays?: any = [];
-  visibleCharacters?: any = [];
   nameSign?: any;
   nameSignText?: any;
   hiddenSign?: any;
@@ -49,6 +47,10 @@ export class Character extends Schema {
   yPhysics?: number;
   isCollidingPhysics?: boolean;
   colliderPhysics?: any;
+  //test
+  visionRays?: any = [];
+  //global actions registered
+  actions: any = {};
 
   constructor(schema, parameters) {
     super(parameters);
@@ -65,6 +67,7 @@ export class Character extends Schema {
               scene: parameters.scene,
               room: parameters.room,
               token: parameters.token,
+              assets: parameters.assets,
               character: this,
               characterId: this.id
             }
@@ -76,15 +79,6 @@ export class Character extends Schema {
   }
 
   update(changes?) {
-    // console.log("characterChanges", changes);
-    // changes?.forEach((change) => {
-    //   switch (change.field) {
-    //     case 'destroy':
-    //       console.log("characterDestroy", change.value);
-    //       break;
-    //   }
-    // });
-
     changes?.forEach((change) => {
       switch (change.field) {
         case 'map':
@@ -128,16 +122,20 @@ export class Character extends Schema {
           if (this.visionLight) this.visionLight.range = this.visionRange;
           break;
         case 'xPhysics':
-          if (this.colliderPhysics) this.colliderPhysics.position.x = this.xPhysics;
+          if (this.parameters.world.test) {
+            if (this.colliderPhysics) this.colliderPhysics.position.x = this.xPhysics;
+          }
           break;
         case 'yPhysics':
-          if (this.colliderPhysics) this.colliderPhysics.position.z = this.yPhysics;
+          if (this.parameters.world.test) {
+            if (this.colliderPhysics) this.colliderPhysics.position.z = this.yPhysics;
+          }
           break;
         case 'isCollidingPhysics':
-          if (this.colliderPhysics)
-            this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray()
-          if (this.isCollidingPhysics && !this.beignDragged) {
-            // this.animator?.playIdle();
+          if (this.parameters.world.test) {
+            if (this.colliderPhysics) {
+              this.colliderPhysics.material.diffuseColor = this.isCollidingPhysics ? BABYLON.Color3.Red() : BABYLON.Color3.Gray();
+            }
           }
           break;
         case 'wears':
@@ -163,20 +161,28 @@ export class Character extends Schema {
 
   remove() {
     super.remove();
+    this.removeActions();
     this.removeMesh();
+  }
+
+  removeActions() {
+    Object.entries(this.actions)?.forEach(([key, value]) => {
+      this.parameters.canvas?.removeEventListener("pointermove", value, false);
+      this.parameters.canvas?.removeEventListener("pointerup", value, false);
+    });
   }
 
   removeMesh() {
     this.detachSelection();
     this.removeSigns();
     this.mesh?.dispose();
+    this.selectionMesh?.dispose();
     this.collider?.dispose();
     this.colliderPhysics?.dispose();
-    this.selectionMesh?.dispose();
     this.mesh = null;
+    this.selectionMesh = null;
     this.collider = null;
     this.colliderPhysics = null;
-    this.selectionMesh = null;
   }
 
   removeSigns() {
@@ -188,15 +194,22 @@ export class Character extends Schema {
     this.hiddenSign = null;
   }
 
+  removeVisionRays() {
+    if (this.parameters.world.test) {
+      this.visionRays?.forEach(visionRay => {
+        visionRay.dispose();
+      });
+      this.visionRays = [];
+    }
+  }
+
   doMesh() {
     setTimeout(() => {
       if (!this.mesh && this.map && this.parameters.world.map && this.parameters.world.map?.mapId == this.map) {
-        //  BABYLON.SceneLoader.ImportMesh('', "assets/meshes/base/", "base.babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
-        // this.mesh = meshes[0];
+        //set mesh
         this.mesh = this.parameters.assets.base.clone();
         this.mesh.skeleton = this.parameters.assets.base.skeleton.clone();
-        // this.mesh.setEnabled(true);
-        this.mesh.name = this.id;
+        this.mesh.material = this.parameters.assets.baseMaterial.clone();
 
         //scaling mesh by height
         this.mesh.scaling.y = this.height;
@@ -205,44 +218,46 @@ export class Character extends Schema {
         this.mesh.position.y = this.z;
         this.mesh.position.x = this.x;
         this.mesh.position.z = this.y;
+
+        //set semantic data to the mesh
+        this.mesh.name = this.id;
         this.mesh.isPickable = false;
 
-        //set mesh material
-        var material = new BABYLON.StandardMaterial(this.id + "Material", this.parameters.scene);
-        this.mesh.material = material;
-
-        //set collider mesh
-        this.collider = BABYLON.MeshBuilder.CreateCylinder('', { height: 1.5, diameter: 0.5 }, this.parameters.scene);
-        this.collider.parent = this.mesh;
-        this.collider.name = this.id;
+        //set collider
+        this.collider = this.parameters.assets.characterCollider.createInstance();
+        this.collider.setEnabled(true);
         this.collider.position.y = 1;
-        this.collider.visibility = 0;
+        //parent collider to mesh
+        this.collider.parent = this.mesh;
+        //set semantic data to the collider
+        this.collider.name = this.id;
         this.collider.isCollible = true;
         this.collider.isCharacter = true;
 
-        //set collider phyics mesh
-        this.colliderPhysics = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 0.9, depth: 0.9 }, this.parameters.scene);
-        this.colliderPhysics.name = this.id + "-physics";
-        this.colliderPhysics.position.y = 0.95;
-        this.colliderPhysics.position.x = this.xPhysics;
-        this.colliderPhysics.position.z = this.yPhysics;
-        this.colliderPhysics.visibility = 0;
-        this.colliderPhysics.isPickable = false;
-        this.colliderPhysics.material = new BABYLON.StandardMaterial("colliderPhysicsMaterial", this.parameters.scene);
-
         //set selection mesh
-        this.selectionMesh = BABYLON.MeshBuilder.CreateCylinder('', { height: 0.05, diameter: 1.75 }, this.parameters.scene);
-        this.selectionMesh.parent = this.mesh;
-        this.selectionMesh.name = this.id + "-selection";
+        this.selectionMesh = this.parameters.assets.characterSelection.clone();
+        this.selectionMesh.setEnabled(true);
         this.selectionMesh.position.y = this.selectionMeshZ;
+        //parent selection mesh to mesh
+        this.selectionMesh.parent = this.mesh;
+        //set selection mesh visibility
         this.selectionMesh.visibility = 0;
+        //set semantic data to the selection mesh
+        this.selectionMesh.name = this.id + "-selection";
         this.selectionMesh.isPickable = false;
-        var selectionMeshMaterial = new BABYLON.StandardMaterial("wall", this.parameters.scene);
-        selectionMeshMaterial.diffuseTexture = new BABYLON.Texture("assets/images/game/selection_circle.png", this.parameters.scene);
-        selectionMeshMaterial.diffuseTexture.hasAlpha = true;
-        selectionMeshMaterial.useAlphaFromDiffuseTexture = true;
-        selectionMeshMaterial.alpha = 0.5;
-        this.selectionMesh.material = selectionMeshMaterial;
+
+        //set collider phyics mesh (if testing)
+        if (this.parameters.world.test) {
+          this.colliderPhysics = this.parameters.assets.characterColliderPhysics.clone();
+          this.colliderPhysics.material = this.parameters.assets.characterColliderPhysicsMaterial.clone();
+          this.colliderPhysics.setEnabled(true);
+          this.colliderPhysics.position.y = 0.95;
+          this.colliderPhysics.position.x = this.xPhysics;
+          this.colliderPhysics.position.z = this.yPhysics;
+          //set semantic data to the collider
+          this.colliderPhysics.name = this.id + "-physics";
+          this.colliderPhysics.isPickable = false;
+        }
 
         //create the animator to manage the transition between animations
         this.animator = new Animator(this.mesh, this.mesh.skeleton, { actual: 'Idle' });
@@ -295,13 +310,9 @@ export class Character extends Schema {
           }
 
           setTimeout(() => {
-            // BABYLON.SceneLoader.ImportMesh("", "assets/meshes/wear/" + this.wears[wearId].category + "/" + this.wears[wearId].subcategory + "/", this.wears[wearId].name + ".babylon", this.parameters.scene, (meshes, particleSystems, skeletons, animationsGroups) => {
-            // this.wearsMeshes[wearId] = meshes[0];
             this.wearsMeshes[wearId] = this.parameters.assets[this.wears[wearId].category][this.wears[wearId].subcategory][this.wears[wearId].name].clone();
-            // this.wearsMeshes[wearId].setEnabled(true);
-            var material = new BABYLON.StandardMaterial(this.id + '-' + wearId + "Material", this.parameters.scene);
-            material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
-            this.wearsMeshes[wearId].material = material;
+            this.wearsMeshes[wearId].material = this.parameters.assets[this.wears[wearId].category][this.wears[wearId].subcategory][this.wears[wearId].name + 'Material'].clone();
+            this.wearsMeshes[wearId].material.diffuseColor = BABYLON.Color3.FromHexString(this.wears[wearId].color);
             this.animator.parent(this.wearsMeshes[wearId]);
           });
         } else if (this.mesh.material) {
@@ -359,7 +370,7 @@ export class Character extends Schema {
           var isShift = e.sourceEvent.shiftKey;
           this.parameters.controller.toggleAction('dragCharacter', true);
           if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
-          var drag = () => {
+          this.actions.drag = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return !mesh.isDragged && mesh.isPickable });
             if (pick?.pickedPoint) {
               if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
@@ -367,16 +378,16 @@ export class Character extends Schema {
                 this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'lookAt' });
             }
           }
-          var drop = (e) => {
+          this.actions.drop = (e) => {
             if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
-            this.parameters.canvas.removeEventListener("pointerup", drop, false);
-            this.parameters.canvas.removeEventListener("pointermove", drag, false);
+            this.parameters.canvas.removeEventListener("pointerup", this.actions.drop, false);
+            this.parameters.canvas.removeEventListener("pointermove", this.actions.drag, false);
             setTimeout(() => {
               this.parameters.controller.toggleAction('dragCharacter', false);
             }, 10);
           };
-          this.parameters.canvas.addEventListener("pointermove", drag, false);
-          this.parameters.canvas.addEventListener("pointerup", drop, false);
+          this.parameters.canvas.addEventListener("pointermove", this.actions.drag, false);
+          this.parameters.canvas.addEventListener("pointerup", this.actions.drop, false);
         }
       }));
       //for select and hide actions
@@ -441,6 +452,7 @@ export class Character extends Schema {
         this.parameters.world.updateCharactersVisibility(this.id);
       });
     }
+    if (this.parameters.world.test) this.removeVisionRays();
   }
 
   initAddingMode() {
@@ -513,25 +525,5 @@ export class Character extends Schema {
         if (!this.beignDragged && (!this.animation || this.animation == 'None')) this.animator?.playIdle();
       }
     }
-  }
-
-  //for testing purposes
-  doVisionRays() {
-    if (this.id == this.parameters.token) {
-      this.visionRays.forEach(visionRay => {
-        visionRay.dispose();
-      });
-      this.visibleCharacters = [];
-      var raysPoints = Vectors.getRadiusPoints({ x: 0, y: 0 }, 64);
-      raysPoints.forEach(rayPoint => {
-        var ray = new BABYLON.Ray(new BABYLON.Vector3(this.x, 1, this.y), new BABYLON.Vector3(rayPoint.x, 0, rayPoint.y), this.parameters.world.adjustVisionRange(this.visionRange));
-        // this.visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1)));
-        var pickedMesh = this.parameters.scene.pickWithRay(ray)?.pickedMesh;
-        if (pickedMesh?.name.indexOf('character') != -1)
-          this.visibleCharacters.push(pickedMesh);
-      });
-    }
-
-    this.parameters.world.updateCharactersVisibility();
   }
 }

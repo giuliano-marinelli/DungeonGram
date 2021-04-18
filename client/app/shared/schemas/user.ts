@@ -1,4 +1,3 @@
-import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { Schema } from './schema';
 import { Rule } from './rule';
 import { Figure } from './figure';
@@ -34,11 +33,13 @@ export class User extends Schema {
         type: Rule, datatype: Object, parameters: () => {
           return {
             userId: this.id,
+            world: parameters.world,
             canvas: parameters.canvas,
             scene: parameters.scene,
             room: parameters.room,
             token: parameters.token,
-            controller: parameters.controller
+            controller: parameters.controller,
+            assets: parameters.assets
           }
         }
       },
@@ -46,11 +47,13 @@ export class User extends Schema {
         type: Figure, datatype: Object, parameters: () => {
           return {
             userId: this.id,
+            world: parameters.world,
             canvas: parameters.canvas,
             scene: parameters.scene,
             room: parameters.room,
             token: parameters.token,
-            controller: parameters.controller
+            controller: parameters.controller,
+            assets: parameters.assets
           }
         }
       }
@@ -119,6 +122,18 @@ export class User extends Schema {
         }
       });
     }
+  }
+
+  remove() {
+    super.remove();
+    this.removeActions();
+  }
+
+  removeActions() {
+    Object.entries(this.actions)?.forEach(([key, value]) => {
+      this.parameters.canvas?.removeEventListener("pointermove", value, false);
+      this.parameters.canvas?.removeEventListener("pointerup", value, false);
+    });
   }
 
   initActions() {
