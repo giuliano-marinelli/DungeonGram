@@ -8,6 +8,8 @@ export class Rule extends Schema {
   shared = false;
   @type("boolean")
   normalizeUnit = true;
+  @type("number")
+  maxPoints = 5;
 
   constructor() {
     super();
@@ -30,8 +32,8 @@ export class Rule extends Schema {
   }
 
   add(point) {
-    this.points.push(new Point(point.x, point.y));
-    console.log(this.points);
+    if (this.points.length <= this.maxPoints)
+      this.points.push(new Point(point.x, point.y));
   }
 
   end() {

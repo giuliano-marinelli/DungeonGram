@@ -9,10 +9,12 @@ export class Path extends Schema {
   points?: Point[];
   //game objects
   meshTo?: any;
-  rays?: any[] = [];
+  line?: any;
 
   constructor(schema, parameters) {
     super(parameters);
+
+    this.init();
 
     this.synchronizeSchema(schema,
       {
@@ -32,13 +34,12 @@ export class Path extends Schema {
       }
     });
     this.doMeshTo();
-    this.doMeshPoints();
   }
 
   remove() {
     super.remove();
     this.removeMeshTo();
-    this.removeRays();
+    this.removeLine();
   }
 
   removeMeshTo() {
@@ -46,51 +47,43 @@ export class Path extends Schema {
     this.meshTo = null;
   }
 
-  removeRays() {
-    this.rays?.forEach(ray => {
-      ray.dispose();
-    });
-    this.rays = [];
+  removeLine() {
+    this.line?.dispose();
+    this.line = null;
+  }
+
+  reset() {
+    this.meshTo.visibility = 0;
+    this.removeLine();
+  }
+
+  init() {
+    //create mesh to
+    this.meshTo = this.parameters.assets.pathPoint.clone();
+    this.meshTo.setEnabled(true);
+    this.meshTo.visibility = 0;
   }
 
   doMeshTo() {
-    this.removeMeshTo();
+    this.reset();
 
     if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.to) {
-      //create mesh
-      this.meshTo = this.parameters.assets.pathPoint.createInstance();
+      //show mesh to
+      this.meshTo.visibility = 1;
 
-      //positioning mesh
-      this.meshTo.position.y = 0.1;
-      this.meshTo.position.x = this.to.x;
-      this.meshTo.position.z = this.to.y;
-
-      //enable mesh
-      this.meshTo.setEnabled(true);
+      //positioning mesh to
+      this.meshTo.position = new BABYLON.Vector3(this.to.x, 0.1, this.to.y);
     }
-  }
-
-  doMeshPoints() {
-    this.removeRays();
 
     if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
       this.points.length) {
+      var points3D = [];
       for (let i = 0; i < this.points.length; i++) {
-        var point = this.points[i];
-
-        if (i > 0) {
-          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0.1, this.points[i - 1].y);
-          var target = new BABYLON.Vector3(point.x, 0.1, point.y);
-          var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
-          var ray = new BABYLON.Ray(
-            origin,
-            targetNormalized,
-            BABYLON.Vector3.Distance(origin, target)
-          );
-          this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.White()));
-        }
+        points3D.push(new BABYLON.Vector3(this.points[i].x, 0.1, this.points[i].y));
       }
+      //create line based on the points
+      this.line = BABYLON.MeshBuilder.CreateLines("lines", { points: points3D }, this.parameters.scene);
     }
   }
 }

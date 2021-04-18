@@ -16,9 +16,11 @@ export class Figure extends Schema {
   shared?: boolean;
   normalizeUnit?: boolean;
   //game objects
-  meshFigure?: any;
+  meshFigureTriangle?: any;
+  meshFigureCircle?: any;
+  meshFigureSquare?: any;
   meshPoints?: any[] = [];
-  rays?: any[] = [];
+  line?: any;
   sumSign?: any;
   sumSignText?: any;
   sum?: number = 0;
@@ -29,8 +31,8 @@ export class Figure extends Schema {
     super(parameters);
 
     this.initActions();
-
     this.initSigns();
+    this.init();
 
     this.synchronizeSchema(schema,
       {
@@ -54,9 +56,9 @@ export class Figure extends Schema {
   remove() {
     super.remove();
     this.removeActions();
-    this.removeMeshFigure();
+    this.removeMeshFigures();
     this.removeMeshPoints();
-    this.removeRays();
+    this.removeLine();
     this.removeSigns();
   }
 
@@ -68,9 +70,13 @@ export class Figure extends Schema {
     });
   }
 
-  removeMeshFigure() {
-    this.meshFigure?.dispose();
-    this.meshFigure = null;
+  removeMeshFigures() {
+    this.meshFigureTriangle?.dispose();
+    this.meshFigureCircle?.dispose();
+    this.meshFigureSquare?.dispose();
+    this.meshFigureTriangle = null;
+    this.meshFigureCircle = null;
+    this.meshFigureSquare = null;
   }
 
   removeMeshPoints() {
@@ -80,11 +86,9 @@ export class Figure extends Schema {
     this.meshPoints = [];
   }
 
-  removeRays() {
-    this.rays?.forEach(ray => {
-      ray.dispose();
-    });
-    this.rays = [];
+  removeLine() {
+    this.line?.dispose();
+    this.line = null;
   }
 
   removeSigns() {
@@ -92,6 +96,16 @@ export class Figure extends Schema {
     this.sumSignText?.dispose();
     this.sumSign = null;
     this.sumSignText = null;
+  }
+
+  reset() {
+    this.meshFigureTriangle.visibility = 0;
+    this.meshFigureCircle.visibility = 0;
+    this.meshFigureSquare.visibility = 0;
+    this.meshPoints.forEach((meshPoint) => {
+      meshPoint.visibility = 0;
+    });
+    this.removeLine();
   }
 
   initActions() {
@@ -148,77 +162,91 @@ export class Figure extends Schema {
     this.sumSign.alpha = 0;
   }
 
+  init() {
+    //create mesh figure triangle
+    this.meshFigureTriangle = this.parameters.assets.triangleFigure.clone();
+    this.meshFigureTriangle.setEnabled(true);
+    this.meshFigureTriangle.visibility = 0;
+
+    //create mesh figure circle
+    this.meshFigureCircle = this.parameters.assets.circleFigure.clone();
+    this.meshFigureCircle.setEnabled(true);
+    this.meshFigureCircle.visibility = 0;
+
+    //create mesh figure square
+    this.meshFigureSquare = this.parameters.assets.squareFigure.clone();
+    this.meshFigureSquare.setEnabled(true);
+    this.meshFigureSquare.visibility = 0;
+
+    //create mesh to
+    for (let i = 0; i <= 2; i++) {
+      this.meshPoints.push(this.parameters.assets.rulePoint.clone());
+      this.meshPoints[i].setEnabled(true);
+      this.meshPoints[i].visibility = 0;
+    }
+  }
+
   doMeshPoints() {
-    this.removeMeshFigure();
-    this.removeMeshPoints();
-    this.removeRays();
+    this.reset()
     this.sum = 0;
 
     if (this.points.length) {
+      var points3D = [];
+      var colors = [];
       for (let i = 0; i < this.points.length; i++) {
-        var point = this.points[i];
-        //create mesh
-        this.meshPoints.push(this.parameters.assets.rulePoint.createInstance());
+        points3D.push(new BABYLON.Vector3(this.points[i].x, 0, this.points[i].y));
+        colors.push(BABYLON.Color3.Yellow().toColor4());
 
-        //positioning mesh
-        this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-        this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-        this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
+        //show mesh point
+        this.meshPoints[i].visibility = 1;
 
-        //enable mesh
-        this.meshPoints[this.meshPoints.length - 1].setEnabled(true);
+        //positioning mesh point
+        this.meshPoints[i].position = points3D[i];
 
         if (i > 0) {
-          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
-          var target = new BABYLON.Vector3(point.x, 0, point.y);
-          var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
-          var distance = BABYLON.Vector3.Distance(origin, target);
-          var ray = new BABYLON.Ray(
-            origin,
-            targetNormalized,
-            distance
-          );
-          this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Yellow()));
-
           if (this.normalizeUnit) {
-            var xDistance = Math.abs(origin.x - target.x);
-            var zDistance = Math.abs(origin.z - target.z);
+            var xDistance = Math.abs(this.points[i - 1].x - this.points[i].x);
+            var zDistance = Math.abs(this.points[i - 1].y - this.points[i].y);
             this.sum += xDistance > zDistance ? xDistance : zDistance;
           } else {
-            this.sum += distance;
+            this.sum += BABYLON.Vector3.Distance(points3D[i - 1], points3D[i]);
           }
         }
       }
 
+      //show the figure shape mesh
       switch (this.type) {
         case 'triangle': default:
-          this.meshFigure = this.parameters.assets.triangleFigure.createInstance();
-          this.meshFigure.position = origin;
-          this.meshFigure.rotation.y = Vectors.Vector3.Angle(origin, target);
-          this.meshFigure.scaling.x = this.sum;
-          this.meshFigure.scaling.z = this.sum;
+          this.meshFigureTriangle.visibility = 1;
+          this.meshFigureTriangle.position = points3D[0];
+          this.meshFigureTriangle.rotation.y = Vectors.Vector3.Angle(points3D[0], points3D[1]);
+          this.meshFigureTriangle.scaling.x = this.sum;
+          this.meshFigureTriangle.scaling.z = this.sum;
           break;
         case 'circle':
-          this.meshFigure = this.parameters.assets.circleFigure.createInstance();
-          this.meshFigure.position = origin;
-          this.meshFigure.rotation.x = Math.PI * 2 / 4;
-          this.meshFigure.scaling.x = this.sum;
-          this.meshFigure.scaling.y = this.sum;
+          this.meshFigureCircle.visibility = 1;
+          this.meshFigureCircle.position = points3D[0];
+          this.meshFigureCircle.rotation.x = Math.PI * 2 / 4;
+          this.meshFigureCircle.scaling.x = this.sum;
+          this.meshFigureCircle.scaling.y = this.sum;
           break;
         case 'square':
           this.sum = this.sum * 2;
 
-          this.meshFigure = this.parameters.assets.squareFigure.createInstance();
-          this.meshFigure.position = origin;
-          this.meshFigure.rotation.x = Math.PI * 2 / 4;
-          this.meshFigure.scaling.x = this.sum;
-          this.meshFigure.scaling.y = this.sum;
+          this.meshFigureSquare.visibility = 1;
+          this.meshFigureSquare.position = points3D[0];
+          this.meshFigureSquare.rotation.x = Math.PI * 2 / 4;
+          this.meshFigureSquare.scaling.x = this.sum;
+          this.meshFigureSquare.scaling.y = this.sum;
           break;
       }
-      this.meshFigure.setEnabled(true);
 
+      //create line based on the points
+      this.line = BABYLON.MeshBuilder.CreateLines("lines", { points: points3D, colors: colors }, this.parameters.scene);
+
+      //show signs with the measures
       this.sumSignText.text = Math.round(this.sum * 5 * 10) / 10 + ' ft\n ' + Math.round(this.sum * 10) / 10 + 'sq';
-      this.sumSign.linkWithMesh(this.meshPoints[this.meshPoints.length - 1]);
+      this.sumSign.linkWithMesh(this.meshPoints[this.points.length - 1]);
       this.sumSign.alpha = 1;
     } else {
       this.sumSign.alpha = 0;

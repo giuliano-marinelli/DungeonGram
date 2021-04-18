@@ -183,6 +183,8 @@ export class Character extends Schema {
     this.selectionMesh = null;
     this.collider = null;
     this.colliderPhysics = null;
+
+    this.movementPath.reset();
   }
 
   removeSigns() {

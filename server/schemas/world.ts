@@ -416,7 +416,7 @@ export class World extends Schema {
     tilemap: {
       resize: {
         do: (client: string, data: any) => {
-          if (data.width >= 2 && data.width <= 1000 && data.height >= 2 && data.height <= 1000
+          if (data.width >= 2 && data.width <= 250 && data.height >= 2 && data.height <= 250
             && data.width % 2 == 0 && data.height % 2 == 0) {
             this.map.tilemap.changeSize(data.width, data.height);
             this.map.worldPhysics.setGrid({ width: data.width, height: data.height });

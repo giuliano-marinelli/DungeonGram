@@ -9,9 +9,10 @@ export class Rule extends Schema {
   points?: Point[];
   shared?: boolean;
   normalizeUnit?: boolean;
+  maxPoints?: number;
   //game objects
   meshPoints?: any[] = [];
-  rays?: any[] = [];
+  line?: any;
   sumSign?: any;
   sumSignText?: any;
   sum?: number = 0;
@@ -22,7 +23,6 @@ export class Rule extends Schema {
     super(parameters);
 
     this.initActions();
-
     this.initSigns();
 
     this.synchronizeSchema(schema,
@@ -36,6 +36,9 @@ export class Rule extends Schema {
     changes?.forEach((change) => {
       if (this.shared || this.parameters.userId == this.parameters.token) {
         switch (change.field) {
+          case 'maxPoints':
+            this.init();
+            break;
           case 'points':
             this.doMeshPoints();
             break;
@@ -48,7 +51,7 @@ export class Rule extends Schema {
     super.remove();
     this.removeActions();
     this.removeMeshPoints();
-    this.removeRays();
+    this.removeLine();
     this.removeSigns();
   }
 
@@ -68,11 +71,9 @@ export class Rule extends Schema {
     this.meshPoints = [];
   }
 
-  removeRays() {
-    this.rays?.forEach(ray => {
-      ray.dispose();
-    });
-    this.rays = [];
+  removeLine() {
+    this.line?.dispose();
+    this.line = null;
   }
 
   removeSigns() {
@@ -80,6 +81,13 @@ export class Rule extends Schema {
     this.sumSignText?.dispose();
     this.sumSign = null;
     this.sumSignText = null;
+  }
+
+  reset() {
+    this.meshPoints.forEach((meshPoint) => {
+      meshPoint.visibility = 0;
+    });
+    this.removeLine();
   }
 
   initActions() {
@@ -149,49 +157,50 @@ export class Rule extends Schema {
     this.sumSign.alpha = 0;
   }
 
-  doMeshPoints() {
+  init() {
     this.removeMeshPoints();
-    this.removeRays();
+    //create mesh points
+    for (let i = 0; i <= this.maxPoints; i++) {
+      this.meshPoints.push(this.parameters.assets.rulePoint.clone());
+      this.meshPoints[i].setEnabled(true);
+      this.meshPoints[i].visibility = 0;
+    }
+  }
+
+  doMeshPoints() {
+    this.reset();
     this.sum = 0;
 
     if (this.points.length) {
+      var points3D = [];
+      var colors = [];
       for (let i = 0; i < this.points.length; i++) {
-        var point = this.points[i];
-        //create mesh
-        this.meshPoints.push(this.parameters.assets.rulePoint.createInstance());
+        points3D.push(new BABYLON.Vector3(this.points[i].x, 0, this.points[i].y));
+        colors.push(BABYLON.Color3.Yellow().toColor4());
 
-        //positioning mesh
-        this.meshPoints[this.meshPoints.length - 1].position.y = 0;
-        this.meshPoints[this.meshPoints.length - 1].position.x = point.x;
-        this.meshPoints[this.meshPoints.length - 1].position.z = point.y;
+        //show mesh point
+        this.meshPoints[i].visibility = 1;
 
-        //enable mesh
-        this.meshPoints[this.meshPoints.length - 1].setEnabled(true);
+        //positioning mesh point
+        this.meshPoints[i].position = points3D[i];
 
         if (i > 0) {
-          var origin = new BABYLON.Vector3(this.points[i - 1].x, 0, this.points[i - 1].y);
-          var target = new BABYLON.Vector3(point.x, 0, point.y);
-          var targetNormalized = BABYLON.Vector3.Normalize(target.subtract(origin));
-          var distance = BABYLON.Vector3.Distance(origin, target);
-          var ray = new BABYLON.Ray(
-            origin,
-            targetNormalized,
-            BABYLON.Vector3.Distance(origin, target)
-          );
-          this.rays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Yellow()));
-
           if (this.normalizeUnit) {
-            var xDistance = Math.abs(origin.x - target.x);
-            var zDistance = Math.abs(origin.z - target.z);
+            var xDistance = Math.abs(this.points[i - 1].x - this.points[i].x);
+            var zDistance = Math.abs(this.points[i - 1].y - this.points[i].y);
             this.sum += xDistance > zDistance ? xDistance : zDistance;
           } else {
-            this.sum += distance;
+            this.sum += BABYLON.Vector3.Distance(points3D[i - 1], points3D[i]);
           }
         }
       }
 
+      //create line based on the points
+      this.line = BABYLON.MeshBuilder.CreateLines("lines", { points: points3D, colors: colors }, this.parameters.scene);
+
+      //show signs with the measures
       this.sumSignText.text = Math.round(this.sum * 5 * 10) / 10 + ' ft\n ' + Math.round(this.sum * 10) / 10 + 'sq';
-      this.sumSign.linkWithMesh(this.meshPoints[this.meshPoints.length - 1]);
+      this.sumSign.linkWithMesh(this.meshPoints[this.points.length - 1]);
       this.sumSign.alpha = 1;
     } else {
       this.sumSign.alpha = 0;
