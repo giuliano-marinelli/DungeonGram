@@ -212,6 +212,15 @@ export class GameComponent implements OnInit, OnDestroy {
       this.assets.wallCollider.material = this.assets.wallColliderMaterial;
     }
 
+    //add wall highlight mesh and material
+    this.assets.wallHighlight = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.01 });
+    this.assets.wallHighlight.setEnabled(false);
+    this.assets.wallHighlight.isPickable = false;
+    this.assets.wallHighlightMaterial = new BABYLON.StandardMaterial("wallHighlight", this.scene);
+    this.assets.wallHighlightMaterial.diffuseColor = BABYLON.Color3.Gray();
+    this.assets.wallHighlightMaterial.alpha = 0;
+    this.assets.wallHighlight.material = this.assets.wallHighlightMaterial;
+
     //add door mesh and material
     this.assets.door = BABYLON.MeshBuilder.CreateBox('', { height: 1, width: 1, depth: 0.1 });
     this.assets.door.setEnabled(false);

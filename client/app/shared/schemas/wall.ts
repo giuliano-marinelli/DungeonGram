@@ -107,17 +107,40 @@ export class Wall extends Schema {
     }
   }
 
+  adjustWallSize(mesh) {
+    //scaling mesh
+    mesh.scaling.x = Vectors.distance(this.from, this.to);
+    mesh.scaling.y = this.height;
+
+    //set pivot point and position at this.from
+    mesh.setPivotPoint(new BABYLON.Vector3(-0.5, 0, 0));
+    mesh.position.x = this.from.x + 0.5;
+    mesh.position.z = this.from.y;
+    mesh.position.y = this.height / 2 - 0.05;
+
+    //rotate by the angle between this.from and this.to
+    mesh.rotation.y = Vectors.angle(this.from, this.to);
+  }
+
   initActions() {
     //set action on mouse in/out/click
     this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
       // this.mesh.material.emissiveColor = BABYLON.Color3.Black();
-      this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
+      if (this.type == 'door') this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
+      else this.parameters.assets.wallHighlight.setEnabled(false);
     }));
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
       if (this.parameters.controller.activeTool?.name == 'walls') {
         // this.mesh.material.emissiveColor = BABYLON.Color3.White();
-        this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+        if (this.type == 'door') {
+          this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+        } else {
+          //add highlight mesh over the wall mesh
+          this.parameters.assets.wallHighlight.setEnabled(true);
+          this.adjustWallSize(this.parameters.assets.wallHighlight); //set wall highlight with the size of the actual wall
+          this.parameters.world.lights.highlightCharacter.addMesh(this.parameters.assets.wallHighlight, BABYLON.Color3.Black(), true);
+        }
       }
     }));
     this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
@@ -125,6 +148,7 @@ export class Wall extends Schema {
         e.sourceEvent.ctrlKey && this.parameters.controller.activeTool?.options?.remove) {
         this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
       }
+      this.parameters.assets.wallHighlight.setEnabled(false);
     }));
     if (this.type == 'door') {
       this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
@@ -187,28 +211,17 @@ export class Wall extends Schema {
     if (this.size == 'small' || (this.size == 'collider' && this.type != 'door')) this.height = this.height / 4;
 
     //set mesh
-    // this.mesh = this.type == "door" ? this.parameters.assets.door.createInstance() : this.parameters.assets.wall.createInstance();
-    this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.clone();
+    this.mesh = this.type == "door" ? this.parameters.assets.door.clone() : this.parameters.assets.wall.createInstance();
     this.mesh.setEnabled(true);
 
-    //scaling mesh
-    this.mesh.scaling.x = Vectors.distance(this.from, this.to);
-    this.mesh.scaling.y = this.height;
+    //set size of the wall based on points (to, from)
+    this.adjustWallSize(this.mesh);
 
     //set mesh visibility in case it was a door on "collider only" mode
     if (this.type == 'door' && this.size == 'collider') this.mesh.visibility = 0.5;
 
-    //set pivot point and position at this.from
-    this.mesh.setPivotPoint(new BABYLON.Vector3(-0.5, 0, 0));
-    this.mesh.position.x = this.from.x + 0.5;
-    this.mesh.position.z = this.from.y;
-    this.mesh.position.y = this.height / 2 - 0.05;
-
-    //rotate by the angle between this.from and this.to
-    this.mesh.rotation.y = Vectors.angle(this.from, this.to);
-
     //set semantic data to the mesh
-    this.mesh.isPickable = false;
+    this.mesh.isPickable = this.parameters.world.users[this.parameters.token].wallsPickable; //set based on user settings
     this.mesh.isCollible = this.size != 'collider';
     this.mesh.isWall = true;
     this.mesh.isDoor = this.type == "door";
@@ -263,7 +276,6 @@ export class Wall extends Schema {
     if (this.size != 'collider')
       this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh, false);
     this.parameters.world.updateCharactersVisibility();
-    this.parameters.world.updateWallVisibility(this);
 
     //optimization for static walls
     if (this.type != "door") {

@@ -99,9 +99,9 @@ export class Figure extends Schema {
   }
 
   reset() {
-    this.meshFigureTriangle.visibility = 0;
-    this.meshFigureCircle.visibility = 0;
-    this.meshFigureSquare.visibility = 0;
+    if (this.meshFigureTriangle) this.meshFigureTriangle.visibility = 0;
+    if (this.meshFigureCircle) this.meshFigureCircle.visibility = 0;
+    if (this.meshFigureSquare) this.meshFigureSquare.visibility = 0;
     this.meshPoints.forEach((meshPoint) => {
       meshPoint.visibility = 0;
     });

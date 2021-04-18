@@ -53,7 +53,7 @@ export class Path extends Schema {
   }
 
   reset() {
-    this.meshTo.visibility = 0;
+    if (this.meshTo) this.meshTo.visibility = 0;
     this.removeLine();
   }
 

@@ -134,6 +134,10 @@ export class TileMap extends Schema {
     this.temporalWallEndPoint.visibility = 0;
 
     var addTemporalWall = (adjustedPoint) => {
+      //before add new events remove the last if exists
+      this.parameters.canvas.removeEventListener("pointermove", this.actions.dragWall, false);
+      this.parameters.canvas.removeEventListener("contextmenu", this.actions.cancelWall, false);
+
       var height = 2.55;
       if (this.parameters.controller.activeTool?.options?.size == 'medium')
         height = height / 2;
@@ -171,6 +175,7 @@ export class TileMap extends Schema {
 
     var removeTemporalWall = () => {
       this.parameters.canvas.removeEventListener("pointermove", this.actions.dragWall, false);
+      this.parameters.canvas.removeEventListener("contextmenu", this.actions.cancelWall, false);
       this.temporalWallStartPoint.visibility = 0;
       this.temporalWallEndPoint.visibility = 0;
       this.temporalWallLineUp?.dispose();
@@ -191,10 +196,11 @@ export class TileMap extends Schema {
     this.actions.startWall = (e) => {
       //only works with left click (left: 0, middle: 1, right: 2)
       if (e.button == 0) {
-        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround || mesh.isWall });
+        var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+        var pickWall = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isWall });
         if (pick.pickedPoint) {
           if (this.parameters.controller.activeTool?.name == 'walls' &&
-            (!this.parameters.controller.activeTool?.options.remove || !pick.pickedMesh.isWall)) {
+            (!this.parameters.controller.activeTool?.options.remove || !e.ctrlKey || !pickWall.pickedMesh)) {
             var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
               this.parameters.controller.activeTool?.options?.adjustTo);
 

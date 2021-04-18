@@ -232,7 +232,7 @@ export class World extends Schema {
     setTimeout(() => {
       if (this.map) {
         var user = this.users[this.parameters.token];
-        if (this.map.tilemap.ground) {
+        if (this.map.tilemap?.ground) {
           if (user.tilemapShowGrid)
             this.map.tilemap.ground.material = this.map.tilemap.gridMaterial;
           else
@@ -245,21 +245,20 @@ export class World extends Schema {
   updateWallsVisibility() {
     setTimeout(() => {
       if (this.map) {
+        var user = this.users[this.parameters.token];
+        //update walls and doors pickable
         for (let wall in this.map?.walls) {
-          this.updateWallVisibility(this.map.walls[wall]);
+          this.map.walls[wall].mesh.isPickable = user.wallsPickable;
         }
         for (let door in this.map?.doors) {
-          this.updateWallVisibility(this.map.doors[door]);
+          this.map.doors[door].mesh.isPickable = user.wallsPickable;
         }
+        //update walls visibility
+        this.parameters.assets.wallMaterial.alpha = user.wallsVisibility;
+        //update doors visibility
         if (!this.users[this.parameters.token].wallsPickable) this.updateCharactersVisibility();
       }
     });
-  }
-
-  updateWallVisibility(wall?) {
-    var user = this.users[this.parameters.token];
-    wall.mesh.isPickable = user.wallsPickable;
-    if (wall.type != "door") wall.mesh.visibility = user.wallsVisibility;
   }
 
   updateCharactersVisibility(character?) {
