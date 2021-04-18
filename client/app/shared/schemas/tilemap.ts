@@ -19,7 +19,8 @@ export class TileMap extends Schema {
   //game objects for walls
   temporalWallStartPoint?: any;
   temporalWallEndPoint?: any;
-  temporalWallRay?: any[] = [];
+  temporalWallLineUp?: any;
+  temporalWallLineDown?: any;
   //global actions registered
   actions: any = {};
 
@@ -67,8 +68,12 @@ export class TileMap extends Schema {
   removeTemporalWalls() {
     this.temporalWallStartPoint?.dispose();
     this.temporalWallEndPoint?.dispose();
+    this.temporalWallLineUp?.dispose();
+    this.temporalWallLineDown?.dispose();
     this.temporalWallStartPoint = null;
     this.temporalWallEndPoint = null;
+    this.temporalWallLineUp = null;
+    this.temporalWallLineDown = null;
   }
 
   update(changes) {
@@ -145,8 +150,8 @@ export class TileMap extends Schema {
       this.temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, height / 2 - 0.05, adjustedPoint.z);
       this.temporalWallEndPoint.isPickable = false;
       this.actions.dragWall = () => {
-        this.temporalWallRay[0]?.dispose();
-        this.temporalWallRay[1]?.dispose();
+        this.temporalWallLineUp?.dispose();
+        this.temporalWallLineDown?.dispose();
         var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
         if (pick.pickedPoint) {
           var adjustedPoint = Vectors.getGridPoint(new BABYLON.Vector3(pick.pickedPoint.x, 0, pick.pickedPoint.z),
@@ -155,11 +160,8 @@ export class TileMap extends Schema {
           var targetA = new BABYLON.Vector3(this.temporalWallEndPoint.position.x, 0, this.temporalWallEndPoint.position.z);
           var originB = new BABYLON.Vector3(this.temporalWallStartPoint.position.x, height, this.temporalWallStartPoint.position.z);
           var targetB = new BABYLON.Vector3(this.temporalWallEndPoint.position.x, height, this.temporalWallEndPoint.position.z);
-          var targetNormalized = BABYLON.Vector3.Normalize(targetA.subtract(originA));
-          var rayA = new BABYLON.Ray(originA, targetNormalized, BABYLON.Vector3.Distance(originA, targetA));
-          var rayB = new BABYLON.Ray(originB, targetNormalized, BABYLON.Vector3.Distance(originB, targetB));
-          this.temporalWallRay[0] = BABYLON.RayHelper.CreateAndShow(rayA, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
-          this.temporalWallRay[1] = BABYLON.RayHelper.CreateAndShow(rayB, this.parameters.scene, new BABYLON.Color3(1, 1, 0.1));
+          this.temporalWallLineUp = BABYLON.MeshBuilder.CreateLines("lines", { points: [originA, targetA] }, this.parameters.scene);
+          this.temporalWallLineDown = BABYLON.MeshBuilder.CreateLines("lines", { points: [originB, targetB] }, this.parameters.scene);
           this.temporalWallEndPoint.position = new BABYLON.Vector3(adjustedPoint.x, height / 2 - 0.05, adjustedPoint.z);
         }
       }
@@ -171,9 +173,10 @@ export class TileMap extends Schema {
       this.parameters.canvas.removeEventListener("pointermove", this.actions.dragWall, false);
       this.temporalWallStartPoint.visibility = 0;
       this.temporalWallEndPoint.visibility = 0;
-      this.temporalWallRay[0]?.dispose();
-      this.temporalWallRay[1]?.dispose();
-      this.temporalWallRay = [];
+      this.temporalWallLineUp?.dispose();
+      this.temporalWallLineDown?.dispose();
+      this.temporalWallLineUp = null;
+      this.temporalWallLineDown = null;
     };
 
     this.actions.cancelWall = (e) => {
@@ -231,12 +234,12 @@ export class TileMap extends Schema {
               action: 'end'
             });
           }
-          //clear wall events and temporal meshes
-          this.parameters.canvas.removeEventListener("pointermove", this.actions.dragWall, false);
-          this.parameters.canvas.removeEventListener("contextmenu", this.actions.cancelWall, false);
-          removeTemporalWall();
         }
       }
+      //clear wall events and temporal meshes
+      this.parameters.canvas.removeEventListener("pointermove", this.actions.dragWall, false);
+      this.parameters.canvas.removeEventListener("contextmenu", this.actions.cancelWall, false);
+      removeTemporalWall();
     };
     this.parameters.canvas.addEventListener("pointerup", this.actions.stopWallMoveLookAt, false);
   }
