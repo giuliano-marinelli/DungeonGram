@@ -73,7 +73,7 @@ export class GlobalComponent {
     }
 
     //add base mesh for 2D characters
-    assets.base2D = BABYLON.MeshBuilder.CreateBox('', { height: 2, width: 1, depth: 0.01 });
+    assets.base2D = BABYLON.MeshBuilder.CreatePlane('', { height: 2, width: 1 });
     assets.base2D.setEnabled(false);
     assets.base2D.setPivotPoint(new BABYLON.Vector3(0, -1, 0));
     assets.base2D.position.y = 1;

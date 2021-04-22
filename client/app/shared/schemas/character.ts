@@ -152,7 +152,7 @@ export class Character extends Schema {
           this.doWears();
           break;
         case 'height':
-          if (this.mesh) this.mesh.scaling.y = this.height;
+          if (this.visualMesh) this.visualMesh.scaling.y = this.height;
           break;
         case 'addingMode':
           this.initAddingMode();
@@ -417,11 +417,17 @@ export class Character extends Schema {
 
   doImages() {
     if (this.mode2D) {
+      if (this.frontMaterial?.diffuseTexture) {
+        this.frontMaterial.diffuseTexture.dispose();
+      }
       var frontImage = this.frontImage ? this.frontImage : '/assets/images/characters/default_front.png';
       this.frontMaterial.diffuseTexture = new BABYLON.Texture(frontImage, this.parameters.scene);
       this.frontMaterial.diffuseTexture.hasAlpha = true;
       this.frontMaterial.useAlphaFromDiffuseTexture = true;
 
+      if (this.backMaterial?.diffuseTexture) {
+        this.frontMaterial.diffuseTexture.dispose();
+      }
       var backImage = this.backImage ? this.backImage : '/assets/images/characters/default_back.png';
       this.backMaterial.diffuseTexture = new BABYLON.Texture(this.disableBack ? frontImage : backImage, this.parameters.scene);
       this.backMaterial.diffuseTexture.hasAlpha = true;
@@ -513,6 +519,7 @@ export class Character extends Schema {
         this.visionLight = this.parameters.world.lights.characterLight;
         this.visionLight.range = this.parameters.world.adjustVisionRange(this.visionRange);
         this.visionLight.parent = this.mesh;
+        this.visionLight.position.y = 0.4;
         this.visionLight.intensity = 100;
         //show selection mesh
         this.selectionMesh.visibility = 1;
