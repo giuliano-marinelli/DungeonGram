@@ -777,19 +777,21 @@
           {{tools.characters.options.selectedCharacterObj.value?.stealth ? 'On': 'Off'}}
         </button>
         <br>
-        <i class="fa fa-fw fa-signing" tippy="Animations / Actions" placement="left"></i>&nbsp;
-        <button class="btn btn-sm" tippy="Stand" placement="bottom"
-          (click)="tools.characters.actions.animation('None')">St</button>
-        <button class="btn btn-sm" tippy="Sit" placement="bottom"
-          (click)="tools.characters.actions.animation('Sit')">Si</button>
-        <button class="btn btn-sm" tippy="Sleep" placement="bottom"
-          (click)="tools.characters.actions.animation('Sleep')">Sl</button>
-        <button class="btn btn-sm" tippy="Float" placement="bottom"
-          (click)="tools.characters.actions.animation('Float')">Fl</button>
-        <button class="btn btn-sm" tippy="Die" placement="bottom"
-          (click)="tools.characters.actions.animation('Die')">D1</button>
-        <button class="btn btn-sm" tippy="Die 2" placement="bottom"
-          (click)="tools.characters.actions.animation('Die.001')">D2</button>
+        <span *ngIf="!tools.characters.options.selectedCharacterObj.value?.mode2D">
+          <i class="fa fa-fw fa-signing" tippy="Animations / Actions" placement="left"></i>&nbsp;
+          <button class="btn btn-sm" tippy="Stand" placement="bottom"
+            (click)="tools.characters.actions.animation('None')">St</button>
+          <button class="btn btn-sm" tippy="Sit" placement="bottom"
+            (click)="tools.characters.actions.animation('Sit')">Si</button>
+          <button class="btn btn-sm" tippy="Sleep" placement="bottom"
+            (click)="tools.characters.actions.animation('Sleep')">Sl</button>
+          <button class="btn btn-sm" tippy="Float" placement="bottom"
+            (click)="tools.characters.actions.animation('Float')">Fl</button>
+          <button class="btn btn-sm" tippy="Die" placement="bottom"
+            (click)="tools.characters.actions.animation('Die')">D1</button>
+          <button class="btn btn-sm" tippy="Die 2" placement="bottom"
+            (click)="tools.characters.actions.animation('Die.001')">D2</button>
+        </span>
       </div>
     </span>
   </div>

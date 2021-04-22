@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { GlobalComponent } from '../shared/global/global.component';
@@ -35,7 +35,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    public auth: AuthService
+    public auth: AuthService,
+    private ngZone: NgZone
   ) {
     this.route.params.subscribe(params => {
       this.campaign = params.campaign;
@@ -122,9 +123,10 @@ export class GameComponent implements OnInit, OnDestroy {
         });
         console.log("Initialized game world", this.world);
 
-        //register a render loop to repeatedly render the scene
-        this.engine.runRenderLoop(() => {
-          this.scene.render();
+        // ignore the change events from the Engine in the Angular ngZone
+        this.ngZone.runOutsideAngular(() => {
+          // start the render loop and therefore start the Engine
+          this.engine.runRenderLoop(() => this.scene.render())
         });
       }
 

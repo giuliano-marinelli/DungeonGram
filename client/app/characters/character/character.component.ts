@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { ShadowOnlyMaterial, SkyMaterial } from '@babylonjs/materials';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
@@ -78,7 +78,8 @@ export class CharacterComponent implements OnInit, OnDestroy {
     private characterService: CharacterService,
     public activeModal: NgbActiveModal,
     private modalService: NgbModal,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -148,9 +149,10 @@ export class CharacterComponent implements OnInit, OnDestroy {
         character: this.characterForm
       });
 
-      //register a render loop to repeatedly render the scene
-      this.engine.runRenderLoop(() => {
-        this.scene.render();
+      // ignore the change events from the Engine in the Angular ngZone
+      this.ngZone.runOutsideAngular(() => {
+        // start the render loop and therefore start the Engine
+        this.engine.runRenderLoop(() => this.scene.render())
       });
 
       //load the input character

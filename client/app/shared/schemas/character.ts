@@ -49,6 +49,7 @@ export class Character extends Schema {
   nameSign?: any;
   nameSignText?: any;
   hiddenSign?: any;
+  stealthSign?: any;
   //physics
   xPhysics?: number;
   yPhysics?: number;
@@ -119,6 +120,7 @@ export class Character extends Schema {
           this.initAnimation();
           break;
         case 'stealth':
+          if (this.stealthSign) this.animator.toggleUI(this.stealthSign, this.stealth);
           this.initStealth();
           break;
         case 'hidden': {
@@ -159,6 +161,10 @@ export class Character extends Schema {
           break;
         case 'name':
           if (this.nameSignText) this.nameSignText.text = this.name;
+          break;
+        case 'mode2D':
+          this.removeMesh();
+          this.doMesh();
           break;
         case 'frontImage':
           if (this.mode2D)
@@ -215,9 +221,11 @@ export class Character extends Schema {
     this.nameSign?.dispose();
     this.nameSignText?.dispose();
     this.hiddenSign?.dispose();
+    this.stealthSign?.dispose();
     this.nameSign = null;
     this.nameSignText = null;
     this.hiddenSign = null;
+    this.stealthSign = null;
   }
 
   removeVisionRays() {
@@ -397,6 +405,8 @@ export class Character extends Schema {
     this.nameSignText.fontSize = 14;
     this.nameSignText.width = "80px";
     this.nameSignText.height = "30px";
+    this.nameSignText.outlineWidth = 5;
+    this.nameSignText.outlineColor = "Black";
     this.nameSignText.textWrapping = TextWrapping.WordWrap;
     this.nameSignText.resizeToFit = true;
     this.nameSign.addControl(this.nameSignText);
@@ -413,6 +423,17 @@ export class Character extends Schema {
 
     this.animator.parentUI(this.hiddenSign, 1, 0);
     this.animator.toggleUI(this.hiddenSign, this.hidden);
+
+    this.stealthSign = new Image('stealth', 'assets/images/game/stealth.png');
+    this.stealthSign.width = "25px";
+    this.stealthSign.height = "25px";
+    this.stealthSign.linkOffsetX = 30;
+    this.stealthSign.linkOffsetY = 20;
+    this.parameters.world.ui.addControl(this.stealthSign);
+
+    this.stealthSign.linkWithMesh(this.signsMesh);
+    this.animator.parentUI(this.stealthSign, 1, 0, true);
+    this.animator.toggleUI(this.stealthSign, this.stealth);
   }
 
   doImages() {
@@ -436,23 +457,24 @@ export class Character extends Schema {
   }
 
   updateMaterial() {
-    if (this.visualMesh) {
-      var camera = new BABYLON.Vector3(this.parameters.world.camera.position.x, 0, this.parameters.world.camera.position.z);
-      var angle = Vectors.angle({ x: this.direction.x, y: this.direction.y }, { x: camera.x, y: camera.z });
+    if (this.visualMesh && this.mode2D) {
+      this.visualMesh.material = this.frontMaterial;
+      // var camera = new BABYLON.Vector3(this.parameters.world.camera.position.x, 0, this.parameters.world.camera.position.z);
+      // var angle = Vectors.angle({ x: this.direction.x, y: this.direction.y }, { x: camera.x, y: camera.z });
 
-      if (angle >= 0 && angle < 1.5) {
-        this.visualMesh.material = this.backMaterial;
-        if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = -1;
-      } else if (angle >= 1.5 && angle < 3) {
-        this.visualMesh.material = this.backMaterial;
-        if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = 1;
-      } else if (angle <= 0 && angle > -1.5) {
-        this.visualMesh.material = this.frontMaterial;
-        if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = -1;
-      } else if (angle <= -1.5 && angle > -3) {
-        this.visualMesh.material = this.frontMaterial;
-        if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = 1;
-      }
+      // if (angle >= 0 && angle < 1.5) {
+      //   this.visualMesh.material = this.backMaterial;
+      //   if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = -1;
+      // } else if (angle >= 1.5 && angle < 3) {
+      //   this.visualMesh.material = this.backMaterial;
+      //   if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = 1;
+      // } else if (angle <= 0 && angle > -1.5) {
+      //   this.visualMesh.material = this.frontMaterial;
+      //   if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = -1;
+      // } else if (angle <= -1.5 && angle > -3) {
+      //   this.visualMesh.material = this.frontMaterial;
+      //   if (this.visualMesh.material?.diffuseTexture) this.visualMesh.material.diffuseTexture.uScale = 1;
+      // }
     }
   }
 

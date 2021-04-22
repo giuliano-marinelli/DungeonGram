@@ -159,13 +159,13 @@ export class World extends Schema {
     }
 
     //update the 2D characters material by the character direction and camera position
-    this.camera.onViewMatrixChangedObservable.add(() => {
-      for (let character in this.characters) {
-        if (this.characters[character].mode2D && this.characters[character].visualMesh) {
-          this.characters[character].updateMaterial();
-        }
-      }
-    });
+    // this.camera.onViewMatrixChangedObservable.add(() => {
+    //   for (let character in this.characters) {
+    //     if (this.characters[character].mode2D && this.characters[character].visualMesh) {
+    //       this.characters[character].updateMaterial();
+    //     }
+    //   }
+    // });
   }
 
   initGlobalLights() {

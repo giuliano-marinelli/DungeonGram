@@ -64,7 +64,7 @@ export class Animator {
     if (!this.mesh._children || !this.mesh._children.find((child) => { return child.uniqueId == mesh.uniqueId })) {
       this.registeredChildren[mesh.uniqueId] = mesh;
       mesh.parent = this.mesh;
-      mesh.skeleton = this.mesh.skeleton.clone("childSkeleton");
+      mesh.skeleton = this.mesh.skeleton?.clone("childSkeleton");
       // mesh.skeleton.enableBlending(this.transition);
       // for (let anim in mesh.skeleton._ranges) {
       //   mesh.skeleton._ranges[anim].from = mesh.skeleton._ranges[anim].from + 1;
@@ -75,7 +75,7 @@ export class Animator {
       for (let childId in this.registeredChildren) {//for each formally registered child
         this.registeredChildren[childId].skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
       }
-      this.skeleton.beginAnimation(this.actual.animation, this.actual.loop, 1);
+      this.skeleton?.beginAnimation(this.actual.animation, this.actual.loop, 1);
       this.visibility(this.mesh.visibility);
     }
   }
