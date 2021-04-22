@@ -1,17 +1,17 @@
 import getS3 from '../database/aws';
 
-//get aws s3
-const s3 = getS3();
-
-//import multer storages
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-
 class Storage {
   storage: any;
   temporalStorage: any;
 
   constructor() {
+    //import multer storages
+    const multer = require('multer');
+    const multerS3 = require('multer-s3');
+
+    //get aws s3
+    const s3 = getS3();
+
     //set storage method based on envinroment variable
     if (process.env.AWS_UPLOAD == "yes") {
       this.storage = multerS3({
