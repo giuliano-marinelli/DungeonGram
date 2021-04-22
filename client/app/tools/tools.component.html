@@ -45,7 +45,6 @@
                           </div>
                         </span>
 
-
                         <app-loading [condition]="isLoadingOwnMaps"></app-loading>
 
                         <p *ngIf="ownMaps.length <= 0" class="text-center">
@@ -82,7 +81,7 @@
                         </div>
 
                         <ngb-pagination *ngIf="countOwnMaps > 0" class="d-flex justify-content-center" size="sm"
-                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pageOwnMaps"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pageOwnMaps"
                           [pageSize]="pageSizeOwnMaps" [collectionSize]="countOwnMaps" (pageChange)="getMaps(true)">
                         </ngb-pagination>
 
@@ -118,7 +117,7 @@
                         </div>
 
                         <ngb-pagination *ngIf="countPublicMaps > 0" class="d-flex justify-content-center" size="sm"
-                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pagePublicMaps"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pagePublicMaps"
                           [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps"
                           (pageChange)="getMaps(false)">
                         </ngb-pagination>
@@ -238,7 +237,7 @@
                       </div>
 
                       <ngb-pagination *ngIf="countOwnCharacters > 0" class="d-flex justify-content-center" size="sm"
-                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pageOwnCharacters"
+                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true" [(page)]="pageOwnCharacters"
                         [pageSize]="pageSizeOwnCharacters" [collectionSize]="countOwnCharacters"
                         (pageChange)="getCharacters(true)">
                       </ngb-pagination>
@@ -267,7 +266,7 @@
                       </div>
 
                       <ngb-pagination *ngIf="countPublicCharacters > 0" class="d-flex justify-content-center" size="sm"
-                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [(page)]="pagePublicCharacters"
+                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pagePublicCharacters"
                         [pageSize]="pageSizePublicCharacters" [collectionSize]="countPublicCharacters"
                         (pageChange)="getCharacters(false)">
                       </ngb-pagination>
