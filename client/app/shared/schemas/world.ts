@@ -28,6 +28,8 @@ export class World extends Schema {
   constructor(schema, parameters) {
     super(parameters);
 
+    this.test = parameters.test;
+
     this.initCamera();
 
     this.initGlobalLights();
@@ -155,6 +157,15 @@ export class World extends Schema {
           BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
       }
     }
+
+    //update the 2D characters material by the character direction and camera position
+    this.camera.onViewMatrixChangedObservable.add(() => {
+      for (let character in this.characters) {
+        if (this.characters[character].mode2D && this.characters[character].visualMesh) {
+          this.characters[character].updateMaterial();
+        }
+      }
+    });
   }
 
   initGlobalLights() {
@@ -326,19 +337,28 @@ export class World extends Schema {
     if (this.characters[character] && this.characters[character].mesh &&
       character != selectedCharacter &&
       (!this.characters[character].addingMode || this.users[this.parameters.token]?.addingModeCharacter != character)) {
-      this.characters[character].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].mesh.position.y + 1.65 * this.characters[selectedCharacter].height, this.characters[selectedCharacter].mesh.position.z);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.characters[character].mesh.position.x, this.characters[character].mesh.position.y + 1.65 * this.characters[character].height, this.characters[character].mesh.position.z).subtract(origin));
-      var ray = new BABYLON.Ray(
-        origin,
-        target,
-        this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
-      );
-      var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
-        return mesh.isCollible && !mesh.isTranspasable && (!mesh.isCharacter || mesh.name == this.characters[character].id)
-      })?.pickedMesh;
-      if ((pickedMesh && this.characters[character].id == pickedMesh.name)
-        && (!this.characters[character].hidden || this.users[this.parameters.token]?.isDM))
+      var canSeeIt = false;
+      var distX = Math.abs(this.characters[character].x - this.characters[selectedCharacter].x);
+      var distY = Math.abs(this.characters[character].y - this.characters[selectedCharacter].y);
+      if (distX <= this.adjustVisionRange(this.characters[selectedCharacter].visionRange)
+        && distY <= this.adjustVisionRange(this.characters[selectedCharacter].visionRange)) {
+        this.characters[character].collider.isPickable = true;
+        var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].height * 2 - 0.1, this.characters[selectedCharacter].mesh.position.z);
+        var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(this.characters[character].mesh.position.x, this.characters[character].height * 2 - 0.1, this.characters[character].mesh.position.z).subtract(origin));
+        var ray = new BABYLON.Ray(
+          origin,
+          target,
+          this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
+        );
+        var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
+          return mesh.isCollible && !mesh.isTranspasable && (!mesh.isCharacter || mesh.name == this.characters[character].id)
+        })?.pickedMesh;
+
+        canSeeIt = (pickedMesh && this.characters[character].id == pickedMesh.name)
+          && (!this.characters[character].hidden || this.users[this.parameters.token]?.isDM);
+      }
+
+      if (canSeeIt)
         this.characters[character].animator.show();
       else {
         this.characters[character].animator.hide(this.characters[character].hidden, false);
@@ -352,21 +372,35 @@ export class World extends Schema {
 
   updateDoorVisibility(door, selectedCharacter) {
     if (this.map.doors[door] && this.map.doors[door].mesh) {
-      this.map.doors[door].collider.isPickable = true;
-      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].mesh.position.y + 1.65 * this.characters[selectedCharacter].height - 0.1, this.characters[selectedCharacter].mesh.position.z);
-      var middlePoint = Vectors.middlePoint(this.map.doors[door].from, this.map.doors[door].to);
-      var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(middlePoint.x, this.map.doors[door].height - 0.1, middlePoint.y).subtract(origin));
-      var ray = new BABYLON.Ray(
-        origin,
-        target,
-        this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
+      var canSeeIt = false;
+      var distX = Math.min(
+        Math.abs(this.map.doors[door].from.x - this.characters[selectedCharacter].x),
+        Math.abs(this.map.doors[door].to.x - this.characters[selectedCharacter].x)
       );
-      var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
-        return (mesh.isCollible || mesh.isTranspasable) && ((!mesh.isCharacter && !mesh.isDoor) || mesh.name == this.map.doors[door].id)
-      })?.pickedMesh;
-      var distanceToDoor = Vectors.distance({ x: this.characters[selectedCharacter].mesh.position.x, y: this.characters[selectedCharacter].mesh.position.z }, { x: this.map.doors[door].to.x, y: this.map.doors[door].to.y });
-      if (((pickedMesh && this.map.doors[door].id == pickedMesh.name) || distanceToDoor < 3)
-        && (!this.map.doors[door].hidden || this.users[this.parameters.token]?.isDM)) {
+      var distY = Math.min(
+        Math.abs(this.map.doors[door].from.y - this.characters[selectedCharacter].y),
+        Math.abs(this.map.doors[door].to.y - this.characters[selectedCharacter].y),
+      );
+      if (distX <= this.adjustVisionRange(this.characters[selectedCharacter].visionRange)
+        && distY <= this.adjustVisionRange(this.characters[selectedCharacter].visionRange)) {
+        this.map.doors[door].collider.isPickable = true;
+        var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].height * 2 - 0.1, this.characters[selectedCharacter].mesh.position.z);
+        var middlePoint = Vectors.middlePoint(this.map.doors[door].from, this.map.doors[door].to);
+        var target = BABYLON.Vector3.Normalize(new BABYLON.Vector3(middlePoint.x, this.map.doors[door].height - 0.1, middlePoint.y).subtract(origin));
+        var ray = new BABYLON.Ray(
+          origin,
+          target,
+          this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
+        );
+        var pickedMesh = this.parameters.scene.pickWithRay(ray, (mesh) => {
+          return (mesh.isCollible || mesh.isTranspasable) && ((!mesh.isCharacter && !mesh.isDoor) || mesh.name == this.map.doors[door].id)
+        })?.pickedMesh;
+        var distanceToDoor = Vectors.distance({ x: this.characters[selectedCharacter].mesh.position.x, y: this.characters[selectedCharacter].mesh.position.z }, { x: this.map.doors[door].to.x, y: this.map.doors[door].to.y });
+
+        canSeeIt = ((pickedMesh && this.map.doors[door].id == pickedMesh.name) || distanceToDoor < 3)
+          && (!this.map.doors[door].hidden || this.users[this.parameters.token]?.isDM);
+      }
+      if (canSeeIt) {
         this.map.doors[door].animator.show();
         if (distanceToDoor <= 3) {
           this.map.doors[door].mesh.isPickable = true;

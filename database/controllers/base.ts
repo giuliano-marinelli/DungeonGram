@@ -61,6 +61,21 @@ abstract class BaseCtrl {
       return res.status(400).send(err.message);
     }
   }
+
+  _formData = (req) => {
+    try {
+      // console.log(req.body);
+      if (req.body.data) {
+        var objectData = JSON.parse(req.body.data);
+        Object.entries(objectData).forEach(([key, value]) => {
+          req.body[key] = value;
+        });
+        delete req.body.data;
+      }
+    } catch {
+      console.log("Can't proccess formdata object data.");
+    }
+  }
 }
 
 export default BaseCtrl;

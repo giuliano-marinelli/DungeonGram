@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Character } from '../shared/models/character.model';
+import { GlobalComponent } from '../shared/global/global.component';
 
 @Injectable()
 export class CharacterService {
@@ -18,7 +19,7 @@ export class CharacterService {
   }
 
   addCharacter(character: Character): Observable<Character> {
-    return this.http.post<Character>('/api/character', character);
+    return this.http.post<Character>('/api/character', GlobalComponent.createFormData(character));
   }
 
   getCharacter(character: Character): Observable<Character> {
@@ -30,7 +31,7 @@ export class CharacterService {
   }
 
   editCharacter(character: Character): Observable<any> {
-    return this.http.post(`/api/character/${character._id}`, character, { responseType: 'text' });
+    return this.http.post(`/api/character/${character._id}`, GlobalComponent.createFormData(character), { responseType: 'text' });
   }
 
   deleteCharacter(character: Character): Observable<any> {

@@ -6,7 +6,7 @@ import CharacterCtrl from '../database/controllers/character';
 import MapCtrl from '../database/controllers/map';
 import InvitationCtrl from '../database/controllers/invitation';
 
-import getS3 from '../database/aws';
+import Storage from './storage';
 
 function setRoutes(app): void {
   //router and controllers initialization
@@ -16,41 +16,12 @@ function setRoutes(app): void {
   const characterCtrl = new CharacterCtrl();
   const mapCtrl = new MapCtrl();
   const invitationCtrl = new InvitationCtrl();
-
-  //get aws s3
-  const s3 = getS3();
+  const storage = new Storage();
 
   //multer configuration
   const multer = require('multer');
-  const multerS3 = require('multer-s3');
 
-  //multer file upload settings
-  var storage;
-  if (process.env.AWS_UPLOAD == "yes") {
-    storage = multerS3({
-      s3: s3,
-      bucket: 'dungeongram',
-      metadata: (req, file, cb) => {
-        cb(null, { fieldName: file.fieldname });
-      },
-      key: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
-      }
-    });
-  } else {
-    storage = multer.diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
-      }
-    });
-  }
-
-  //multer mime type validation
+  //define multer to upload files (to disk or aws s3)
   const upload = multer({
     storage: storage,
     limits: {
@@ -61,7 +32,7 @@ function setRoutes(app): void {
         cb(null, true);
       } else {
         cb(null, false);
-        return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        return cb(new Error('Only .png, .jpg and .jpeg format allowed.'));
       }
     }
   });
@@ -88,9 +59,17 @@ function setRoutes(app): void {
   //characters
   router.route('/characters').get(characterCtrl.getAll);
   router.route('/characters/count').get(characterCtrl.count);
-  router.route('/character').post(characterCtrl.insert);
+  router.route('/character').post(
+    storage.temporal(["portrait", "facePortrait"]),
+    upload.fields([{ name: "frontImageFile", maxCount: 1 }, { name: "backImageFile", maxCount: 1 }, { name: "portrait", maxCount: 1 }, { name: "facePortrait", maxCount: 1 }]),
+    characterCtrl.insert
+  );
   router.route('/character/:id').get(characterCtrl.get);
-  router.route('/character/:id').post(characterCtrl.update);
+  router.route('/character/:id').post(
+    storage.temporal(["portrait", "facePortrait"]),
+    upload.fields([{ name: "frontImageFile", maxCount: 1 }, { name: "backImageFile", maxCount: 1 }, { name: "portrait", maxCount: 1 }, { name: "facePortrait", maxCount: 1 }]),
+    characterCtrl.update
+  );
   router.route('/character/:id').delete(characterCtrl.delete);
 
   //maps
@@ -108,7 +87,6 @@ function setRoutes(app): void {
   router.route('/invitation/:id').get(invitationCtrl.get);
   router.route('/invitation/:id').post(invitationCtrl.update);
   router.route('/invitation/:id').delete(invitationCtrl.delete);
-
 
   //apply the routes to our application with the prefix /api
   app.use('/api', router);

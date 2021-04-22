@@ -81,6 +81,7 @@ class UserCtrl extends BaseCtrl {
       if (!existent) {
         req.body.role = 'user';
         req.body.verified = false;
+
         if (req.file) req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
         const obj = await new this.model(req.body).save();
@@ -89,6 +90,7 @@ class UserCtrl extends BaseCtrl {
         throw new Error('email already exists');
       }
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).json({ error: err.message });
     }
   }
@@ -103,23 +105,15 @@ class UserCtrl extends BaseCtrl {
       req.body.verified = JSON.parse(JSON.stringify(user)).verified;
       req.body.email = resu.user.email;
       if (req.file) {
-        if (user.avatar) {
-          const s3 = getS3();
-          const fs = require('fs');
+        this.model.deleteFiles(user.avatar);
 
-          try {
-            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: user.avatar.split('/').pop() }).promise();
-            else fs.unlinkSync(user.avatar);
-          } catch (err) {
-            console.log("Not found file to delete");
-          }
-        }
         req.body.avatar = req.file.location ? req.file.location : req.file.destination + req.file.filename;
       }
 
       await this.model.updateOne({ _id: req.params.id, email: resu.user.email }, req.body);
       res.sendStatus(200);
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).send(err.message);
     }
   }

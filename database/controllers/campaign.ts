@@ -252,17 +252,21 @@ class CampaignCtrl extends BaseCtrl {
   //insert (restricted to logged user)
   insert = async (req, res) => {
     try {
+      this._formData(req);
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
       if (!resu.user.verified) throw new Error('not verified email');
+      if (req.body.title == null) throw new Error("Campaign must have a title");
 
       delete req.body._id;
       req.body.owner = resu.user._id;
+
       if (req.file) req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
       const obj = await new this.model(req.body).save();
       res.status(201).json(obj);
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).json({ error: err.message });
     }
   }
@@ -364,28 +368,23 @@ class CampaignCtrl extends BaseCtrl {
   //update by id (restricted to logged user)
   update = async (req, res) => {
     try {
+      this._formData(req);
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
+      if (req.body.title == null) throw new Error("Campaign must have a title");
 
       const campaign = await this.model.findOne({ _id: req.params.id, owner: resu.user._id });
-      if (req.file) {
-        if (campaign.banner) {
-          const s3 = getS3();
-          const fs = require('fs');
 
-          try {
-            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: campaign.banner.split('/').pop() }).promise();
-            else fs.unlinkSync(campaign.banner);
-          } catch (err) {
-            console.log("Not found file to delete");
-          }
-        }
+      if (req.file) {
+        this.model.deleteFiles(campaign.banner);
+
         req.body.banner = req.file.location ? req.file.location : req.file.destination + req.file.filename;
       }
 
       await this.model.updateOne({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).send(err.message);
     }
   }

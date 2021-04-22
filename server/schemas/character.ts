@@ -49,6 +49,14 @@ export class Character extends Schema {
   portrait;
   @type("string")
   facePortrait;
+  @type("boolean")
+  mode2D = false;
+  @type("boolean")
+  disableBack = false;
+  @type("string")
+  frontImage;
+  @type("string")
+  backImage;
   //internal attributes
   movementAcum = 0;
   collide = false;
@@ -112,6 +120,10 @@ export class Character extends Schema {
       this.height = this.db.height;
       this.portrait = this.db.portrait;
       this.facePortrait = this.db.facePortrait;
+      this.mode2D = this.db.mode2D;
+      this.disableBack = this.db.disableBack;
+      this.frontImage = this.db.frontImage;
+      this.backImage = this.db.backImage;
     }
   }
 

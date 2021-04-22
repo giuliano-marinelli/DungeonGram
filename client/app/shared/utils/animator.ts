@@ -34,19 +34,21 @@ export class Animator {
   }
 
   play(animation, loop?) {
-    if (loop == null) loop = true;
-    if (animation != this.actual.animation || loop != this.actual.loop) {
-      this.skeleton.beginAnimation(animation, loop, 1);
-      // this.mesh.getChildren().forEach((child) => {
-      // if (this.mesh._children) {
-      // this.mesh._children.forEach((child) => {
-      for (let childId in this.registeredChildren) {//for each formally registered child
-        this.registeredChildren[childId].skeleton?.beginAnimation(animation, loop, 1);
+    if (this.skeleton) {
+      if (loop == null) loop = true;
+      if (animation != this.actual.animation || loop != this.actual.loop) {
+        this.skeleton.beginAnimation(animation, loop, 1);
+        // this.mesh.getChildren().forEach((child) => {
+        // if (this.mesh._children) {
+        // this.mesh._children.forEach((child) => {
+        for (let childId in this.registeredChildren) {//for each formally registered child
+          this.registeredChildren[childId].skeleton?.beginAnimation(animation, loop, 1);
+        }
+        // });
+        // }
+        this.actual.animation = animation;
+        this.actual.loop = loop;
       }
-      // });
-      // }
-      this.actual.animation = animation;
-      this.actual.loop = loop;
     }
   }
 
@@ -93,8 +95,8 @@ export class Animator {
     this.mesh.removeChild(child);
   }
 
-  parentUI(control, alphaOn, alphaOff) {
-    control.linkWithMesh(this.mesh);
+  parentUI(control, alphaOn, alphaOff, onlyAlpha?) {
+    if (!onlyAlpha) control.linkWithMesh(this.mesh);
     this.registeredChildrenUI[control.uniqueId] = { control: control, alphaOn: alphaOn, alphaOff: alphaOff, active: false };
     this.registeredChildrenUI[control.uniqueId].control.alpha = 0;
   }

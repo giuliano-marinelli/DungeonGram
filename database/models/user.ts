@@ -68,9 +68,6 @@ userSchema.pre('deleteMany', { query: true, document: false }, async function ()
 userSchema.methods._delete = async function () {
   console.log("DELETE User: ", this.username, this.email);
 
-  const s3 = getS3();
-  const fs = require('fs');
-
   //delete invitations
   await Invitation.deleteMany({ $or: [{ recipient: this._id }, { sender: this._id }] });
 
@@ -84,13 +81,28 @@ userSchema.methods._delete = async function () {
   await Map.deleteMany({ owner: this._id });
 
   //delete avatar file
-  if (this.avatar) {
-    try {
-      if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: this.avatar.split('/').pop() }).promise();
-      else fs.unlinkSync(this.avatar);
-    } catch (err) {
-      console.log("not found file " + this.avatar + " to delete");
+  User.deleteFiles(this.avatar);
+}
+
+userSchema.statics.deleteFiles = async function (avatar) {
+  try {
+    if (avatar) {
+      const sameAvatarUsers = await User.find({ avatar: avatar });
+
+      if (!sameAvatarUsers || sameAvatarUsers.length <= 1) {
+        const s3 = getS3();
+        const fs = require('fs');
+
+        try {
+          if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: avatar.split('/').pop() }).promise();
+          else fs.unlinkSync(avatar);
+        } catch (err) {
+          console.log("Not found file " + avatar + " to delete");
+        }
+      }
     }
+  } catch {
+    console.log("Failed to delete " + avatar + " file");
   }
 }
 
@@ -100,6 +112,8 @@ userSchema.statics.findByAuthorization = async function (req) {
   if (!authorization) authorization = req;
   try {
     var decoded = jwt.verify(authorization, process.env.SECRET_TOKEN);
+    if (!decoded?.user) return { status: 401 };
+
     const user = await User.findOne({ _id: decoded.user._id });
     return { user: user, status: 200 };
   } catch (e) {

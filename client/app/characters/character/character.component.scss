@@ -1,3 +1,9 @@
+//babylon loading screen fix
+::ng-deep #babylonjsLoadingDiv {
+  position: fixed !important;
+  z-index: 10000;
+}
+
 #character {
   position: relative;
   width: 100%;
@@ -107,6 +113,10 @@ canvas {
   width: 200px;
 }
 
+.ce-character-dropdown {
+  width: 400px !important;
+}
+
 .ce-btn-container .dropright .dropdown-menu {
   left: 55px !important;
 }
@@ -159,4 +169,55 @@ canvas {
 .form-check-input.check-image[type="radio"]:checked + img,
 .form-check-input.check-image[type="checkbox"]:checked + img {
   filter: drop-shadow(0px 0px 4px white);
+}
+
+/* IMAGE UPLOADER */
+.uploader-img {
+  width: 100%;
+  height: 150px;
+  // border-radius: 125px;
+  -o-object-fit: contain;
+  object-fit: contain;
+  -o-object-position: center;
+  object-position: center;
+  overflow: hidden;
+}
+
+.uploader-img.disabled {
+  filter: grayscale(100%);
+}
+
+.uploader-img-upload {
+  display: inline-block;
+  position: absolute;
+  width: 100%;
+  height: 150px;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: inset 0px 0px 30px 20px #000000;
+  box-shadow: inset 0px 0px 30px 20px #000000;
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.uploader-img-container {
+  width: 100%;
+  position: relative;
+  display: inline-block;
+}
+
+.uploader-img-container:hover .uploader-img-upload {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.uploader-img-upload-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
 }

@@ -72,6 +72,10 @@
         {{character.description}}
       </p>
       <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
+        <button class="btn btn-sm btn-dark ml-2" (click)="openCharacter(character, true)"
+          [hidden]="auth.currentUser._id == character.owner" tippy="View">
+          <i class="fa fa-eye"></i>
+        </button>
         <button class="btn btn-sm btn-dark character-btn-alt ml-2" (click)="openCharacter(character)"
           [hidden]="auth.currentUser._id != character.owner" tippy="Edit">
           <i class="fa fa-pencil"></i>

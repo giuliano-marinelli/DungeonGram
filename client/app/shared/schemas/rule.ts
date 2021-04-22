@@ -130,10 +130,11 @@ export class Rule extends Schema {
 
     //action for stop the rule drawing
     this.actions.stopRule = (e) => {
-      if (e.button == 0 /*&& this.parameters.controller.activeTool?.name == 'rule'*/) {
+      if (e.button == 0) {
         this.parameters.canvas.removeEventListener("pointermove", this.actions.dragRule, false);
         this.parameters.canvas.removeEventListener("contextmenu", this.actions.addRule, false);
-        this.parameters.controller.send('game', 'rule', { action: 'end' });
+        if (this.parameters.controller.activeTool?.name == 'rule')
+          this.parameters.controller.send('game', 'rule', { action: 'end' });
       }
     }
     this.parameters.canvas.addEventListener("pointerup", this.actions.stopRule, false);

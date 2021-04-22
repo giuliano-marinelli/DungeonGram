@@ -83,9 +83,10 @@ export class CharacterListComponent implements OnInit {
     );
   }
 
-  openCharacter(character?) {
+  openCharacter(character?, viewOnly?) {
     var modalRef = this.modalService.open(CharacterComponent, { size: 'xl', backdrop: 'static' });
     if (character) modalRef.componentInstance.character = character;
+    if (viewOnly) modalRef.componentInstance.viewOnly = viewOnly;
     modalRef.componentInstance.getCharacters.subscribe(() => {
       this.getCharacters(true);
       this.getCharacters(false);

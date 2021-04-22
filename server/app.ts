@@ -28,8 +28,8 @@ dotenv.config();
 app.use('/', express.static(path.join(__dirname, '../public'))); //make angular compiled folder public
 app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 500000 }));
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }

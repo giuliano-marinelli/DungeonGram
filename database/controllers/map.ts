@@ -114,6 +114,7 @@ class MapCtrl extends BaseCtrl {
   //insert (restricted to logged user)
   insert = async (req, res) => {
     try {
+      this._formData(req);
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
       if (!resu.user.verified) throw new Error('not verified email');
@@ -126,6 +127,7 @@ class MapCtrl extends BaseCtrl {
       req.body.tilemap = {
         width: 20, height: 20
       };
+
       if (req.file) req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
 
       const obj = await new this.model(req.body).save();
@@ -134,6 +136,7 @@ class MapCtrl extends BaseCtrl {
       await campaign.save();
       res.status(201).json(obj);
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).json({ error: err.message });
     }
   }
@@ -264,28 +267,21 @@ class MapCtrl extends BaseCtrl {
   //update by id (restricted to logged user)
   update = async (req, res) => {
     try {
+      this._formData(req);
       const resu = await User.findByAuthorization(req);
       if (resu.status != 200) throw new Error('unauthorized');
 
       const map = await this.model.findOne({ _id: req.params.id, owner: resu.user._id });
       if (req.file) {
-        if (map.terrain) {
-          const s3 = getS3();
-          const fs = require('fs');
+        this.model.deleteFiles(map.terrain);
 
-          try {
-            if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: map.terrain.split('/').pop() }).promise();
-            else fs.unlinkSync(map.terrain);
-          } catch (err) {
-            console.log("Not found file to delete");
-          }
-        }
         req.body.terrain = req.file.location ? req.file.location : req.file.destination + req.file.filename;
       }
 
       await this.model.updateOne({ _id: req.params.id, owner: resu.user._id }, req.body);
       res.sendStatus(200);
     } catch (err) {
+      if (req.file) this.model.deleteFiles(req.file.location ? req.file.location : req.file.destination + req.file.filename);
       return res.status(400).send(err.message);
     }
   }

@@ -85,9 +85,6 @@ mapSchema.pre('deleteMany', { query: true, document: false }, async function () 
 mapSchema.methods._delete = async function () {
   console.log("DELETE Map: ", this.name);
 
-  const s3 = getS3();
-  const fs = require('fs');
-
   //delete references to map on campaigns
   await Campaign.update(
     { maps: { $in: [this._id] } },
@@ -101,13 +98,28 @@ mapSchema.methods._delete = async function () {
   );
 
   //delete terrain file
-  if (this.terrain) {
-    try {
-      if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: this.terrain.split('/').pop() }).promise();
-      else fs.unlinkSync(this.terrain);
-    } catch (err) {
-      console.log("not found file " + this.terrain + " to delete");
+  Map.deleteFiles(this.terrain);
+}
+
+mapSchema.statics.deleteFiles = async function (terrain) {
+  try {
+    if (terrain) {
+      const sameTerrainMaps = await Map.find({ terrain: terrain });
+
+      if (!sameTerrainMaps || sameTerrainMaps.length <= 1) {
+        const s3 = getS3();
+        const fs = require('fs');
+
+        try {
+          if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: terrain.split('/').pop() }).promise();
+          else fs.unlinkSync(terrain);
+        } catch (err) {
+          console.log("Not found file " + terrain + " to delete");
+        }
+      }
     }
+  } catch {
+    console.log("Failed to delete " + terrain + " file");
   }
 }
 

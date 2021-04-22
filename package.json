@@ -61,6 +61,7 @@
     "express-basic-auth": "^1.2.0",
     "font-awesome": "^4.7.0",
     "highlight.js": "^10.7.1",
+    "is-base64": "^1.1.0",
     "izitoast": "^1.4.0",
     "jackson-js": "^1.1.0",
     "jquery": "^3.6.0",

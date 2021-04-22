@@ -126,7 +126,10 @@ export class ToolsComponent implements OnInit {
           normalizeUnit: true
         },
         actions: {
-          toggle: () => { this.toggleActiveTool(this.tools.rule, !this.tools.rule.active) },
+          toggle: () => {
+            this.toggleActiveTool(this.tools.rule, !this.tools.rule.active);
+            this.controller.send('game', 'rule', { action: 'end' });
+          },
           adjustTo: (value) => { this.tools.rule.options.adjustTo = value },
           share: (share) => { this.controller.send('game', 'rule', { value: share, action: 'share' }) },
           normalizeUnit: (normalizeUnit) => { this.controller.send('game', 'rule', { value: normalizeUnit, action: 'normalizeUnit' }) },
@@ -140,7 +143,10 @@ export class ToolsComponent implements OnInit {
           normalizeUnit: true
         },
         actions: {
-          toggle: () => { this.toggleActiveTool(this.tools.figure, !this.tools.figure.active) },
+          toggle: () => {
+            this.toggleActiveTool(this.tools.figure, !this.tools.figure.active);
+            this.controller.send('game', 'figure', { action: 'end' });
+          },
           type: (type) => { this.controller.send('game', 'figure', { value: type, action: 'type' }) },
           adjustTo: (value) => { this.tools.figure.options.adjustTo = value },
           share: (share) => { this.controller.send('game', 'figure', { value: share, action: 'share' }) },

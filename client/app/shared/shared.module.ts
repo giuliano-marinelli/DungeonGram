@@ -42,7 +42,7 @@ import { TruncatePipe } from './pipes/truncate.pipe';
     ConfirmComponent,
     LeaveGuardWarningComponent,
     FilterPipe,
-    TruncatePipe
+    TruncatePipe,
   ],
   providers: [
     ToastComponent

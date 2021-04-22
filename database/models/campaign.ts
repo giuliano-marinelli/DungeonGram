@@ -67,9 +67,6 @@ campaignSchema.pre('deleteMany', { query: true, document: false }, async functio
 campaignSchema.methods._delete = async function () {
   console.log("DELETE Campaign: ", this.title);
 
-  const s3 = getS3();
-  const fs = require('fs');
-
   //delete invitations
   await Invitation.deleteMany({ campaign: this._id });
 
@@ -87,13 +84,28 @@ campaignSchema.methods._delete = async function () {
     await Map.deleteMany({ _id: { $in: this.maps } });
 
   //delete banner file
-  if (this.banner) {
-    try {
-      if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: this.banner.split('/').pop() }).promise();
-      else fs.unlinkSync(this.banner);
-    } catch (err) {
-      console.log("not found file " + this.banner + " to delete");
+  Campaign.deleteFiles(this.banner);
+}
+
+campaignSchema.statics.deleteFiles = async function (banner) {
+  try {
+    if (banner) {
+      const sameBannerCampaigns = await Campaign.find({ banner: banner });
+
+      if (!sameBannerCampaigns || sameBannerCampaigns.length <= 1) {
+        const s3 = getS3();
+        const fs = require('fs');
+
+        try {
+          if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: banner.split('/').pop() }).promise();
+          else fs.unlinkSync(banner);
+        } catch (err) {
+          console.log("Not found file " + banner + " to delete");
+        }
+      }
     }
+  } catch {
+    console.log("Failed to delete " + banner + " file");
   }
 }
 

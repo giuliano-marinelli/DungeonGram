@@ -11,4 +11,8 @@ export class Character {
   portrait?: string;
   facePortrait?: string;
   copyOf?: string;
+  mode2D?: boolean;
+  disableBack?: boolean;
+  frontImage?: string;
+  backImage?: string;
 }
