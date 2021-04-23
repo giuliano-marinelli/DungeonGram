@@ -34,7 +34,8 @@
         </button>
         <button class="btn minimize pull-right" tippy="{{minimized ? 'Maximize Chat' : 'Minimize Chat'}}"
           (click)="minimized = !minimized; scrollDown()">
-          <span class="material-icons">{{minimized ? 'keyboard_arrow_up': 'keyboard_arrow_down'}}</span>
+          <i class="fa fa-{{minimized ? 'window-maximize': 'window-minimize'}}"></i>
+          <!-- <span class="material-icons">{{minimized ? 'keyboard_arrow_up': 'keyboard_arrow_down'}}</span> -->
         </button>
       </div>
     </div>
