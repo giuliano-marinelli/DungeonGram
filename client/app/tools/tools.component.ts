@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Controller } from '../shared/controller/controller';
 import { Campaign } from 'client/app/shared/models/campaign.model';
@@ -33,6 +33,9 @@ export class ToolsComponent implements OnInit {
   isLoadingCampaign = true;
 
   //for characters list and their pagination
+  searchOwnCharacters: string = '';
+  searchPublicCharacters: string = '';
+
   pageOwnCharacters: number = 1;
   pagePublicCharacters: number = 1;
   pageSizeOwnCharacters: number = 4;
@@ -46,6 +49,9 @@ export class ToolsComponent implements OnInit {
   isLoadingPublicCharacters: boolean = true;
 
   //for maps list and their pagination
+  searchOwnMaps: string = '';
+  searchPublicMaps: string = '';
+
   pageOwnMaps: number = 1;
   pagePublicMaps: number = 1;
   pageSizeOwnMaps: number = 4;
@@ -70,7 +76,8 @@ export class ToolsComponent implements OnInit {
     private campaignService: CampaignService,
     private mapService: MapService,
     private characterService: CharacterService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private changeDetector: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -216,7 +223,9 @@ export class ToolsComponent implements OnInit {
           charactersOnCampaign: this.controller.initSetting("charactersOnCampaign", null),
           addingMode: this.controller.initSetting("addingMode", false),
           selectedCharacter: this.controller.initSetting("selectedCharacter", null),
-          selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null),
+          selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null, ()=> {
+            this.changeDetector.markForCheck();
+          }),
           addingModeModel: this.controller.initSetting("addingModeModel", null),
           selectedMap: null //map is selected when openedMap setting change on maps tool options
         },
@@ -317,7 +326,10 @@ export class ToolsComponent implements OnInit {
 
   //for characters
   countCharacters(own: boolean): void {
-    this.characterService.countCharacters({ own: own }).subscribe(
+    this.characterService.countCharacters({
+      search: own ? this.searchOwnCharacters : this.searchPublicCharacters,
+      own: own
+    }).subscribe(
       data => {
         if (own) this.countOwnCharacters = data
         else this.countPublicCharacters = data
@@ -330,6 +342,7 @@ export class ToolsComponent implements OnInit {
     this.countCharacters(own);
     this.characterService.getCharacters(
       {
+        search: own ? this.searchOwnCharacters : this.searchPublicCharacters,
         own: own,
         page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
         count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters
@@ -371,7 +384,10 @@ export class ToolsComponent implements OnInit {
 
   //for maps
   countMaps(own: boolean): void {
-    this.mapService.countMaps({ own: own }).subscribe(
+    this.mapService.countMaps({
+      search: own ? this.searchOwnMaps : this.searchPublicMaps,
+      own: own
+    }).subscribe(
       data => {
         if (own) this.countOwnMaps = data
         else this.countPublicMaps = data
@@ -384,6 +400,7 @@ export class ToolsComponent implements OnInit {
     this.countMaps(own);
     this.mapService.getMaps(
       {
+        search: own ? this.searchOwnMaps : this.searchPublicMaps,
         own: own,
         page: own ? this.pageOwnMaps : this.pagePublicMaps,
         count: own ? this.pageSizeOwnMaps : this.pageSizePublicMaps
@@ -495,6 +512,9 @@ export class ToolsComponent implements OnInit {
   }
 
   getUsersByCharacter(character: any) {
-    return Object.values(this.tools.users.options.users?.value).filter((u) => u.selectedCharacter == character.id)
+    if (character)
+      return Object.values(this.tools.users.options.users?.value).filter((u) => u.selectedCharacter == character.id)
+    else
+      return null;
   }
 }

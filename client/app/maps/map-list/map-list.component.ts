@@ -16,6 +16,9 @@ declare var iziToast;
 })
 export class MapListComponent implements OnInit {
 
+  searchOwnMaps: string = '';
+  searchPublicMaps: string = '';
+
   pageOwnMaps: number = 1;
   pagePublicMaps: number = 1;
   pageSizeOwnMaps: number = 10;
@@ -40,7 +43,10 @@ export class MapListComponent implements OnInit {
   }
 
   countMaps(own: boolean): void {
-    this.mapService.countMaps({ own: own }).subscribe(
+    this.mapService.countMaps({
+      search: own ? this.searchOwnMaps : this.searchPublicMaps,
+      own: own
+    }).subscribe(
       data => {
         if (own) this.countOwnMaps = data
         else this.countPublicMaps = data
@@ -54,6 +60,7 @@ export class MapListComponent implements OnInit {
       this.countMaps(own);
       this.mapService.getMaps(
         {
+          search: own ? this.searchOwnMaps : this.searchPublicMaps,
           own: own,
           page: own ? this.pageOwnMaps : this.pagePublicMaps,
           count: own ? this.pageSizeOwnMaps : this.pageSizePublicMaps

@@ -94,13 +94,25 @@
 
 .maps {
   overflow: auto;
-  max-height: 495px;
+  max-height: 630px;
   width: 245px;
   margin-bottom: 10px;
 }
 
 .maps-add {
   width: 259px;
+}
+
+.maps-own {
+  overflow: auto;
+  max-height: 200px;
+  min-height: 200px;
+}
+
+.maps-public {
+  overflow: auto;
+  max-height: 200px;
+  min-height: 200px;
 }
 
 .character-img {
@@ -154,7 +166,7 @@
 
 .characters-onmap {
   overflow: auto;
-  max-height: 515px;
+  max-height: 610px;
   width: 210px;
   margin-left: 0px;
   margin-top: 10px;

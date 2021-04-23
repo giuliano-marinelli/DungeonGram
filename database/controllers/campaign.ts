@@ -16,6 +16,7 @@ class CampaignCtrl extends BaseCtrl {
       const own = req.query.own == 'true' ? true : false;
       const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
       const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var docs;
       if (own == true) {
@@ -87,11 +88,21 @@ class CampaignCtrl extends BaseCtrl {
           },
           {
             $match: {
-              $or: [
-                { owner: resu.user._id },
-                // { players: { $in: [resu.user._id] } },
-                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
-                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
+              $and: [
+                ...(search ? [{
+                  $or: [
+                    { title: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                  ]
+                }] : []),
+                {
+                  $or: [
+                    { owner: resu.user._id },
+                    // { players: { $in: [resu.user._id] } },
+                    { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
+                    { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
+                  ]
+                }
               ]
             }
           },
@@ -167,10 +178,20 @@ class CampaignCtrl extends BaseCtrl {
             $match: {
               owner: { $ne: resu?.user?._id },
               // players: { $nin: [resu?.user?._id] },
-              $or: [
-                { invitations: { $eq: [{}] } },
-                { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
-                { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+              $and: [
+                ...(search ? [{
+                  $or: [
+                    { title: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                  ]
+                }] : []),
+                {
+                  $or: [
+                    { invitations: { $eq: [{}] } },
+                    { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
+                    { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+                  ]
+                }
               ],
               private: false
             }
@@ -190,6 +211,7 @@ class CampaignCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
       const own = req.query.own == 'true' ? true : false;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var count;
       if (own) {
@@ -205,11 +227,21 @@ class CampaignCtrl extends BaseCtrl {
           },
           {
             $match: {
-              $or: [
-                { owner: resu.user._id },
-                // { players: { $in: [resu.user._id] } },
-                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
-                { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
+              $and: [
+                ...(search ? [{
+                  $or: [
+                    { title: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                  ]
+                }] : []),
+                {
+                  $or: [
+                    { owner: resu.user._id },
+                    // { players: { $in: [resu.user._id] } },
+                    { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } },
+                    { invitations: { $elemMatch: { recipient: resu.user._id, accepted: null } } }
+                  ]
+                }
               ]
             }
           },
@@ -231,9 +263,20 @@ class CampaignCtrl extends BaseCtrl {
             $match: {
               owner: { $ne: resu?.user?._id },
               // players: { $nin: [resu?.user?._id] },
-              $or: [
-                { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
-                { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+              $and: [
+                ...(search ? [{
+                  $or: [
+                    { title: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                  ]
+                }] : []),
+                {
+                  $or: [
+                    { invitations: { $eq: [{}] } },
+                    { invitations: { $not: { $elemMatch: { recipient: resu?.user?._id } } } },
+                    { invitations: { $elemMatch: { recipient: resu?.user?._id, accepted: false } } }
+                  ]
+                }
               ],
               private: false
             }

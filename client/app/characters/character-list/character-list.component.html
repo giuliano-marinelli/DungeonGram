@@ -4,25 +4,42 @@
     <app-loading [condition]="isLoadingOwn"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoadingOwn">
-    <p class="card-text">
-      <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
-        [isEnabled]="!auth.loggedIn">
-        <span class="d-inline-block" interactive="true" [tippy]="not_verified" placement="right"
-          [isEnabled]="!auth.isVerified">
-          <button type="button" class="btn btn-dark character-btn" (click)="openCharacter()"
-            [disabled]="!auth.loggedIn || !auth.isVerified"
-            attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
-            <i class="fa fa-plus"></i> New Character
+    <p class="card-text row">
+      <span class="col">
+        <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
+          [isEnabled]="!auth.loggedIn">
+          <span class="d-inline-block" interactive="true" [tippy]="not_verified" placement="right"
+            [isEnabled]="!auth.isVerified">
+            <button type="button" class="btn btn-dark character-btn" (click)="openCharacter()"
+              [disabled]="!auth.loggedIn || !auth.isVerified"
+              attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
+              <i class="fa fa-plus"></i> New Character
+            </button>
+          </span>
+        </span>
+        <ng-template #not_verified>
+          You need to <span class='text-warning'>verify your email</span> to enable character creation. <br><br>
+          Go to your <a routerLink="/account">Profile</a> to do it<br>
+        </ng-template>
+      </span>
+      <span class="col">
+        <span class="input-group pull-right" style="max-width: 300px;">
+          <input type="text" class="form-control character-input-alt" placeholder="Search..."
+            [(ngModel)]="searchOwnCharacters" (keyup)="getCharacters(true)" />
+          <button [hidden]="!searchOwnCharacters" (click)="searchOwnCharacters = ''; getCharacters(true)" type="button"
+            class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+            <i class="fa fa-times"></i>
           </button>
+          <div class="input-group-append">
+            <button class="btn character-btn-alt" type="button" (click)="getCharacters(true)">
+              <i class="fa fa-fw fa-search"></i>
+            </button>
+          </div>
         </span>
       </span>
-      <ng-template #not_verified>
-        You need to <span class='text-warning'>verify your email</span> to enable character creation. <br><br>
-        Go to your <a routerLink="/account">Profile</a> to do it<br>
-      </ng-template>
     </p>
     <p *ngIf="ownCharacters.length <= 0" class="card-text">
-      You have not created characters yet
+      No own characters found
     </p>
     <div *ngIf="ownCharacters.length > 0"
       class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
@@ -43,8 +60,23 @@
     <app-loading [condition]="isLoadingPublic"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoadingPublic">
+    <p class="card-text text-right">
+      <span class=" input-group d-inline-flex" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchPublicCharacters"
+          (keyup)="getCharacters(false)" />
+        <button [hidden]="!searchPublicCharacters" (click)="searchPublicCharacters = ''; getCharacters(false)" type="button"
+          class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="input-group-append">
+          <button class="btn btn-dark" type="button" (click)="getCharacters(false)">
+            <i class="fa fa-fw fa-search"></i>
+          </button>
+        </div>
+      </span>
+    </p>
     <p *ngIf="publicCharacters.length <= 0" class="card-text">
-      There are no public characters created yet
+      No public characters found
     </p>
     <div *ngIf="publicCharacters.length > 0"
       class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">

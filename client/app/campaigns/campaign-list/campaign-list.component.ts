@@ -19,6 +19,9 @@ declare var iziToast;
 })
 export class CampaignListComponent implements OnInit {
 
+  searchOwnCampaigns: string = '';
+  searchPublicCampaigns: string = '';
+
   pageOwnCampaigns: number = 1;
   pagePublicCampaigns: number = 1;
   pageSizeOwnCampaigns: number = 10;
@@ -44,7 +47,10 @@ export class CampaignListComponent implements OnInit {
   }
 
   countCampaigns(own: boolean): void {
-    this.campaignService.countCampaigns({ own: own }).subscribe(
+    this.campaignService.countCampaigns({
+      search: own ? this.searchOwnCampaigns : this.searchPublicCampaigns,
+      own: own
+    }).subscribe(
       data => {
         if (own) this.countOwnCampaigns = data
         else this.countPublicCampaigns = data
@@ -58,6 +64,7 @@ export class CampaignListComponent implements OnInit {
       this.countCampaigns(own);
       this.campaignService.getCampaigns(
         {
+          search: own ? this.searchOwnCampaigns : this.searchPublicCampaigns,
           own: own,
           page: own ? this.pageOwnCampaigns : this.pagePublicCampaigns,
           count: own ? this.pageSizeOwnCampaigns : this.pageSizePublicCampaigns

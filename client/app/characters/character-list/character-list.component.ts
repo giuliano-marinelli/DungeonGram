@@ -16,6 +16,9 @@ declare var iziToast;
 })
 export class CharacterListComponent implements OnInit {
 
+  searchOwnCharacters: string = '';
+  searchPublicCharacters: string = '';
+
   pageOwnCharacters: number = 1;
   pagePublicCharacters: number = 1;
   pageSizeOwnCharacters: number = 10;
@@ -40,7 +43,10 @@ export class CharacterListComponent implements OnInit {
   }
 
   countCharacters(own: boolean): void {
-    this.characterService.countCharacters({ own: own }).subscribe(
+    this.characterService.countCharacters({
+      search: own ? this.searchOwnCharacters : this.searchPublicCharacters,
+      own: own
+    }).subscribe(
       data => {
         if (own) this.countOwnCharacters = data
         else this.countPublicCharacters = data
@@ -54,6 +60,7 @@ export class CharacterListComponent implements OnInit {
       this.countCharacters(own);
       this.characterService.getCharacters(
         {
+          search: own ? this.searchOwnCharacters : this.searchPublicCharacters,
           own: own,
           page: own ? this.pageOwnCharacters : this.pagePublicCharacters,
           count: own ? this.pageSizeOwnCharacters : this.pageSizePublicCharacters

@@ -4,25 +4,42 @@
     <app-loading [condition]="isLoadingOwn"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoadingOwn">
-    <p class="card-text">
-      <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
-        [isEnabled]="!auth.loggedIn">
-        <span class="d-inline-block" interactive="true" [tippy]="not_verified" placement="right"
-          [isEnabled]="!auth.isVerified">
-          <button type="button" class="btn btn-dark campaign-btn" (click)="openCampaign()"
-            [disabled]="!auth.loggedIn || !auth.isVerified"
-            attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
-            <i class="fa fa-plus"></i> New Campaign
+    <p class="card-text row">
+      <span class="col">
+        <span class="d-inline-block" tippy="You must be logged in to create characters" placement="right"
+          [isEnabled]="!auth.loggedIn">
+          <span class="d-inline-block" interactive="true" [tippy]="not_verified" placement="right"
+            [isEnabled]="!auth.isVerified">
+            <button type="button" class="btn btn-dark campaign-btn" (click)="openCampaign()"
+              [disabled]="!auth.loggedIn || !auth.isVerified"
+              attr.style="{{!auth.loggedIn ? 'pointer-events: none;' : ''}}">
+              <i class="fa fa-plus"></i> New Campaign
+            </button>
+          </span>
+        </span>
+        <ng-template #not_verified>
+          You need to <span class='text-warning'>verify your email</span> to enable campaign creation. <br><br>
+          Go to your <a routerLink="/account">Profile</a> to do it<br>
+        </ng-template>
+      </span>
+      <span class="col">
+        <span class="input-group pull-right" style="max-width: 300px;">
+          <input type="text" class="form-control campaign-input-alt" placeholder="Search..."
+            [(ngModel)]="searchOwnCampaigns" (keyup)="getCampaigns(true)" />
+          <button [hidden]="!searchOwnCampaigns" (click)="searchOwnCampaigns = ''; getCampaigns(true)" type="button"
+            class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+            <i class="fa fa-times"></i>
           </button>
+          <div class="input-group-append">
+            <button class="btn campaign-btn-alt" type="button" (click)="getCampaigns(true)">
+              <i class="fa fa-fw fa-search"></i>
+            </button>
+          </div>
         </span>
       </span>
-      <ng-template #not_verified>
-        You need to <span class='text-warning'>verify your email</span> to enable campaign creation. <br><br>
-        Go to your <a routerLink="/account">Profile</a> to do it<br>
-      </ng-template>
     </p>
     <p *ngIf="ownCampaigns.length <= 0" class="card-text">
-      You have not created campaigns yet
+      No own campaigns found
     </p>
     <div *ngIf="ownCampaigns.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">
       <div *ngFor="let campaign of ownCampaigns" class="col mb-4">
@@ -41,8 +58,23 @@
     <app-loading [condition]="isLoadingPublic"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoadingPublic">
+    <p class="card-text text-right">
+      <span class=" input-group d-inline-flex" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchPublicCampaigns"
+          (keyup)="getCampaigns(false)" />
+        <button [hidden]="!searchPublicCampaigns" (click)="searchPublicCampaigns = ''; getCampaigns(false)"
+          type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="input-group-append">
+          <button class="btn btn-dark" type="button" (click)="getCampaigns(false)">
+            <i class="fa fa-fw fa-search"></i>
+          </button>
+        </div>
+      </span>
+    </p>
     <p *ngIf="publicCampaigns.length <= 0" class="card-text">
-      There are no public campaigns created yet
+      No public campaigns found
     </p>
     <div *ngIf="publicCampaigns.length > 0"
       class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">

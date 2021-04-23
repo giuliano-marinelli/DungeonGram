@@ -19,21 +19,19 @@ class UserCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200 || resu?.user?.role != 'admin') throw new Error('unauthorized'); //(if logged user is admin)
       if (resu.status != 200) throw new Error('unauthorized');
-      const search = req.query.search;
       const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
       const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var docs;
-      if (search) {
-        docs = await this.model.find({
+      docs = await this.model.find({
+        ...(search ? {
           $or: [
-            { username: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } }
+            { username: { $regex: ".*" + search + ".*", $options: "i" } },
+            { email: { $regex: ".*" + search + ".*", $options: "i" } }
           ]
-        }).skip(skip).limit(limit);;
-      } else {
-        docs = await this.model.find({}).skip(skip).limit(limit);;
-      }
+        } : {})
+      }).skip(skip).limit(limit);;
       res.status(200).json(docs);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -45,19 +43,18 @@ class UserCtrl extends BaseCtrl {
     try {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
-      const search = req.query.search;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var count;
-      if (search) {
-        count = await this.model.count({
+      count = await this.model.count({
+        ...(search ? {
           $or: [
-            { username: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } }
+            { username: { $regex: ".*" + search + ".*", $options: "i" } },
+            { email: { $regex: ".*" + search + ".*", $options: "i" } }
           ]
-        });
-      } else {
-        count = await this.model.count({});
-      }
+        } : {})
+      });
+
       res.status(200).json(count);
     } catch (err) {
       return res.status(400).json({ error: err.message });

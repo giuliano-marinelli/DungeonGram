@@ -12,6 +12,8 @@ declare var iziToast;
 })
 export class AdminComponent implements OnInit {
 
+  searchUsers: string = '';
+
   pageUsers: number = 1;
   pageSizeUsers: number = 10;
   _countUsers: number = 0;
@@ -29,7 +31,9 @@ export class AdminComponent implements OnInit {
   }
 
   countUsers(): void {
-    this.userService.countUsers().subscribe(
+    this.userService.countUsers({
+      search: this.searchUsers,
+    }).subscribe(
       data => this._countUsers = data,
       error => iziToast.error({ message: 'There was an error, users can\'t be counted.' })
     );
@@ -38,6 +42,7 @@ export class AdminComponent implements OnInit {
   getUsers(): void {
     this.countUsers();
     this.userService.getUsers({
+      search: this.searchUsers,
       page: this.pageUsers,
       count: this.pageSizeUsers
     }).subscribe(

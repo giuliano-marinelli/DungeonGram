@@ -4,6 +4,21 @@
     <app-loading [condition]="isLoading"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoading">
+    <p class="card-text text-right">
+      <span class=" input-group d-inline-flex" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchUsers"
+          (keyup)="getUsers()" />
+        <button [hidden]="!searchUsers" (click)="searchUsers = ''; getUsers()"
+          type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="input-group-append">
+          <button class="btn btn-dark" type="button" (click)="getUsers()">
+            <i class="fa fa-fw fa-search"></i>
+          </button>
+        </div>
+      </span>
+    </p>
     <p *ngIf="users.length <= 0" class="card-text">
       There are no registered users
     </p>

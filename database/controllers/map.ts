@@ -17,6 +17,7 @@ class MapCtrl extends BaseCtrl {
       const own = req.query.own == 'true' ? true : false;
       const skip = req.query.page ? (req.query.page - 1) * req.query.count : 0;
       const limit = req.query.count ? parseInt(req.query.count) : Number.MAX_SAFE_INTEGER;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var docs;
       if (own) {
@@ -41,6 +42,12 @@ class MapCtrl extends BaseCtrl {
           // },
           {
             $match: {
+              ...(search ? {
+                $or: [
+                  { name: { $regex: ".*" + search + ".*", $options: "i" } },
+                  { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                ]
+              } : {}),
               owner: resu.user._id,
               copyOf: null,
               terrain: { $nin: [null, ""] }
@@ -68,6 +75,12 @@ class MapCtrl extends BaseCtrl {
           // },
           {
             $match: {
+              ...(search ? {
+                $or: [
+                  { name: { $regex: ".*" + search + ".*", $options: "i" } },
+                  { description: { $regex: ".*" + search + ".*", $options: "i" } }
+                ]
+              } : {}),
               owner: { $ne: resu?.user?._id },
               private: false,
               copyOf: null,
@@ -88,17 +101,30 @@ class MapCtrl extends BaseCtrl {
       const resu = await User.findByAuthorization(req);
       // if (resu.status != 200) throw new Error('unauthorized');
       const own = req.query.own == 'true' ? true : false;
+      const search = req.query.search && req.query.search != '' ? req.query.search : null;
 
       var count;
       if (own) {
         if (resu.status != 200) throw new Error('unauthorized');
         count = await this.model.count({
+          ...(search ? {
+            $or: [
+              { name: { $regex: ".*" + search + ".*", $options: "i" } },
+              { description: { $regex: ".*" + search + ".*", $options: "i" } }
+            ]
+          } : {}),
           owner: resu.user._id,
           copyOf: null,
           terrain: { $nin: [null, ""] }
         });
       } else {
         count = await this.model.count({
+          ...(search ? {
+            $or: [
+              { name: { $regex: ".*" + search + ".*", $options: "i" } },
+              { description: { $regex: ".*" + search + ".*", $options: "i" } }
+            ]
+          } : {}),
           owner: { $ne: resu?.user?._id },
           private: false,
           copyOf: null,

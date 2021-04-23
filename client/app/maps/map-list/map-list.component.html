@@ -13,11 +13,25 @@
         </button>
       </span>
     </p> -->
-    <p *ngIf="ownMaps.length <= 0" class="card-text">
-      You have not created maps yet
+    <p class="card-text text-right">
+      <span class="input-group d-inline-flex" style="max-width: 300px;">
+        <input type="text" class="form-control map-input-alt" placeholder="Search..." [(ngModel)]="searchOwnMaps"
+          (keyup)="getMaps(true)" />
+        <button [hidden]="!searchOwnMaps" (click)="searchOwnMaps = ''; getMaps(true)" type="button"
+          class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="input-group-append">
+          <button class="btn map-btn-alt" type="button" (click)="getMaps(true)">
+            <i class="fa fa-fw fa-search"></i>
+          </button>
+        </div>
+      </span>
     </p>
-    <div *ngIf="ownMaps.length > 0"
-      class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+    <p *ngIf="ownMaps.length <= 0" class="card-text">
+      No own maps found
+    </p>
+    <div *ngIf="ownMaps.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
       <div *ngFor="let map of ownMaps" class="col mb-4">
         <ng-container [ngTemplateOutlet]="mapCard" [ngTemplateOutletContext]="{map: map}">
         </ng-container>
@@ -35,26 +49,39 @@
     <app-loading [condition]="isLoadingPublic"></app-loading>
   </div>
   <div class="card-body" *ngIf="!isLoadingPublic">
-    <p *ngIf="publicMaps.length <= 0" class="card-text">
-      There are no public maps created yet
+    <p class="card-text text-right">
+      <span class="input-group d-inline-flex" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchPublicMaps"
+          (keyup)="getMaps(false)" />
+        <button [hidden]="!searchPublicMaps" (click)="searchPublicMaps = ''; getMaps(false)" type="button"
+          class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="input-group-append">
+          <button class="btn btn-dark" type="button" (click)="getMaps(false)">
+            <i class="fa fa-fw fa-search"></i>
+          </button>
+        </div>
+      </span>
     </p>
-    <div *ngIf="publicMaps.length > 0"
-      class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+    <p *ngIf="publicMaps.length <= 0" class="card-text">
+      No public maps found
+    </p>
+    <div *ngIf="publicMaps.length > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
       <div *ngFor="let map of publicMaps" class="col mb-4">
         <ng-container [ngTemplateOutlet]="mapCard" [ngTemplateOutletContext]="{map: map}">
         </ng-container>
       </div>
     </div>
     <ngb-pagination *ngIf="countPublicMaps > 0" class="d-flex justify-content-end" [(page)]="pagePublicMaps"
-      [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps"
-      (pageChange)="getMaps(false)"></ngb-pagination>
+      [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps" (pageChange)="getMaps(false)"></ngb-pagination>
   </div>
 </div>
 
 <ng-template #mapCard let-map='map'>
   <div class="card h-100">
-    <img src="{{map.terrain}}" onerror="this.src='assets/images/game/default_terrain.png'"
-      class="card-img-top map-img" alt="{{map.title}}">
+    <img src="{{map.terrain}}" onerror="this.src='assets/images/game/default_terrain.png'" class="card-img-top map-img"
+      alt="{{map.title}}">
     <div class="card-body map-card-body">
       <h5 class="card-title"><i *ngIf="map.private" tippy="This map is private"
           class="fa fa-user-secret">&nbsp;</i>{{map.name}}<br />

@@ -45,10 +45,24 @@
                           </div>
                         </span>
 
+                        <span class="input-group input-group-sm">
+                          <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchOwnMaps"
+                            (keyup)="getMaps(true)" />
+                          <button [hidden]="!searchOwnMaps" (click)="searchOwnMaps = ''; getMaps(true)" type="button"
+                            class="btn btn-sm bg-transparent" style="margin-left: -29px; z-index: 100;">
+                            <i class="fa fa-times"></i>
+                          </button>
+                          <div class="input-group-append">
+                            <button class="btn btn-sm btn-dark" type="button" (click)="getMaps(true)">
+                              <i class="fa fa-fw fa-search"></i>
+                            </button>
+                          </div>
+                        </span>
+
                         <app-loading [condition]="isLoadingOwnMaps"></app-loading>
 
                         <p *ngIf="ownMaps.length <= 0" class="text-center">
-                          <small class="text-muted">You have not created maps yet</small>
+                          <small class="text-muted">No own maps found</small>
                         </p>
 
                         <div *ngIf="!isLoadingOwnMaps" class="row row-cols-2 maps-own">
@@ -81,7 +95,7 @@
                         </div>
 
                         <ngb-pagination *ngIf="countOwnMaps > 0" class="d-flex justify-content-center" size="sm"
-                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pageOwnMaps"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true" [(page)]="pageOwnMaps"
                           [pageSize]="pageSizeOwnMaps" [collectionSize]="countOwnMaps" (pageChange)="getMaps(true)">
                         </ngb-pagination>
 
@@ -90,10 +104,24 @@
                       <div id="maps-list-public">
                         <h6>Public</h6>
 
+                        <span class="input-group input-group-sm">
+                          <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchPublicMaps"
+                            (keyup)="getMaps(false)" />
+                          <button [hidden]="!searchPublicMaps" (click)="searchPublicMaps = ''; getMaps(false)"
+                            type="button" class="btn btn-sm bg-transparent" style="margin-left: -29px; z-index: 100;">
+                            <i class="fa fa-times"></i>
+                          </button>
+                          <div class="input-group-append">
+                            <button class="btn btn-sm btn-dark" type="button" (click)="getMaps(false)">
+                              <i class="fa fa-fw fa-search"></i>
+                            </button>
+                          </div>
+                        </span>
+
                         <app-loading [condition]="isLoadingPublicMaps"></app-loading>
 
                         <p *ngIf="publicMaps.length <= 0" class="text-center">
-                          <small class="text-muted">There are no public maps created yet</small>
+                          <small class="text-muted">No public maps found</small>
                         </p>
 
                         <div *ngIf="!isLoadingPublicMaps" class="row row-cols-2 maps-public">
@@ -117,8 +145,8 @@
                         </div>
 
                         <ngb-pagination *ngIf="countPublicMaps > 0" class="d-flex justify-content-center" size="sm"
-                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pagePublicMaps"
-                          [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps"
+                          [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"
+                          [(page)]="pagePublicMaps" [pageSize]="pageSizePublicMaps" [collectionSize]="countPublicMaps"
                           (pageChange)="getMaps(false)">
                         </ngb-pagination>
 
@@ -205,10 +233,24 @@
                         </div>
                       </span>
 
+                      <span class="input-group input-group-sm" style="padding-right: 24px; padding-left: 24px;">
+                        <input type="text" class="form-control" placeholder="Search..."
+                          [(ngModel)]="searchOwnCharacters" (keyup)="getCharacters(true)" />
+                        <button [hidden]="!searchOwnCharacters" (click)="searchOwnCharacters = ''; getCharacters(true)"
+                          type="button" class="btn btn-sm bg-transparent" style="margin-left: -29px; z-index: 100;">
+                          <i class="fa fa-times"></i>
+                        </button>
+                        <div class="input-group-append">
+                          <button class="btn btn-sm btn-dark" type="button" (click)="getCharacters(true)">
+                            <i class="fa fa-fw fa-search"></i>
+                          </button>
+                        </div>
+                      </span>
+
                       <app-loading [condition]="isLoadingOwnCharacters"></app-loading>
 
                       <p *ngIf="ownCharacters.length <= 0" class="text-center">
-                        <small class="text-muted">You have not created characters yet</small>
+                        <small class="text-muted">No own characters found</small>
                       </p>
 
                       <div *ngIf="!isLoadingOwnCharacters" class="row row-cols-2 characters-own">
@@ -237,9 +279,9 @@
                       </div>
 
                       <ngb-pagination *ngIf="countOwnCharacters > 0" class="d-flex justify-content-center" size="sm"
-                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true" [(page)]="pageOwnCharacters"
-                        [pageSize]="pageSizeOwnCharacters" [collectionSize]="countOwnCharacters"
-                        (pageChange)="getCharacters(true)">
+                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"
+                        [(page)]="pageOwnCharacters" [pageSize]="pageSizeOwnCharacters"
+                        [collectionSize]="countOwnCharacters" (pageChange)="getCharacters(true)">
                       </ngb-pagination>
 
                     </div>
@@ -247,10 +289,25 @@
                     <div id="characters-list-public">
                       <h6>Public</h6>
 
+                      <span class="input-group input-group-sm" style="padding-right: 24px; padding-left: 24px;">
+                        <input type="text" class="form-control" placeholder="Search..."
+                          [(ngModel)]="searchPublicCharacters" (keyup)="getCharacters(false)" />
+                        <button [hidden]="!searchPublicCharacters"
+                          (click)="searchPublicCharacters = ''; getCharacters(false)" type="button"
+                          class="btn btn-sm bg-transparent" style="margin-left: -29px; z-index: 100;">
+                          <i class="fa fa-times"></i>
+                        </button>
+                        <div class="input-group-append">
+                          <button class="btn btn-sm btn-dark" type="button" (click)="getCharacters(false)">
+                            <i class="fa fa-fw fa-search"></i>
+                          </button>
+                        </div>
+                      </span>
+
                       <app-loading [condition]="isLoadingPublicCharacters"></app-loading>
 
                       <p *ngIf="publicCharacters.length <= 0" class="text-center">
-                        <small class="text-muted">There are no public characters created yet</small>
+                        <small class="text-muted">No public characters found</small>
                       </p>
 
                       <div *ngIf="!isLoadingPublicCharacters" class="row row-cols-2 characters-public">
@@ -266,9 +323,9 @@
                       </div>
 
                       <ngb-pagination *ngIf="countPublicCharacters > 0" class="d-flex justify-content-center" size="sm"
-                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"  [(page)]="pagePublicCharacters"
-                        [pageSize]="pageSizePublicCharacters" [collectionSize]="countPublicCharacters"
-                        (pageChange)="getCharacters(false)">
+                        [maxSize]="3" [ellipses]="false" [boundaryLinks]="true" [rotate]="true"
+                        [(page)]="pagePublicCharacters" [pageSize]="pageSizePublicCharacters"
+                        [collectionSize]="countPublicCharacters" (pageChange)="getCharacters(false)">
                       </ngb-pagination>
 
                     </div>
@@ -307,11 +364,13 @@
                             <div class="card h-100">
                               <button *ngIf="getUsersByCharacter(character)?.length > 0" class="btn position-absolute"
                                 style="left: 0; z-index: 1;" [tippy]="character_users_menu"
+                                [data]="{character: character, container: tool_characters_container}"
                                 [appendTo]="tool_characters_container" [maxWidth]="300">
                                 <i class="fa fa-user"></i>
                               </button>
                               <button class="btn position-absolute" style="right: 0; z-index: 1;"
                                 [tippy]="character_context_menu" interactive="true"
+                                [data]="{character: character, container: tool_characters_container}"
                                 [appendTo]="tool_characters_container" trigger="click" placement="right-start"
                                 [maxWidth]="300">
                                 <i class="fa fa-ellipsis-v"></i>
@@ -336,66 +395,6 @@
                                 </div>
                               </div>
                             </div>
-                            <ng-template #character_users_menu>
-                              <p *ngFor="let userAssigned of getUsersByCharacter(character)">
-                                <img class="user-portrait-image small" [src]="userAssigned.avatar"
-                                  [tippy]="character_users_submenu_user" [appendTo]="tool_characters_container"
-                                  onerror="this.src='assets/images/characters/default-preview.jpg'" />
-                                {{userAssigned.username}}&nbsp;
-                                <span class='badge badge-warning' [hidden]='!userAssigned.isDM'>
-                                  DM
-                                </span>
-                              </p>
-                            </ng-template>
-                            <ng-template #character_context_menu>
-                              <div class="list-group">
-                                <button type="button" class="list-group-item list-group-item-action p-2"
-                                  [tippy]="character_context_submenu_assign_to" interactive="true"
-                                  [appendTo]="tool_characters_container" placement="right-start">
-                                  <i class="fa fa-fw fa-user"></i> Assign to Player <i
-                                    class="fa fa-fw fa-caret-right pull-right"></i>
-                                </button>
-                                <ng-template #character_context_submenu_assign_to>
-                                  <div class="list-group">
-                                    <button
-                                      *ngFor="let player of ObjectValues(tools.users.options.users?.value) | filter: { isDM: false }"
-                                      type="button" class="list-group-item list-group-item-action p-2"
-                                      (click)="tool.actions.assignTo(character.id, player.id)">
-                                      {{player.username}}
-                                    </button>
-                                  </div>
-                                </ng-template>
-                                <button type="button" class="list-group-item list-group-item-action p-2"
-                                  [tippy]="character_context_submenu_move_to_map" interactive="true"
-                                  [appendTo]="tool_characters_container" placement="right-start">
-                                  <i class="fa fa-fw fa-map-marker"></i> Move to Map <i
-                                    class="fa fa-fw fa-caret-right pull-right"></i>
-                                </button>
-                                <ng-template #character_context_submenu_move_to_map>
-                                  <div class="list-group">
-                                    <button *ngFor="let map of campaign?.maps_info" type="button"
-                                      class="list-group-item list-group-item-action p-2"
-                                      (click)="tool.actions.moveToMap(character.id, map._id)">
-                                      {{map.name}}
-                                    </button>
-                                    <button type="button"
-                                      class="list-group-item list-group-item-action p-2 text-warning"
-                                      (click)="tool.actions.moveToMap(character.id)">
-                                      &laquo;Off the maps&raquo;
-                                    </button>
-                                  </div>
-                                </ng-template>
-                                <button type="button" class="list-group-item list-group-item-action p-2"
-                                  (click)="openCharacter(character.modelId, character.id)">
-                                  <i class="fa fa-fw fa-pencil"></i> Edit
-                                </button>
-                                <button type="button" class="list-group-item list-group-item-action p-2"
-                                  style="color: #dc3545;" (confirm)="tool.actions.remove(character)"
-                                  [confirmAppendTo]="tool_characters_container" confirmPlacement="right-start">
-                                  <i class="fa fa-fw fa-trash"></i> Delete
-                                </button>
-                              </div>
-                            </ng-template>
                           </div>
                         </div>
                       </span>
@@ -742,41 +741,57 @@
     </div>
   </div>
 
-  <div id="selection-tools" #selection_tools class="{{tools.characters.options.selectedCharacter?.value &&  tools.characters.options.selectedCharacterObj?.value  &&
-    tools.characters.options.selectedCharacterObj?.value?.map == tools.maps.options.openedMap?.value &&
-    tools.maps.options.openedMap?.value ? 'show' : ''}}">
-    <span>
-      <img class="selection-portrait float-right" src="{{tools.characters.options.selectedCharacterObj.value?.facePortrait
-          ? tools.characters.options.selectedCharacterObj.value?.facePortrait
-          : tools.characters.options.selectedCharacterObj.value?.portrait}}"
+  <div id="selection-tools" #selection_tools class="{{tools.characters.options.selectedCharacter?.value && tools.characters.options.selectedCharacterObj?.value  &&
+  tools.characters.options.selectedCharacterObj?.value?.map == tools.maps.options.openedMap?.value &&
+  tools.maps.options.openedMap?.value ? 'show' : ''}}">
+    <ng-container [ngTemplateOutlet]="selection_tools_template"
+      [ngTemplateOutletContext]="{character: tools.characters.options.selectedCharacterObj}">
+    </ng-container>
+  </div>
+
+  <ng-template #selection_tools_template let-character="character">
+    <span *ngIf="character?.value">
+      <img class="selection-portrait float-right"
+        src="{{character.value.facePortrait ? character.value.facePortrait: character.value.portrait}}"
         onerror="this.src='assets/images/characters/default-preview.jpg'">
       <div class="selection-title">
-        <h5>{{tools.characters.options.selectedCharacterObj.value?.name}}</h5>
+        <span class="d-inline-block" [tippy]="character.value.description" [appendTo]="selection_tools" placement="left"
+          [isEnabled]="character.value.description">
+          <h5>
+            {{character.value.name}}
+          </h5>
+        </span>
         <div style="position: absolute; bottom: 0px;">
-          <button class="btn btn-sm btn-dark mr-2"
-            (click)="openCharacter(tools.characters.options.selectedCharacterObj.value?.modelId, tools.characters.options.selectedCharacterObj.value?.id)"
+          <!-- <button class="btn btn-sm mr-2" style="right: 0; z-index: 1;" [tippy]="character_context_menu"
+            [data]="{character: character.value, container: selection_tools, side: 'left'}" trigger="click"
+            placement="left-start" interactive="true" [maxWidth]="300">
+            <i class="fa fa-ellipsis-v"></i>
+          </button> -->
+          <button class="btn btn-sm btn-dark mr-2" (click)="openCharacter(character.value.modelId, character.value.id)"
             tippy="Edit" [appendTo]="selection_tools" placement="left">
             <i class="fa fa-pencil"></i>
           </button>
-          <button *ngIf="tools.users.options.isDM?.value" class="btn btn-sm btn-danger" tippy="Delete"
-            [appendTo]="selection_tools"
-            (confirm)="tools.characters.actions.remove(tools.characters.options.selectedCharacterObj.value)"
+          <button *ngIf="tools.users.options.isDM?.value" class="btn btn-sm btn-danger mr-2" tippy="Delete"
+            [appendTo]="selection_tools" (confirm)="tools.characters.actions.remove(character.value)"
             [confirmAppendTo]="selection_tools" placement="right">
             <i class="fa fa-trash"></i>
           </button>
+          <!-- <button *ngIf="getUsersByCharacter(character.value)?.length > 0" class="btn btn-sm" style="left: 0; z-index: 1;"
+            [tippy]="character_users_menu" [data]="{character: character.value, container: selection_tools}" [maxWidth]="300">
+            <i class="fa fa-user"></i>
+          </button> -->
         </div>
-        <!-- <h6 class="text-muted">{{tools.characters.options.selectedCharacterObj.value?.group}}</h6> -->
+        <!-- <h6 class="text-muted">{{character.group}}</h6> -->
       </div>
       <div class="selection-content">
         <i class="fa fa-fw fa-eye" tippy="Vision Range" placement="left"></i>&nbsp;
-        {{tools.characters.options.selectedCharacterObj.value?.visionRange}}
+        {{character.value.visionRange}}
         <i class="fa fa-fw fa-deaf ml-2" tippy="Stealth Mode"></i>
-        <button class="btn btn-sm"
-          (click)="tools.characters.actions.stealth(!tools.characters.options.selectedCharacterObj.value?.stealth)">
-          {{tools.characters.options.selectedCharacterObj.value?.stealth ? 'On': 'Off'}}
+        <button class="btn btn-sm" (click)="tools.characters.actions.stealth(!character.value.stealth)">
+          {{character.value.stealth ? 'On': 'Off'}}
         </button>
         <br>
-        <span *ngIf="!tools.characters.options.selectedCharacterObj.value?.mode2D">
+        <span *ngIf="!character.value.mode2D">
           <i class="fa fa-fw fa-signing" tippy="Animations / Actions" placement="left"></i>&nbsp;
           <button class="btn btn-sm" tippy="Stand" placement="bottom"
             (click)="tools.characters.actions.animation('None')">St</button>
@@ -793,6 +808,67 @@
         </span>
       </div>
     </span>
-  </div>
+  </ng-template>
+
+  <!-- CONTEXT MENUS -->
+
+  <ng-template #character_users_menu let-data='data'>
+    <p *ngFor="let userAssigned of getUsersByCharacter(data.character)">
+      <img class="user-portrait-image small" [src]="userAssigned.avatar"
+        onerror="this.src='assets/images/characters/default-preview.jpg'" />
+      {{userAssigned.username}}&nbsp;
+      <span class='badge badge-warning' [hidden]='!userAssigned.isDM'>
+        DM
+      </span>
+    </p>
+  </ng-template>
+
+  <ng-template #character_context_menu let-data='data'>
+    <div class="list-group">
+      <button type="button" class="list-group-item list-group-item-action p-2"
+        [tippy]="character_context_submenu_assign_to" interactive="true" [appendTo]="data.container"
+        placement="{{data.side ? data.side : 'right'}}-start">
+        <i class="fa fa-fw fa-user"></i> Assign to Player <i
+          class="fa fa-fw fa-caret-{{data.side ? data.side : 'right'}} pull-right"></i>
+      </button>
+      <ng-template #character_context_submenu_assign_to>
+        <div class="list-group">
+          <button *ngFor="let player of ObjectValues(tools.users.options.users?.value) | filter: { isDM: false }"
+            type="button" class="list-group-item list-group-item-action p-2"
+            (click)="tools.characters.actions.assignTo(data.character.id, player.id)">
+            {{player.username}}
+          </button>
+        </div>
+      </ng-template>
+      <button type="button" class="list-group-item list-group-item-action p-2"
+        [tippy]="character_context_submenu_move_to_map" interactive="true" [appendTo]="data.container"
+        placement="{{data.side ? data.side : 'right'}}-start">
+        <i class="fa fa-fw fa-map-marker"></i> Move to Map <i
+          class="fa fa-fw fa-caret-{{data.side ? data.side : 'right'}} pull-right"></i>
+      </button>
+      <ng-template #character_context_submenu_move_to_map>
+        <div class="list-group">
+          <button *ngFor="let map of campaign?.maps_info" type="button"
+            class="list-group-item list-group-item-action p-2"
+            (click)="tools.characters.actions.moveToMap(data.character.id, map._id)">
+            {{map.name}}
+          </button>
+          <button type="button" class="list-group-item list-group-item-action p-2 text-warning"
+            (click)="tools.characters.actions.moveToMap(data.character.id)">
+            &laquo;Off the maps&raquo;
+          </button>
+        </div>
+      </ng-template>
+      <button type="button" class="list-group-item list-group-item-action p-2"
+        (click)="openCharacter(data.character.modelId, data.character.id)">
+        <i class="fa fa-fw fa-pencil"></i> Edit
+      </button>
+      <button type="button" class="list-group-item list-group-item-action p-2" style="color: #dc3545;"
+        (confirm)="tools.characters.actions.remove(data.character)" [confirmAppendTo]="data.container"
+        confirmPlacement="right-start">
+        <i class="fa fa-fw fa-trash"></i> Delete
+      </button>
+    </div>
+  </ng-template>
 
 </div>
