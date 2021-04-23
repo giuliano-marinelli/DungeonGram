@@ -34,6 +34,11 @@ export class CampaignListComponent implements OnInit {
   isLoadingOwn = true;
   isLoadingPublic = true;
 
+  deleteSended: Campaign[] = [];
+  leaveSended: Campaign[] = [];
+  acceptSended: Campaign[] = [];
+  deniedSended: Campaign[] = [];
+
   constructor(
     public auth: AuthService,
     private campaignService: CampaignService,
@@ -84,6 +89,7 @@ export class CampaignListComponent implements OnInit {
   }
 
   deleteCampaign(campaign: Campaign): void {
+    this.deleteSended.push(campaign);
     this.campaignService.deleteCampaign(campaign).subscribe(
       data => iziToast.success({ message: 'Campaign deleted successfully.' }),
       error => iziToast.error({ message: 'There was an error, campaign can\'t be deleted.' }),
@@ -113,6 +119,7 @@ export class CampaignListComponent implements OnInit {
   }
 
   acceptInvitation(campaign: Campaign): void {
+    this.acceptSended.push(campaign);
     var invitation = this.getInvitation(campaign);
     invitation.accepted = true;
     this.invitationService.editInvitation(invitation).subscribe(
@@ -126,6 +133,7 @@ export class CampaignListComponent implements OnInit {
   }
 
   deniedInvitation(campaign: Campaign): void {
+    this.deniedSended.push(campaign);
     var invitation = this.getInvitation(campaign);
     invitation.accepted = false;
     this.invitationService.editInvitation(invitation).subscribe(
@@ -139,6 +147,7 @@ export class CampaignListComponent implements OnInit {
   }
 
   leaveInvitation(campaign: Campaign): void {
+    this.leaveSended.push(campaign);
     var invitation = this.getInvitation(campaign);
     invitation.accepted = false;
     this.invitationService.editInvitation(invitation).subscribe(
@@ -146,7 +155,7 @@ export class CampaignListComponent implements OnInit {
       error => iziToast.error({ message: 'There was an error, you can\'t leave the campaign.' }),
       () => {
         this.getCampaigns(true);
-        this.getCampaigns(false)
+        this.getCampaigns(false);
       }
     );
   }

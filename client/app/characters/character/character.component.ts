@@ -43,6 +43,7 @@ export class CharacterComponent implements OnInit, OnDestroy {
   portraitSize: number = 400;
 
   //form
+  formSended: boolean = false;
   characterForm: FormGroup;
   _id;
   // owner;
@@ -184,6 +185,7 @@ export class CharacterComponent implements OnInit, OnDestroy {
       // characterValue.wears = this.getSelectedWears();
       characterValue.portrait = GlobalComponent.dataURLtoFile(await this.getPortrait(), "portrait");
       characterValue.facePortrait = GlobalComponent.dataURLtoFile(await this.getFacePortrait(), "facePortrait");
+      this.formSended = true;
       if (!this.character) {
         this.characterService.addCharacter(characterValue).subscribe(
           res => {

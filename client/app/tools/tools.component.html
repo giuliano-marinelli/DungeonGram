@@ -174,18 +174,19 @@
                                 <div class="btn-group" role="group">
                                   <button class="btn btn-sm btn-primary" (click)="tool.actions.open(map)"
                                     tippy="{{tool.options.openedMap.value != map['_id'] ? 'Play' : 'Stop'}}"
-                                    [appendTo]="tool_maps_container">
+                                    [appendTo]="tool_maps_container" [disabled]="deleteSendedMap.includes(map)">
                                     <i
                                       class="fa fa-{{tool.options.openedMap.value != map['_id'] ? 'play' : 'pause'}}"></i>
                                   </button>
                                   <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openMap(map)"
-                                    tippy="Edit" [appendTo]="tool_maps_container">
+                                    tippy="Edit" [appendTo]="tool_maps_container"
+                                    [disabled]="deleteSendedMap.includes(map)">
                                     <i class="fa fa-pencil"></i>
                                   </button>
                                   <button class="btn btn-sm btn-danger" (confirm)="deleteMap(map)"
                                     confirmDoubleCheck="true" [confirmAppendTo]="tool_maps_container" tippy="Delete"
-                                    [appendTo]="tool_maps_container">
-                                    <i class="fa fa-trash"></i>
+                                    [appendTo]="tool_maps_container" [disabled]="deleteSendedMap.includes(map)">
+                                    <i class="fa fa-{{deleteSendedMap.includes(map) ? 'spinner fa-spin': 'trash'}}"></i>
                                   </button>
                                 </div>
                               </div>
@@ -264,13 +265,16 @@
                             <div class="card-body p-0 character-btn">
                               <div class="btn-group" role="group">
                                 <button class="btn btn-sm btn-dark campaign-btn-alt" (click)="openCharacter(character)"
-                                  tippy="Edit" [appendTo]="tool_characters_container">
+                                  tippy="Edit" [appendTo]="tool_characters_container"
+                                  [disabled]="deleteSendedCharacter.includes(character)">
                                   <i class="fa fa-pencil"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" (confirm)="deleteCharacter(character)"
                                   confirmDoubleCheck="true" [confirmAppendTo]="tool_characters_container" tippy="Delete"
-                                  [appendTo]="tool_characters_container">
-                                  <i class="fa fa-trash"></i>
+                                  [appendTo]="tool_characters_container"
+                                  [disabled]="deleteSendedCharacter.includes(character)">
+                                  <i
+                                    class="fa fa-{{deleteSendedCharacter.includes(character) ? 'spinner fa-spin': 'trash'}}"></i>
                                 </button>
                               </div>
                             </div>

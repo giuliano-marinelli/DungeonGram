@@ -22,6 +22,9 @@ export class AccountComponent implements OnInit {
   verifyMessage: string;
 
   isLoading = true;
+  //form
+  formSended: boolean = false;
+  emailSended: boolean = false;
   accountForm: FormGroup;
   _id;
   username = new FormControl('', [
@@ -97,13 +100,16 @@ export class AccountComponent implements OnInit {
   save(): void {
     this.accountForm.markAllAsTouched();
     if (this.accountForm.valid) {
+      this.formSended = true;
       this.userService.editUser(this.accountForm.value).subscribe(
         res => {
           iziToast.success({ message: 'Account settings saved.' });
           this.getUser();
+          this.formSended = false;
         },
         error => {
-          iziToast.error({ message: "Account settings can't be saved." + (error.error ? "<br>" + error.error : "") })
+          iziToast.error({ message: "Account settings can't be saved." + (error.error ? "<br>" + error.error : "") });
+          this.formSended = false;
         }
       );
     } else {
@@ -112,14 +118,17 @@ export class AccountComponent implements OnInit {
   }
 
   sendVerificationEmail(): void {
+    this.emailSended = true;
     this.userService.verificationUser(this.accountForm.value).subscribe(
       res => {
         iziToast.info({ message: "Verification email sended." });
         this.getUser();
+        this.emailSended = false;
       },
       error => {
         iziToast.error({ message: "Verification email can't be sended." + (error.error ? "<br>" + error.error : "") });
-      }
+        this.emailSended = false;
+      },
     );
   }
 

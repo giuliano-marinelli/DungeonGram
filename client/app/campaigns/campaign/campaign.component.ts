@@ -21,6 +21,8 @@ export class CampaignComponent implements OnInit {
   @ViewChild("banner_img") bannerImage: ElementRef;
 
   isLoading = true;
+  //form
+  formSended: boolean = false;
   campaignForm: FormGroup;
   _id;
   // owner;
@@ -81,6 +83,7 @@ export class CampaignComponent implements OnInit {
   saveCampaign(): void {
     this.campaignForm.markAllAsTouched();
     if (this.campaignForm.valid) {
+      this.formSended = true;
       if (!this.campaign) {
         this.campaignService.addCampaign(this.campaignForm.value).subscribe(
           res => {

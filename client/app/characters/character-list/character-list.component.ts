@@ -31,6 +31,8 @@ export class CharacterListComponent implements OnInit {
   isLoadingOwn: boolean = true;
   isLoadingPublic: boolean = true;
 
+  deleteSended: Character[] = [];
+
   constructor(
     public auth: AuthService,
     private characterService: CharacterService,
@@ -80,6 +82,7 @@ export class CharacterListComponent implements OnInit {
   }
 
   deleteCharacter(character: Character): void {
+    this.deleteSended.push(character);
     this.characterService.deleteCharacter(character).subscribe(
       data => iziToast.success({ message: 'Character deleted successfully.' }),
       error => iziToast.error({ message: 'There was an error, character can\'t be deleted.' }),

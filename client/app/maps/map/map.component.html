@@ -79,8 +79,8 @@
     <div class="modal-footer">
       <button type="button" ngbAutofocus class="btn btn-default" data-dismiss="modal"
         (click)="activeModal.dismiss('Close click')">Cancel</button>
-      <button type="button" class="btn btn-dark" type="submit">
-        <i class="fa fa-floppy-o"></i> Save
+      <button type="button" class="btn btn-dark" type="submit" [disabled]="formSended">
+        <i class="fa fa-{{formSended ? 'spinner fa-spin': 'floppy-o'}}"></i> Save
       </button>
     </div>
   </form>

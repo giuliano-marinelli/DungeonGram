@@ -80,12 +80,12 @@
         <p class="text-{{this.verified.value ? 'success' : 'danger'}} text-left ml-4">
           {{this.verified.value ? '* Your email was verified' : '* Your email is not verified'}}
         </p>
-        <button class="btn btn-dark pull-right" type="submit" (click)="save()">
-          <i class="fa fa-save"></i> Save
+        <button class="btn btn-dark pull-right" type="submit" (click)="save()" [disabled]="formSended">
+          <i class="fa fa-{{formSended ? 'spinner fa-spin': 'floppy-o'}}"></i> Save
         </button>
         <button *ngIf="!this.verified.value" class="btn btn-danger pull-right mr-2" tippy="Send verification email"
-          (click)="sendVerificationEmail()">
-          <i class="fa fa-envelope"></i> Verify Email
+          (click)="sendVerificationEmail()" [disabled]="emailSended">
+          <i class="fa fa-{{emailSended ? 'spinner fa-spin': 'envelope'}}"></i> Verify Email
         </button>
       </form>
     </div>

@@ -23,6 +23,9 @@ export class MapComponent implements OnInit {
   @ViewChild("terrain_img") terrainImage: ElementRef;
 
   isLoading = true;
+
+  //form
+  formSended: boolean = false;
   mapForm: FormGroup;
   _id;
   owner;
@@ -88,6 +91,7 @@ export class MapComponent implements OnInit {
   saveMap(): void {
     this.mapForm.markAllAsTouched();
     if (this.mapForm.valid) {
+      this.formSended = true;
       if (!this.map) {
         this.mapService.addMap(this.mapForm.value, this.campaign).subscribe(
           res => {

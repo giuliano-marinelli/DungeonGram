@@ -109,33 +109,38 @@
       </p>
       <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
         <button class="btn btn-sm btn-primary" routerLink="/game/{{campaign._id}}"
-          [hidden]="auth.currentUser._id != campaign.owner && !getInvitation(campaign)?.accepted">
+          [hidden]="auth.currentUser._id != campaign.owner && !getInvitation(campaign)?.accepted"
+          [disabled]="deleteSended.includes(campaign) || leaveSended.includes(campaign)">
           <i class="fa fa-play"></i> Play
         </button>
         <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openInvite(campaign)"
-          [hidden]="auth.currentUser._id != campaign.owner" tippy="Invite Players">
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Invite Players"
+          [disabled]="deleteSended.includes(campaign)">
           <i class="fa fa-user-plus"></i>
         </button>
         <button class="btn btn-sm btn-dark campaign-btn-alt ml-2" (click)="openCampaign(campaign)"
-          [hidden]="auth.currentUser._id != campaign.owner" tippy="Edit">
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Edit" [disabled]="deleteSended.includes(campaign)">
           <i class="fa fa-pencil"></i>
         </button>
         <button class="btn btn-sm btn-danger ml-2" (confirm)="deleteCampaign(campaign)" confirmDoubleCheck="true"
-          [hidden]="auth.currentUser._id != campaign.owner" tippy="Delete">
-          <i class="fa fa-trash"></i>
+          [hidden]="auth.currentUser._id != campaign.owner" tippy="Delete" [disabled]="deleteSended.includes(campaign)">
+          <i class="fa fa-{{deleteSended.includes(campaign) ? 'spinner fa-spin': 'trash'}}"></i>
         </button>
 
         <button class="btn btn-sm btn-success ml-2" (click)="acceptInvitation(campaign)"
-          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
-          <i class="fa fa-check"></i> Accept
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null"
+          [disabled]="acceptSended.includes(campaign) || deniedSended.includes(campaign)">
+          <i class="fa fa-{{acceptSended.includes(campaign) ? 'spinner fa-spin': 'check'}}"></i> Accept
         </button>
         <button class="btn btn-sm btn-danger ml-2" (click)="deniedInvitation(campaign)"
-          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null">
-          <i class="fa fa-times"></i> Denied
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == null"
+          [disabled]="deniedSended.includes(campaign) || acceptSended.includes(campaign)">
+          <i class="fa fa-{{deniedSended.includes(campaign) ? 'spinner fa-spin': 'times'}}"></i> Denied
         </button>
         <button class="btn btn-sm btn-danger ml-2" (confirm)="leaveInvitation(campaign)" tippy="Leave"
-          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == true">
-          <i class="fa fa-sign-out"></i>
+          *ngIf="getInvitation(campaign) && getInvitation(campaign).accepted == true"
+          [disabled]="leaveSended.includes(campaign)">
+          <i class="fa fa-{{leaveSended.includes(campaign) ? 'spinner fa-spin': 'sign-out'}}"></i>
         </button>
       </p>
     </div>

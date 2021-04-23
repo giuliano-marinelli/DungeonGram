@@ -64,8 +64,8 @@
       <span class=" input-group d-inline-flex" style="max-width: 300px;">
         <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchPublicCharacters"
           (keyup)="getCharacters(false)" />
-        <button [hidden]="!searchPublicCharacters" (click)="searchPublicCharacters = ''; getCharacters(false)" type="button"
-          class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+        <button [hidden]="!searchPublicCharacters" (click)="searchPublicCharacters = ''; getCharacters(false)"
+          type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
           <i class="fa fa-times"></i>
         </button>
         <div class="input-group-append">
@@ -109,12 +109,13 @@
           <i class="fa fa-eye"></i>
         </button>
         <button class="btn btn-sm btn-dark character-btn-alt ml-2" (click)="openCharacter(character)"
-          [hidden]="auth.currentUser._id != character.owner" tippy="Edit">
+          [hidden]="auth.currentUser._id != character.owner" tippy="Edit" [disabled]="deleteSended.includes(character)">
           <i class="fa fa-pencil"></i>
         </button>
         <button class="btn btn-sm btn-danger ml-2" (confirm)="deleteCharacter(character)" confirmDoubleCheck="true"
-          [hidden]="auth.currentUser._id != character.owner" tippy="Delete">
-          <i class="fa fa-trash"></i>
+          [hidden]="auth.currentUser._id != character.owner" tippy="Delete"
+          [disabled]="deleteSended.includes(character)">
+          <i class="fa fa-{{deleteSended.includes(character) ? 'spinner fa-spin': 'trash'}}"></i>
         </button>
       </p>
     </div>

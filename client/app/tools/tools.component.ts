@@ -71,6 +71,9 @@ export class ToolsComponent implements OnInit {
 
   ObjectValues = Object.values; //for get values of object
 
+  deleteSendedCharacter: Character[] = [];
+  deleteSendedMap: Map[] = [];
+
   constructor(
     public auth: AuthService,
     private campaignService: CampaignService,
@@ -371,6 +374,7 @@ export class ToolsComponent implements OnInit {
   }
 
   deleteCharacter(character: Character): void {
+    this.deleteSendedCharacter.push(character);
     this.characterService.deleteCharacter(character).subscribe(
       data => iziToast.success({ message: 'Character deleted successfully.' }),
       error => iziToast.error({ message: 'There was an error, character can\'t be deleted.' }),
@@ -453,6 +457,7 @@ export class ToolsComponent implements OnInit {
   }
 
   deleteMap(map: Map) {
+    this.deleteSendedMap.push(map);
     this.mapService.deleteMap(map).subscribe(
       data => {
         iziToast.success({ message: 'Map deleted successfully.' });
