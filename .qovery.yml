@@ -1,0 +1,11 @@
+---
+application:
+  name: "dungeongram"
+  project: "dungeongram"
+  organization: "QoveryCommunity"
+routers:
+- name: "main-dungeongram"
+  routes:
+  - application_name: "dungeongram"
+    paths:
+    - "/*"
