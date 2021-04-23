@@ -109,9 +109,7 @@
       </div>
       <div class="col-md-5">
         <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
-          style="width: 500px; height: 500px;"
-          src="assets/images/about/about_shared.jpg"
-          data-holder-rendered="true">
+          style="width: 500px; height: 500px;" src="assets/images/about/about_shared.jpg" data-holder-rendered="true">
       </div>
     </div>
 
@@ -177,8 +175,9 @@
   <!-- FOOTER -->
   <footer class="container">
     <p class="float-right">
-      <a href="#"><i class="fa fa-arrow-circle-up fa-2x" tippy="Back to top"></i></a>
+      <a routerLink="./" (click)="scrollToTop()"><i class="fa fa-arrow-circle-up fa-2x" tippy="Back to top"></i></a>
     </p>
-    <p>© 2021 DungeonGram · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+    <p>© 2020 - 2021 DungeonGram · <a routerLink="/privacy">Privacy</a> · <a routerLink="/terms">Terms of Use</a> · <a
+        routerLink="/cookies">Cookies</a></p>
   </footer>
 </main>

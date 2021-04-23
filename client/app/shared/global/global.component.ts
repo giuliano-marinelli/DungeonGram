@@ -90,7 +90,7 @@ export class GlobalComponent {
       assets.character.visibility = collidersVisibility;
 
       //add character signs mesh
-      assets.characterSigns = BABYLON.MeshBuilder.CreatePlane('', { height: 1, width: 1});
+      assets.characterSigns = BABYLON.MeshBuilder.CreatePlane('', { height: 1, width: 1 });
       assets.characterSigns.setEnabled(false);
       assets.characterSigns.visibility = collidersVisibility;
       if (options?.test) {

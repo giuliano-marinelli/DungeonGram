@@ -18,6 +18,9 @@ import { CharacterComponent } from './characters/character/character.component';
 import { CharacterListComponent } from './characters/character-list/character-list.component';
 import { CampaignListComponent } from './campaigns/campaign-list/campaign-list.component';
 import { MapListComponent } from './maps/map-list/map-list.component';
+import { PrivacyComponent } from './privacy/privacy.component';
+import { TermsComponent } from './terms/terms.component';
+import { CookiesComponent } from './cookies/cookies.component';
 
 const routes: Routes = [
   { path: '', component: AboutComponent },
@@ -33,11 +36,14 @@ const routes: Routes = [
   { path: 'campaigns', component: CampaignListComponent },
   { path: 'characters', component: CharacterListComponent },
   { path: 'maps', component: MapListComponent },
+  { path: 'privacy', component: PrivacyComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'cookies', component: CookiesComponent },
   { path: '**', redirectTo: '/notfound' },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' })],
+  imports: [RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy', useHash: false, anchorScrolling: 'enabled', scrollPositionRestoration: 'top' })],
   exports: [RouterModule]
 })
 
