@@ -6,6 +6,9 @@ application:
   port: 3000
 routers:
 - name: "main-dungeongram"
+  custom_domains:
+    - branch: master
+      domain: www.dungeongram.com
   routes:
   - application_name: "dungeongram"
     paths:
