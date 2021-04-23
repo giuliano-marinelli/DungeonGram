@@ -366,8 +366,10 @@
                             *ngFor="let character of ObjectValues(tool.options.charactersOnCampaign.value) | filter: { addingMode: false, map: tools.characters.options.selectedMap }"
                             class="col mb-2 p">
                             <div class="card h-100">
-                              <button *ngIf="getUsersByCharacter(character)?.length > 0" class="btn position-absolute"
-                                style="left: 0; z-index: 1;" [tippy]="character_users_menu"
+                              <button
+                                *ngIf="getUsersByCharacter(character)?.length > 0 || character.id == tools.characters.options.publicSelectedCharacter?.value"
+                                class="btn position-absolute" style="left: 0; z-index: 1;"
+                                [tippy]="character_users_menu"
                                 [data]="{character: character, container: tool_characters_container}"
                                 [appendTo]="tool_characters_container" [maxWidth]="300">
                                 <i class="fa fa-user"></i>
@@ -610,7 +612,7 @@
                   <input type="range" class="form-control-range" #fogOfWar_visibilityPlayers
                     (change)="tool.actions.visibilityPlayers({ value: fogOfWar_visibilityPlayers.value })" min="0"
                     max="1" step="0.1" value="{{tool.options.fogOfWarVisibilityPlayers?.value}}" />
-                  <small class="text-muted">(this will impact in all players)</small>
+                  <small class="text-muted">(this will impact in all players and also in spectators)</small>
                 </div>
 
                 <hr />
@@ -747,7 +749,7 @@
 
   <div id="selection-tools" #selection_tools class="{{tools.characters.options.selectedCharacter?.value && tools.characters.options.selectedCharacterObj?.value  &&
   tools.characters.options.selectedCharacterObj?.value?.map == tools.maps.options.openedMap?.value &&
-  tools.maps.options.openedMap?.value ? 'show' : ''}}">
+  tools.maps.options.openedMap?.value && tools.users.options.isPlayer?.value ? 'show' : ''}}">
     <ng-container [ngTemplateOutlet]="selection_tools_template"
       [ngTemplateOutletContext]="{character: tools.characters.options.selectedCharacterObj}">
     </ng-container>
@@ -771,8 +773,9 @@
             placement="left-start" interactive="true" [maxWidth]="300">
             <i class="fa fa-ellipsis-v"></i>
           </button> -->
-          <button class="btn btn-sm btn-dark mr-2" (click)="openCharacter(character.value.modelId, character.value.id)"
-            tippy="Edit" [appendTo]="selection_tools" placement="left">
+          <button *ngIf="tools.users.options.isPlayer?.value" class="btn btn-sm btn-dark mr-2"
+            (click)="openCharacter(character.value.modelId, character.value.id)" tippy="Edit"
+            [appendTo]="selection_tools" placement="left">
             <i class="fa fa-pencil"></i>
           </button>
           <button *ngIf="tools.users.options.isDM?.value" class="btn btn-sm btn-danger mr-2" tippy="Delete"
@@ -795,7 +798,7 @@
           {{character.value.stealth ? 'On': 'Off'}}
         </button>
         <br>
-        <span *ngIf="!character.value.mode2D">
+        <span *ngIf="!character.value.mode2D && tools.users.options.isPlayer?.value">
           <i class="fa fa-fw fa-signing" tippy="Animations / Actions" placement="left"></i>&nbsp;
           <button class="btn btn-sm" tippy="Stand" placement="bottom"
             (click)="tools.characters.actions.animation('None')">St</button>
@@ -825,6 +828,12 @@
         DM
       </span>
     </p>
+    <p *ngIf="data.character.id == tools.characters.options.publicSelectedCharacter?.value">
+      <img class="user-portrait-image small" src="assets/images/characters/public.png" />
+      <span class="text-primary">
+        &laquo;Public&raquo;
+      </span>
+    </p>
   </ng-template>
 
   <ng-template #character_context_menu let-data='data'>
@@ -832,22 +841,27 @@
       <button type="button" class="list-group-item list-group-item-action p-2"
         [tippy]="character_context_submenu_assign_to" interactive="true" [appendTo]="data.container"
         placement="{{data.side ? data.side : 'right'}}-start">
-        <i class="fa fa-fw fa-user"></i> Assign to Player <i
+        <i class="fa fa-fw fa-user"></i> Assign to <i
           class="fa fa-fw fa-caret-{{data.side ? data.side : 'right'}} pull-right"></i>
       </button>
       <ng-template #character_context_submenu_assign_to>
         <div class="list-group">
-          <button *ngFor="let player of ObjectValues(tools.users.options.users?.value) | filter: { isDM: false }"
+          <button
+            *ngFor="let player of ObjectValues(tools.users.options.users?.value) | filter: { isDM: false, isPlayer: true }"
             type="button" class="list-group-item list-group-item-action p-2"
             (click)="tools.characters.actions.assignTo(data.character.id, player.id)">
             {{player.username}}
+          </button>
+          <button type="button" class="list-group-item list-group-item-action p-2 text-primary"
+            (click)="tools.characters.actions.assignTo(data.character.id, null, true)">
+            &laquo;Public&raquo;
           </button>
         </div>
       </ng-template>
       <button type="button" class="list-group-item list-group-item-action p-2"
         [tippy]="character_context_submenu_move_to_map" interactive="true" [appendTo]="data.container"
         placement="{{data.side ? data.side : 'right'}}-start">
-        <i class="fa fa-fw fa-map-marker"></i> Move to Map <i
+        <i class="fa fa-fw fa-map-marker"></i> Move to <i
           class="fa fa-fw fa-caret-{{data.side ? data.side : 'right'}} pull-right"></i>
       </button>
       <ng-template #character_context_submenu_move_to_map>

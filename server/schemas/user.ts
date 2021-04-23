@@ -6,17 +6,17 @@ import { default as UserDB } from '../../database/models/user';
 
 export class User extends Schema {
   @type("number")
-  wallsVisibility: number;
+  wallsVisibility: number = 0;
   @type("boolean")
-  wallsPickable: boolean;
+  wallsPickable: boolean = false;
   @type("number")
-  fogOfWarVisibility: number;
+  fogOfWarVisibility: number = 0;
   @type("boolean")
-  tilemapShowGrid: boolean;
+  tilemapShowGrid: boolean = true;
   @type(Rule)
-  rule: Rule;
+  rule: Rule = new Rule();
   @type(Figure)
-  figureDrawer: Figure;
+  figureDrawer: Figure = new Figure();
   @type("string")
   selectedCharacter: string;
   @type("string")
@@ -24,7 +24,9 @@ export class User extends Schema {
   @type("string")
   addingModeModel: string;
   @type("boolean")
-  isDM: boolean;
+  isDM: boolean = false;
+  @type("boolean")
+  isPlayer: boolean = false;
   @type("string")
   username: string;
   @type("string")
@@ -34,18 +36,8 @@ export class User extends Schema {
 
   db: any;
 
-  constructor(wallsVisibility: number = 0, wallsPickable: boolean = false,
-    fogOfWarVisibility: number = 0, tilemapShowGrid: boolean = true,
-    rule: Rule = new Rule(), figureDrawer: Figure = new Figure, selectedCharacter?: string, isDM: boolean = false) {
+  constructor() {
     super();
-    this.wallsVisibility = wallsVisibility;
-    this.wallsPickable = wallsPickable;
-    this.fogOfWarVisibility = fogOfWarVisibility;
-    this.tilemapShowGrid = tilemapShowGrid;
-    this.rule = rule;
-    this.figureDrawer = figureDrawer;
-    this.selectedCharacter = selectedCharacter;
-    this.isDM = isDM;
   }
 
   async load(userId: string) {

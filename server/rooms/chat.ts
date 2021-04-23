@@ -67,6 +67,7 @@ export class ChatRoom extends Room {
             _id: mongoose.Types.ObjectId(options.campaign),
             $or: [
               { owner: resu.user._id },
+              { private: false },
               { invitations: { $elemMatch: { recipient: resu.user._id, accepted: true } } }
             ]
           }

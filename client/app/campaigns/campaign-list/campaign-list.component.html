@@ -108,6 +108,11 @@
         </small>
       </p>
       <p class="card-text text-right position-absolute" style="bottom: 0.5rem; right: 0.5rem;">
+        <button class="btn btn-sm btn-dark" routerLink="/game/{{campaign._id}}"
+          [hidden]="auth.currentUser._id == campaign.owner || getInvitation(campaign)?.accepted">
+          <i class="fa fa-eye"></i> Spectate
+        </button>
+
         <button class="btn btn-sm btn-primary" routerLink="/game/{{campaign._id}}"
           [hidden]="auth.currentUser._id != campaign.owner && !getInvitation(campaign)?.accepted"
           [disabled]="deleteSended.includes(campaign) || leaveSended.includes(campaign)">

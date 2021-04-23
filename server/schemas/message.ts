@@ -11,7 +11,7 @@ export class Message extends Schema {
   @type("number")
   date: number;
 
-  constructor(content: string, userObj?: any,) {
+  constructor(content: string, userObj?: any) {
     super();
     this.user = userObj?._id?.toString();
     this.username = userObj?.username;

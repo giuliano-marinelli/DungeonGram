@@ -276,6 +276,7 @@ export class Wall extends Schema {
     if (this.size != 'collider')
       this.parameters.world.lights.characterLight._shadowGenerator.addShadowCaster(this.mesh, false);
     this.parameters.world.updateCharactersVisibility();
+    this.parameters.world.updateWallVisibility();
 
     //optimization for static walls
     if (this.type != "door") {

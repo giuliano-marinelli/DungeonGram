@@ -95,14 +95,13 @@ export class ToolsComponent implements OnInit {
         name: 'users',
         options: {
           isDM: this.controller.initSetting("isDM", false, (isDM) => {
-            if (isDM) {
-              this.orderedTools = [this.tools.maps, this.tools.characters, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
-            } else {
-              this.orderedTools = [this.tools.grid, this.tools.rule, this.tools.figure];
-            }
-            this.initHotkeys();
+            this.enableTools();
           }),
-          users: this.controller.initSetting("usersOnCampaign", [])
+          isPlayer: this.controller.initSetting("isPlayer", false, (isPlayer) => {
+            this.enableTools();
+          }),
+          users: this.controller.initSetting("usersOnCampaign", []),
+          hotkeysActions: {}
         }
       },
       walls: {
@@ -226,9 +225,10 @@ export class ToolsComponent implements OnInit {
           charactersOnCampaign: this.controller.initSetting("charactersOnCampaign", null),
           addingMode: this.controller.initSetting("addingMode", false),
           selectedCharacter: this.controller.initSetting("selectedCharacter", null),
-          selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null, ()=> {
+          selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null, () => {
             this.changeDetector.markForCheck();
           }),
+          publicSelectedCharacter: this.controller.initSetting("publicSelectedCharacter", null),
           addingModeModel: this.controller.initSetting("addingModeModel", null),
           selectedMap: null //map is selected when openedMap setting change on maps tool options
         },
@@ -245,8 +245,8 @@ export class ToolsComponent implements OnInit {
           update: (character?) => {
             this.controller.send('game', 'character', { action: 'update', character: character });
           },
-          assignTo: (character, user) => {
-            this.controller.send('game', 'character', { action: 'assignTo', character: character, user: user });
+          assignTo: (character, user?, toPublic?) => {
+            this.controller.send('game', 'character', { action: 'assignTo', character: character, user: user, toPublic: toPublic });
           },
           moveToMap: (character, map?) => {
             this.controller.send('game', 'character', { action: 'moveToMap', character: character, map: map });
@@ -305,10 +305,22 @@ export class ToolsComponent implements OnInit {
     );
   }
 
+  enableTools(): void {
+    if (this.tools.users.options.isDM?.value) {
+      this.orderedTools = [this.tools.maps, this.tools.characters, this.tools.grid, this.tools.walls, this.tools.fogOfWar, this.tools.rule, this.tools.figure];
+    } else if (this.tools.users.options.isPlayer?.value) {
+      this.orderedTools = [this.tools.grid, this.tools.rule, this.tools.figure];
+    } else {
+      this.orderedTools = [this.tools.grid]
+    }
+    this.initHotkeys();
+  }
+
   initHotkeys() {
     this.orderedTools.forEach(tool => {
+      if (this.tools.users.options.hotkeysActions[tool.name]) this.gameScene.actionManager.unregisterAction(this.tools.users.options.hotkeysActions[tool.name]);
       if (tool.hotkey) {
-        this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+        this.tools.users.options.hotkeysActions[tool.name] = this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
           {
             trigger: BABYLON.ActionManager.OnKeyUpTrigger,
             parameter: tool.hotkey
@@ -517,9 +529,11 @@ export class ToolsComponent implements OnInit {
   }
 
   getUsersByCharacter(character: any) {
-    if (character)
-      return Object.values(this.tools.users.options.users?.value).filter((u) => u.selectedCharacter == character.id)
-    else
-      return null;
+    if (character) {
+      var players = Object.values(this.tools.users.options.users?.value).filter((u) => {
+        return u.isPlayer && u.selectedCharacter == character.id
+      });
+      return players;
+    } else return null;
   }
 }

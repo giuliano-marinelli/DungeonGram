@@ -18,6 +18,7 @@ export class World extends Schema {
   map?: Map;
   fogOfWarVisibilityPlayers?: number;
   maxVisionCharacters?: number;
+  publicSelectedCharacter?: string;
   //game objects
   camera?: any;
   lights?: any = {};
@@ -106,6 +107,9 @@ export class World extends Schema {
           this.parameters.controller.updateSetting('maxVisionCharacters', this.maxVisionCharacters);
           var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
           if (this.characters[selectedCharacter] && this.lights.characterLight) this.lights.characterLight.range = this.adjustVisionRange(this.characters[selectedCharacter].visionRange);
+          break;
+        case 'publicSelectedCharacter':
+          this.parameters.controller.updateSetting('publicSelectedCharacter', this.publicSelectedCharacter);
           break;
       }
     });
@@ -270,6 +274,12 @@ export class World extends Schema {
         if (!this.users[this.parameters.token].wallsPickable) this.updateCharactersVisibility();
       }
     });
+  }
+
+  updateWallVisibility() {
+    var user = this.users[this.parameters.token];
+    //update walls visibility
+    this.parameters.assets.wallMaterial.alpha = user.wallsVisibility;
   }
 
   updateCharactersVisibility(character?) {

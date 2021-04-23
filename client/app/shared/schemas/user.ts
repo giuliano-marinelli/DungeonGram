@@ -15,6 +15,7 @@ export class User extends Schema {
   addingModeCharacter?: string;
   addingModeModel?: string;
   isDM?: boolean;
+  isPlayer?: boolean;
   avatar?: string;
   username?: string;
   email?: string;
@@ -81,6 +82,9 @@ export class User extends Schema {
             break;
           case 'isDM':
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('isDM', this.isDM);
+            break;
+          case 'isPlayer':
+            if (this.id == this.parameters.token) this.parameters.controller.updateSetting('isPlayer', this.isPlayer);
             break;
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();

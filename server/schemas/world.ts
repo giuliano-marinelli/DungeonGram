@@ -9,6 +9,7 @@ import { WorldPhysics } from '../physics/world.physics';
 
 import mongoose from 'mongoose';
 import { default as CampaignDB } from '../../database/models/campaign';
+import { default as InvitationDB } from '../../database/models/invitation';
 import { default as CharacterDB } from '../../database/models/character';
 import { default as MapDB } from '../../database/models/map';
 
@@ -25,6 +26,8 @@ export class World extends Schema {
   fogOfWarVisibilityPlayers: number;
   @type("number")
   maxVisionCharacters: number;
+  @type("string")
+  publicSelectedCharacter: string;
   //physics
   worldPhysics: WorldPhysics;
 
@@ -66,7 +69,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number"
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
         }
       },
       drag: {
@@ -201,10 +204,19 @@ export class World extends Schema {
       },
       assignTo: {
         do: (client: string, data: any) => {
-          this.users[data.user].selectedCharacter = data.character;
+          if (data.toPublic) {
+            this.publicSelectedCharacter = data.character;
+            for (let userId in this.users) {
+              if (!this.users[userId].isPlayer) this.users[userId].selectedCharacter = data.character;
+            }
+          } else {
+            this.users[data.user].selectedCharacter = data.character;
+          }
         },
         validate: (client: string, data: any) => {
-          return data.character != null && typeof data.character === "string" && data.user != null && typeof data.user === "string" && this.users[client].isDM
+          return data.character != null && typeof data.character === "string" &&
+            ((data.user != null && typeof data.user === "string") || (data.toPublic != null && typeof data.toPublic === "boolean"))
+            && this.users[client].isDM
         }
       },
       moveToMap: {
@@ -232,7 +244,7 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" &&
-            (data.id == null || typeof data.id === "string")
+            (data.id == null || typeof data.id === "string") && this.users[client].isPlayer
         }
       },
       animation: {
@@ -246,7 +258,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return data.animation != null && typeof data.animation === "string"
+          return data.animation != null && typeof data.animation === "string" && this.users[client].isPlayer
         }
       },
       stealth: {
@@ -260,7 +272,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return data.stealth != null && typeof data.stealth === "boolean"
+          return data.stealth != null && typeof data.stealth === "boolean" && this.users[client].isPlayer
         }
       },
       hide: {
@@ -350,7 +362,8 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return this.map != null && data.id != null && data.target != null &&
-            typeof data.id === "string" && typeof data.target.x === "number" && typeof data.target.y === "number"
+            typeof data.id === "string" && typeof data.target.x === "number" && typeof data.target.y === "number" &&
+            this.users[client].isPlayer
         }
       },
       endRotate: {
@@ -362,7 +375,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return this.map != null && data.id != null && typeof data.id === "string"
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isPlayer
         }
       },
       block: {
@@ -395,7 +408,7 @@ export class World extends Schema {
           }
         },
         validate: (client: string, data: any) => {
-          return this.map != null && data.id != null && typeof data.id === "string"
+          return this.map != null && data.id != null && typeof data.id === "string" && this.users[client].isPlayer
         }
       },
       closeAll: {
@@ -439,36 +452,49 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].rule.start({ x: data.x, y: data.y });
         },
-        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+        }
       },
       move: {
         do: (client: string, data: any) => {
           this.users[client].rule.move({ x: data.x, y: data.y });
         },
-        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+        }
       },
       add: {
         do: (client: string, data: any) => {
           this.users[client].rule.add({ x: data.x, y: data.y });
         },
-        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+        }
       },
       end: {
         do: (client: string, data: any) => {
           this.users[client].rule.end();
+        },
+        validate: (client: string, data: any) => {
+          return this.users[client].isPlayer
         }
       },
       share: {
         do: (client: string, data: any) => {
           this.users[client].rule.shared = data.value;
         },
-        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "boolean" && this.users[client].isPlayer
+        }
       },
       normalizeUnit: {
         do: (client: string, data: any) => {
           this.users[client].rule.normalizeUnit = data.value;
         },
-        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "boolean" && this.users[client].isPlayer
+        }
       }
     },
     figure: {
@@ -476,24 +502,33 @@ export class World extends Schema {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.start({ x: data.x, y: data.y });
         },
-        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+        }
       },
       move: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.move({ x: data.x, y: data.y });
         },
-        validate: (client: string, data: any) => { return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" }
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+        }
       },
       end: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.end();
+        },
+        validate: (client: string, data: any) => {
+          return this.users[client].isPlayer
         }
       },
       share: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.shared = data.value;
         },
-        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "boolean" && this.users[client].isPlayer
+        }
       },
       type: {
         do: (client: string, data: any) => {
@@ -501,14 +536,16 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.value != null &&
-            (data.value == 'triangle' || data.value == 'circle' || data.value == 'square')
+            (data.value == 'triangle' || data.value == 'circle' || data.value == 'square') && this.users[client].isPlayer
         }
       },
       normalizeUnit: {
         do: (client: string, data: any) => {
           this.users[client].figureDrawer.normalizeUnit = data.value;
         },
-        validate: (client: string, data: any) => { return data.value != null && typeof data.value === "boolean" }
+        validate: (client: string, data: any) => {
+          return data.value != null && typeof data.value === "boolean" && this.users[client].isPlayer
+        }
       }
     },
     fogOfWar: {
@@ -560,7 +597,9 @@ export class World extends Schema {
           this.execCommand(client, 'character', { action: 'addingModeOff' });
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (client: string, data: any) => { return data.map != null && typeof data.map === "string" && this.users[client].isDM }
+        validate: (client: string, data: any) => {
+          return data.map != null && typeof data.map === "string" && this.users[client].isDM
+        }
       },
       close: {
         do: async (client: string, data: any) => {
@@ -571,7 +610,9 @@ export class World extends Schema {
           this.execCommand(client, 'character', { action: 'addingModeOff' });
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
+        validate: (client: string, data: any) => {
+          return this.map != null && this.users[client].isDM
+        }
       },
       discard: {
         do: async (client: string, data: any) => {
@@ -581,13 +622,17 @@ export class World extends Schema {
           this.execCommand(client, 'character', { action: 'addingModeOff' });
           data.roomRef?.broadcast('mapUpdate');
         },
-        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
+        validate: (client: string, data: any) => {
+          return this.map != null && this.users[client].isDM
+        }
       },
       updateTilemap: {
         do: async (client: string, data: any) => {
           this.map.updateTilemap();
         },
-        validate: (client: string, data: any) => { return this.map != null && this.users[client].isDM }
+        validate: (client: string, data: any) => {
+          return this.map != null && this.users[client].isDM
+        }
       },
       update: {
         do: (client: string, data: any) => {
@@ -712,6 +757,9 @@ export class World extends Schema {
 
     this.maxVisionCharacters = campaign.settings?.maxVisionCharacters != null
       ? campaign.settings?.maxVisionCharacters : 200;
+
+    this.publicSelectedCharacter = campaign.settings?.publicSelectedCharacter != null
+      ? campaign.settings?.publicSelectedCharacter : null;
   }
 
   async persist() {
@@ -728,16 +776,19 @@ export class World extends Schema {
     }
 
     for (let userId in this.users) {
-      usersOnCampaign.push({
-        ref: userId,
-        settings: {
-          wallsVisibility: this.users[userId].wallsVisibility,
-          fogOfWarVisibility: this.users[userId].fogOfWarVisibility,
-          tilemapShowGrid: this.users[userId].tilemapShowGrid,
-          selectedCharacter: this.users[userId].selectedCharacter,
-          isDM: this.users[userId].isDM
-        }
-      });
+      if (this.users[userId].isPlayer) {
+        usersOnCampaign.push({
+          ref: userId,
+          settings: {
+            wallsVisibility: this.users[userId].wallsVisibility,
+            fogOfWarVisibility: this.users[userId].fogOfWarVisibility,
+            tilemapShowGrid: this.users[userId].tilemapShowGrid,
+            selectedCharacter: this.users[userId].selectedCharacter,
+            isDM: this.users[userId].isDM,
+            isPlayer: this.users[userId].isPlayer,
+          }
+        });
+      }
     }
 
     var charactersOnCampaign = [];
@@ -769,7 +820,8 @@ export class World extends Schema {
     campaign.characters = charactersOnCampaign;
     campaign.settings = {
       fogOfWarVisibilityPlayers: this.fogOfWarVisibilityPlayers,
-      maxVisionCharacters: this.maxVisionCharacters
+      maxVisionCharacters: this.maxVisionCharacters,
+      publicSelectedCharacter: this.publicSelectedCharacter
     }
 
     await CampaignDB.updateOne({ _id: campaign._id }, campaign);
@@ -789,12 +841,22 @@ export class World extends Schema {
     if (!user.settings.selectedCharacter) user.settings.selectedCharacter = null;
     if (!user.settings.isDM) user.settings.isDM = client == campaign.owner;
 
+    user.settings.isPlayer = false;
+    if (user.settings.isDM) {
+      user.settings.isPlayer = true;
+    } else {
+      const invitation = await InvitationDB.findOne({ recipient: mongoose.Types.ObjectId(user.ref), campaign: campaign._id, accepted: true });
+      if (invitation) user.settings.isPlayer = true;
+    }
+    if (!user.settings.isPlayer) user.settings.selectedCharacter = this.publicSelectedCharacter;
+
     this.users[user.ref] = new User();
     this.users[user.ref].wallsVisibility = user.settings.wallsVisibility;
     this.users[user.ref].fogOfWarVisibility = user.settings.fogOfWarVisibility;
     this.users[user.ref].tilemapShowGrid = user.settings.tilemapShowGrid;
     this.users[user.ref].selectedCharacter = user.settings.selectedCharacter;
     this.users[user.ref].isDM = user.settings.isDM;
+    this.users[user.ref].isPlayer = user.settings.isPlayer;
 
     if (user.ref) this.users[user.ref].load(user.ref); //load a specific user of db
   }

@@ -24,6 +24,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   users: any;
   message: string;
   minimized: boolean = false;
+  filterSpectators: boolean = false;
 
   //chat schemas
   messenger: any;
@@ -106,8 +107,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     })
   }
 
+  getFilteredMessages() {
+    return Object.values(this.messages.value).filter((m: any) => {
+      return !this.filterSpectators || this.users.value[m.user].isPlayer;
+    });
+  }
+
   getLastMessage() {
-    return Object.values(this.messages.value).pop();
+    return this.getFilteredMessages().pop();
   }
 
   getTime(date): string {
