@@ -3,12 +3,12 @@ application:
   name: "dungeongram"
   project: "dungeongram"
   organization: "QoveryCommunity"
-  port: 3000
+databases:
+- type: "MONGODB"
+  name: "dungeongram"
+  version: "4.4"
 routers:
 - name: "main-dungeongram"
-  custom_domains:
-    - branch: master
-      domain: www.dungeongram.com
   routes:
   - application_name: "dungeongram"
     paths:
