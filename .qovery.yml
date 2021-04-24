@@ -1,12 +1,8 @@
 ---
 application:
   name: "dungeongram"
-  project: "dungeongram"
+  project: "DungeonGram"
   organization: "QoveryCommunity"
-databases:
-- type: "MONGODB"
-  name: "dungeongram"
-  version: "4.4"
 routers:
 - name: "main-dungeongram"
   routes:
