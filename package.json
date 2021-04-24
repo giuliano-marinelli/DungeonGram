@@ -6,6 +6,7 @@
     "node": "12.16.1",
     "npm": "6.13.4"
   },
+  "sideEffects": false,
   "scripts": {
     "start": "node dist/server/app.js",
     "build": "concurrently -n \"client,server\" -c \"blue,yellow\" \"ng build\" \"tsc -p server\"",
