@@ -69,8 +69,8 @@ characterSchema.statics.deleteFiles = async function (image, attribute) {
         const fs = require('fs');
 
         try {
-          if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: image.split('/').pop() }).promise();
-          else fs.unlinkSync(image);
+          if (process.env.NODE_ENV.trim() == "test") fs.unlinkSync(image);
+          else await s3.deleteObject({ Bucket: "dungeongram", Key: image.split('/').pop() }).promise();
         } catch (err) {
           console.log("Not found file " + image + " to delete");
         }

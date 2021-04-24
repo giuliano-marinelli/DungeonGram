@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 
 async function setMongo(): Promise<any> {
   let mongodbURI;
-  if (process.env.NODE_ENV === 'test') {
-    mongodbURI = process.env.MONGODB_TEST_URI;
+  console.log("NODE_ENV", process.env.NODE_ENV, process.env.NODE_ENV.trim() == 'test')
+  if (process.env.NODE_ENV.trim() == "test") {
+    mongodbURI = process.env.MONGODB_URI_TEST;
   } else {
     mongodbURI = process.env.MONGODB_URI;
   }

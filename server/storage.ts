@@ -13,7 +13,17 @@ class Storage {
     const s3 = getS3();
 
     //set storage method based on envinroment variable
-    if (process.env.AWS_UPLOAD == "yes") {
+    if (process.env.NODE_ENV.trim() == "test") {
+      this.storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+          cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
+        }
+      });
+    } else {
       this.storage = multerS3({
         s3: s3,
         bucket: 'dungeongram',
@@ -23,16 +33,6 @@ class Storage {
         key: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           cb(null, file.fieldname + '-' + uniqueSuffix);
-        }
-      });
-    } else {
-      this.storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, 'uploads/');
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
         }
       });
     }

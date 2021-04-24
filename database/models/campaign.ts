@@ -97,8 +97,8 @@ campaignSchema.statics.deleteFiles = async function (banner) {
         const fs = require('fs');
 
         try {
-          if (process.env.AWS_UPLOAD == "yes") await s3.deleteObject({ Bucket: "dungeongram", Key: banner.split('/').pop() }).promise();
-          else fs.unlinkSync(banner);
+          if (process.env.NODE_ENV.trim() == "test") fs.unlinkSync(banner);
+          else await s3.deleteObject({ Bucket: "dungeongram", Key: banner.split('/').pop() }).promise();
         } catch (err) {
           console.log("Not found file " + banner + " to delete");
         }

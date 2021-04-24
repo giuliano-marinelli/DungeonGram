@@ -30,7 +30,7 @@ app.use('/uploads', express.static('uploads')); //make uploads folder public
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 500000 }));
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV.trim() !== 'test') {
   app.use(morgan('dev'));
 }
 
@@ -57,7 +57,7 @@ const basicAuth = require('express-basic-auth');
 app.use('/colyseus', basicAuth({
   //list of users and passwords
   users: {
-    "admin": "admin",
+    "admin": "15742891",
   },
   //sends WWW-Authenticate header, which will prompt the user to fill credentials in
   challenge: true
