@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { GlobalComponent } from '../shared/global/global.component';
@@ -14,14 +14,17 @@ import { World } from '../shared/schemas/world';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent implements OnInit, OnDestroy {
+export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   //babylon
-  canvas: HTMLCanvasElement;
+  // @ViewChild('renderCanvas', { static: true })
+  // canvasRef: ElementRef<HTMLCanvasElement>;
+  canvas: any;
   engine: any;
   scene: any;
   optimizer: any;
   assetsManager: any;
   assets: any = {};
+  fps: number = 0;
 
   //game
   gameRoom: any;
@@ -46,9 +49,60 @@ export class GameComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.campaign && this.access == null) {
-      this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+      this.controller = new Controller();
 
-      this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true, doNotHandleContextLost: true });
+      this.ngZone.runOutsideAngular(() => {
+        var host = window.document.location.host.replace(/:.*/, '');
+        // var url = environment.production
+        //   ? "wss://dungeongram-gameserver.herokuapp.com"
+        //   : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
+        var url = location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : '')
+        console.log("Connecting game to: " + url);
+        var client = new Colyseus.Client(url);
+        client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
+          .then((room: any) => {
+            this.ngZone.runOutsideAngular(() => {
+              console.log("Joined to game room", room);
+              this.gameRoom = room;
+              this.controller.rooms.game = this.gameRoom;
+              this.initGame();
+            });
+            this.ngZone.run(() => {
+              this.access = true;
+            });
+          })
+          .catch((error: any) => {
+            console.log("Can't join game room", error);
+            this.ngZone.run(() => {
+              this.access = false;
+            });
+          });
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    console.log('game component disposed');
+    this.scene?.clearCachedVertexData();
+    this.scene?.cleanCachedTextureBuffer();
+    this.scene?.dispose();
+    this.engine?.stopRenderLoop();
+    this.engine?.dispose();
+    this.gameRoom?.leave();
+  }
+
+  ngAfterViewChecked() {
+    // console.log('Change detection triggered!');
+  }
+
+  initGame() {
+    console.log("Joined Game");
+    // ignore the Angular change events of all outside the zone
+    this.ngZone.runOutsideAngular(() => {
+      this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+      // this.canvas = this.canvasRef.nativeElement;
+
+      this.engine = new BABYLON.Engine(this.canvas, false, { stencil: true, doNotHandleContextLost: true }, true);
       //optimizations
       // this.engine.enableOfflineSupport = false;
 
@@ -68,73 +122,45 @@ export class GameComponent implements OnInit, OnDestroy {
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
       this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
-      this.controller = new Controller();
-
-      var host = window.document.location.host.replace(/:.*/, '');
-      // var url = environment.production
-      //   ? "wss://dungeongram-gameserver.herokuapp.com"
-      //   : location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + (Number(location.port) + 1) : '');
-      var url = location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : '')
-      console.log("Connecting game to: " + url);
-      var client = new Colyseus.Client(url);
-      client.joinOrCreate("game", { campaign: this.campaign, token: localStorage.getItem('token') })
-        .then((room: any) => {
-          console.log("Joined to game room", room);
-          this.gameRoom = room;
-          this.controller.rooms.game = this.gameRoom;
-          this.access = true;
-          this.initGame();
-        })
-        .catch((error: any) => {
-          console.log("Can't join game room", error);
-          this.access = false;
-        });
-
       //resize canvas on resize window
       window.onresize = () => {
         this.engine?.resize();
       };
-    }
-  }
 
-  ngOnDestroy(): void {
-    console.log('game component disposed');
-    this.scene?.clearCachedVertexData();
-    this.scene?.cleanCachedTextureBuffer();
-    this.scene?.dispose();
-    this.engine?.dispose();
-    this.gameRoom?.leave();
-  }
-
-  initGame() {
-    console.log("Joined Game");
-    this.gameRoom.onStateChange.once(() => {
-      //after the assetsManager finish to load all meshes
-      this.assetsManager.onFinish = (tasks) => {
-        //create the root schema object
-        this.world = new World(this.gameRoom.state.world, {
-          scene: this.scene,
-          room: this.gameRoom,
-          canvas: this.canvas,
-          controller: this.controller,
-          token: this.auth.currentUser._id,
-          assets: this.assets,
-          test: this.test
-        });
-        console.log("Initialized game world", this.world);
-
-        // ignore the change events from the Engine in the Angular ngZone
+      this.gameRoom.onStateChange.once(() => {
         this.ngZone.runOutsideAngular(() => {
-          // start the render loop and therefore start the Engine
-          this.engine.runRenderLoop(() => this.scene.render())
+          //after the assetsManager finish to load all meshes
+          this.assetsManager.onFinish = (tasks) => {
+            this.ngZone.runOutsideAngular(() => {
+              //create the root schema object
+              this.world = new World(this.gameRoom.state.world, {
+                scene: this.scene,
+                room: this.gameRoom,
+                canvas: this.canvas,
+                controller: this.controller,
+                token: this.auth.currentUser._id,
+                assets: this.assets,
+                test: this.test
+              });
+              console.log("Initialized game world", this.world);
+
+              // start the render loop and therefore start the Engine
+              this.engine.runRenderLoop(() => {
+                this.ngZone.run(() => {
+                  this.fps = this.engine?.getFps().toFixed();
+                });
+                this.scene.render();
+              });
+            });
+          }
+
+          //add the task for each mesh to the assetsManager and other assets to be cloned
+          GlobalComponent.assetsTasks(this.assetsManager, this.assets, this.scene, { test: this.test });
+
+          //call the loading of meshes
+          this.assetsManager.load();
         });
-      }
-
-      //add the task for each mesh to the assetsManager and other assets to be cloned
-      GlobalComponent.assetsTasks(this.assetsManager, this.assets, this.scene, { test: this.test });
-
-      //call the loading of meshes
-      this.assetsManager.load();
+      });
     });
   }
 

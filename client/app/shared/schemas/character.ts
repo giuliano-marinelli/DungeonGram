@@ -299,8 +299,8 @@ export class Character extends Schema {
 
         //set collider phyics mesh (if testing)
         if (this.parameters.world.test) {
-          this.colliderPhysics = this.parameters.assets.characterColliderPhysics.clone();
-          this.colliderPhysics.material = this.parameters.assets.characterColliderPhysicsMaterial.clone();
+          this.colliderPhysics = this.parameters.assets.characterColliderPhysics.createInstance();
+          this.colliderPhysics.material = this.parameters.assets.characterColliderPhysicsMaterial.createInstance();
           this.colliderPhysics.setEnabled(true);
           this.colliderPhysics.position.y = 0.95;
           this.colliderPhysics.position.x = this.xPhysics;

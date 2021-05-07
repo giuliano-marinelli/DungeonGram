@@ -84,6 +84,7 @@ export class ToolsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log("tools on init")
     if (this.campaignId) this.getCampaign(); else this.isLoadingCampaign = false;
     this.getCharacters(true);
     this.getCharacters(false);
@@ -224,9 +225,11 @@ export class ToolsComponent implements OnInit {
         options: {
           charactersOnCampaign: this.controller.initSetting("charactersOnCampaign", null),
           addingMode: this.controller.initSetting("addingMode", false),
-          selectedCharacter: this.controller.initSetting("selectedCharacter", null),
+          selectedCharacter: this.controller.initSetting("selectedCharacter", null, ()=> {
+            this.changeDetector.detectChanges();
+          }),
           selectedCharacterObj: this.controller.initSetting("selectedCharacterObj", null, () => {
-            this.changeDetector.markForCheck();
+            this.changeDetector.detectChanges();
           }),
           publicSelectedCharacter: this.controller.initSetting("publicSelectedCharacter", null),
           addingModeModel: this.controller.initSetting("addingModeModel", null),
@@ -317,18 +320,18 @@ export class ToolsComponent implements OnInit {
   }
 
   initHotkeys() {
-    this.orderedTools.forEach(tool => {
-      if (this.tools.users.options.hotkeysActions[tool.name]) this.gameScene.actionManager.unregisterAction(this.tools.users.options.hotkeysActions[tool.name]);
-      if (tool.hotkey) {
-        this.tools.users.options.hotkeysActions[tool.name] = this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
-          {
-            trigger: BABYLON.ActionManager.OnKeyUpTrigger,
-            parameter: tool.hotkey
-          },
-          () => { this.callTool(tool.name); }
-        ));
-      }
-    });
+    // this.orderedTools.forEach(tool => {
+    //   if (this.tools.users.options.hotkeysActions[tool.name]) this.gameScene.actionManager.unregisterAction(this.tools.users.options.hotkeysActions[tool.name]);
+    //   if (tool.hotkey) {
+    //     this.tools.users.options.hotkeysActions[tool.name] = this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+    //       {
+    //         trigger: BABYLON.ActionManager.OnKeyUpTrigger,
+    //         parameter: tool.hotkey
+    //       },
+    //       () => { this.callTool(tool.name); }
+    //     ));
+    //   }
+    // });
 
     // document.addEventListener("keyup", event => {
     //   // console.log(event.key);

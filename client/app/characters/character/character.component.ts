@@ -150,11 +150,12 @@ export class CharacterComponent implements OnInit, OnDestroy {
         character: this.characterForm
       });
 
-      // ignore the change events from the Engine in the Angular ngZone
-      this.ngZone.runOutsideAngular(() => {
-        // start the render loop and therefore start the Engine
-        this.engine.runRenderLoop(() => this.scene.render())
-      });
+      // start the render loop and therefore start the Engine
+      this.engine.runRenderLoop(() => {
+        this.ngZone.runOutsideAngular(() => {
+          this.scene.render();
+        });
+      })
 
       //load the input character
       if (this.character) this.getCharacter();

@@ -223,7 +223,7 @@ export class World extends Schema {
     // var box = BABYLON.Mesh.CreateBox('SkyBox', 1000, this.parameters.scene, false, BABYLON.Mesh.BACKSIDE);
     // box.material = new BABYLON.SkyMaterial('sky', this.parameters.scene);
     // box.material.inclination = -0.35;
-    this.parameters.scene.clearColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    this.parameters.scene.clearColor = new BABYLON.Color3(0, 0, 0);
   }
 
   initUI() {

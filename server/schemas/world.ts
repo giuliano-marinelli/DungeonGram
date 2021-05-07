@@ -31,8 +31,6 @@ export class World extends Schema {
   //physics
   worldPhysics: WorldPhysics;
 
-  loadTimer: number = 0;
-
   command = {
     user: {
       join: {
@@ -58,10 +56,14 @@ export class World extends Schema {
       },
     },
     character: {
+      _options: {
+        addingModeTimer: 0
+      },
       move: {
         do: (client: string, data: any) => {
           if (this.map != null && this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map) {
             if (!this.users[client].addingModeCharacter &&
+              !this.users[client].beignDragged &&
               this.users[client].selectedCharacter &&
               data.x >= 0 && data.y >= 0 &&
               data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
@@ -109,23 +111,27 @@ export class World extends Schema {
       },
       addingModeOn: {
         do: async (client: string, data: any) => {
-          if (!this.users[client].addingModeCharacter) {
-            //add adding mode character
-            var id = await this.addCharacter({ model: data.model, map: this.map?.mapId })
-            this.characters[id].addingMode = true;
+          if (this.command.character._options.addingModeTimer == 0) {
+            if (!this.users[client].addingModeCharacter) {
+              this.command.character._options.addingModeTimer = 1500;
 
-            //activate adding mode on user with the created characeter
-            this.users[client].addingModeCharacter = id;
-            this.users[client].addingModeModel = data.model;
+              //add adding mode character
+              var id = await this.addCharacter({ model: data.model, map: this.map?.mapId })
+              this.characters[id].addingMode = true;
 
-            //drag adding mode character to the point sended
-            var point = data.x || data.y ? { x: data.x, y: data.y } : null;
-            this.characters[id].drag(point);
-          } else {
-            var lastAddingModeModel = this.users[client].addingModeModel;
-            this.execCommand(client, 'character', { action: 'addingModeOff' });
-            if (lastAddingModeModel != data.model)
-              this.execCommand(client, 'character', data);
+              //activate adding mode on user with the created characeter
+              this.users[client].addingModeCharacter = id;
+              this.users[client].addingModeModel = data.model;
+
+              //drag adding mode character to the point sended
+              var point = data.x || data.y ? { x: data.x, y: data.y } : null;
+              this.characters[id].drag(point);
+            } else {
+              var lastAddingModeModel = this.users[client].addingModeModel;
+              this.execCommand(client, 'character', { action: 'addingModeOff' });
+              if (lastAddingModeModel != data.model)
+                this.execCommand(client, 'character', data);
+            }
           }
         },
         validate: (client: string, data: any) => {
@@ -134,12 +140,14 @@ export class World extends Schema {
       },
       addingModeOff: {
         do: (client: string, data: any) => {
-          //remove adding mode character
-          delete this.characters[this.users[client].addingModeCharacter]
+          if (this.command.character._options.addingModeTimer == 0) {
+            //remove adding mode character
+            delete this.characters[this.users[client].addingModeCharacter]
 
-          //deactivate adding mode on user
-          this.users[client].addingModeCharacter = null;
-          this.users[client].addingModeModel = null;
+            //deactivate adding mode on user
+            this.users[client].addingModeCharacter = null;
+            this.users[client].addingModeModel = null;
+          }
         },
         validate: (client: string, data: any) => { return this.users[client].isDM }
       },
@@ -575,6 +583,9 @@ export class World extends Schema {
       }
     },
     map: {
+      _options: {
+        loadTimer: 0
+      },
       open: {
         do: async (client: string, data: any) => {
           var previousMap = this.map?.mapId;
@@ -584,8 +595,8 @@ export class World extends Schema {
             this.map = null;
             await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
           }
-          if (previousMap != data.map && this.loadTimer == 0) {
-            this.loadTimer = 1500;
+          if (previousMap != data.map && this.command.map._options.loadTimer == 0) {
+            this.command.map._options.loadTimer = 1500;
             await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: data.map } });
             setTimeout(() => {
               this.worldPhysics = new WorldPhysics();
@@ -691,6 +702,7 @@ export class World extends Schema {
     try {
       if (client && type
         && data?.action
+        && data?.action != '_options'
         && this.command[type]
         && this.command[type][data?.action]
         && this.command[type][data?.action].do) {
@@ -712,7 +724,8 @@ export class World extends Schema {
   }
 
   update(deltaTime: number) {
-    this.loadTimer = this.loadTimer - deltaTime >= 0 ? this.loadTimer - deltaTime : 0;
+    this.command.map._options.loadTimer = this.command.map._options.loadTimer - deltaTime >= 0 ? this.command.map._options.loadTimer - deltaTime : 0;
+    this.command.character._options.addingModeTimer = this.command.character._options.addingModeTimer - deltaTime >= 0 ? this.command.character._options.addingModeTimer - deltaTime : 0;
 
     //udpate physics world
     this.map?.worldPhysics?.update(deltaTime);

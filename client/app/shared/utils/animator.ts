@@ -64,7 +64,8 @@ export class Animator {
     if (!this.mesh._children || !this.mesh._children.find((child) => { return child.uniqueId == mesh.uniqueId })) {
       this.registeredChildren[mesh.uniqueId] = mesh;
       mesh.parent = this.mesh;
-      mesh.skeleton = this.mesh.skeleton?.clone("childSkeleton");
+      // mesh.skeleton = this.mesh.skeleton?.clone("childSkeleton");
+      mesh.skeleton = this.mesh.skeleton;
       // mesh.skeleton.enableBlending(this.transition);
       // for (let anim in mesh.skeleton._ranges) {
       //   mesh.skeleton._ranges[anim].from = mesh.skeleton._ranges[anim].from + 1;
@@ -102,8 +103,8 @@ export class Animator {
   }
 
   unparentUI(child) {
-    delete this.registeredChildrenUI[child.uniqueId];
-    child.linkWithMesh(null);
+    delete this.registeredChildrenUI[child?.uniqueId];
+    child?.linkWithMesh(null);
   }
 
   visibility(value) {
@@ -114,7 +115,7 @@ export class Animator {
   }
 
   toggleUI(child, active?) {
-    if (this.registeredChildrenUI[child.uniqueId]) {
+    if (this.registeredChildrenUI[child?.uniqueId]) {
       this.registeredChildrenUI[child.uniqueId].active = active != null ? active : !this.registeredChildrenUI[child.uniqueId].active;
       if (this.mesh.isEnabled()) {
         this.registeredChildrenUI[child.uniqueId].control.alpha = this.registeredChildrenUI[child.uniqueId].active
@@ -184,6 +185,12 @@ export class Animator {
 
       this.lastDirection = vectorDirection;
     }
+  }
+
+  combineMeshes() {
+    this.mesh = BABYLON.Mesh.MergeMeshes([this.mesh, ...[this.registeredChildren]], true, true, undefined, false, true);
+    this.registeredChildren = [];
+    return this.mesh;
   }
 
   static cameraSpinTo = function (camera, whichprop, targetval, speed) {

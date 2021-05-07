@@ -58,6 +58,7 @@
     "compressorjs": "^1.0.7",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
     "font-awesome": "^4.7.0",

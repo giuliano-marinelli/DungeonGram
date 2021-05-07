@@ -25,7 +25,8 @@
         </div>
       </div>
       <div class="col-2">
-        <button class="btn filterSpec pull-right" tippy="{{filterSpectators ? 'Show Spectators Messages' : 'Hide Spectators Messages'}}"
+        <button class="btn filterSpec pull-right"
+          tippy="{{filterSpectators ? 'Show Spectators Messages' : 'Hide Spectators Messages'}}"
           (click)="filterSpectators = !filterSpectators; scrollDown()">
           <span class="fa-stack">
             <i class="fa fa-commenting fa-stack-1x"></i>
@@ -90,8 +91,12 @@
   </div>
   <div id="chat-send">
     <div class="input-group">
-      <input class="form-control" type="text" id="input" value="" [(ngModel)]="message" autofocus autocomplete="off"
-        (keydown.enter)='sendMessage()' placeholder="Enter text or /roll command" />
+      <input class="form-control" maxlength="{{messageSize}}" style="padding-right: 52px;" type="text" id="input"
+        value="" [(ngModel)]="message" autofocus autocomplete="off" (keydown.enter)='sendMessage()'
+        placeholder="Enter text or /roll command" />
+      <button type="button" class="btn bg-transparent" style="width: 52px; margin-left: -52px; z-index: 100;" disabled>
+        {{message ? (messageSize - message.length >= 0 ? messageSize - message.length : 0) : messageSize}}
+      </button>
       <div class="input-group-append">
         <button class="btn btn-dark" type="button" (click)='sendMessage()'><i class="fa fa-paper-plane"></i></button>
       </div>

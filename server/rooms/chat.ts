@@ -18,6 +18,8 @@ export class ChatRoom extends Room {
   clientUserObj: any = {};
 
   onCreate(options) {
+    const escape = require('escape-html');
+
     this.roomId = 'chat' + options.campaign;
 
     console.log('ChatRoom-', this.roomId, '-: created');
@@ -26,8 +28,8 @@ export class ChatRoom extends Room {
 
     this.onMessage("*", (client, type, data) => {
       if (type == 'message' && data.content && typeof data.content === "string") {
-        console.log('ChatRoom-', this.roomId, '-: client', this.clientUserObj[client.sessionId].username, 'send message =>', data.content);
-        this.state.messenger?.addMessage(data.content, this.clientUserObj[client.sessionId]);
+        console.log('ChatRoom-', this.roomId, '-: client', this.clientUserObj[client.sessionId].username, 'send message =>', escape(data.content));
+        this.state.messenger?.addMessage(escape(data.content), this.clientUserObj[client.sessionId]);
       }
 
       // this.broadcast("messages", '<b>' + this.clientUserObj[client.sessionId].username + '</b> ' +

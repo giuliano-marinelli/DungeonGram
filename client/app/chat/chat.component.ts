@@ -23,6 +23,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: any;
   users: any;
   message: string;
+  messageSize: number = 200;
   minimized: boolean = false;
   filterSpectators: boolean = false;
 
@@ -89,7 +90,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     //   document.querySelector("#chat-messages").scrollTop = document.querySelector("#chat-messages").scrollHeight;
     // });
   }
-
 
   sendMessage(message?) {
     if (message)
