@@ -54,6 +54,18 @@ export class World extends Schema {
           // this.worldPhysics.removeEntity(client, 'character'); //remove physics character
         }
       },
+      ping: {
+        do: (client: string, data: any) => {
+          if (this.users[client]) {
+            var pingDate = new Date(data.time);
+            var nowDate = new Date(Date.now());
+            this.users[client].latency = Math.abs(nowDate.getTime() - pingDate.getTime());
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.time != null && typeof data.time === "number" && this.users[client].isPlayer
+        }
+      }
     },
     character: {
       _options: {

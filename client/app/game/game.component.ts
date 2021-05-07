@@ -25,6 +25,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   assetsManager: any;
   assets: any = {};
   fps: number = 0;
+  latency: any;
 
   //game
   gameRoom: any;
@@ -49,9 +50,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnInit(): void {
     if (this.campaign && this.access == null) {
-      this.controller = new Controller();
-
       this.ngZone.runOutsideAngular(() => {
+        this.controller = new Controller({ ping: { rooms: ['game'], interval: 5000 } });
+        this.latency = this.controller.initSetting("latency", 0);
+
         var host = window.document.location.host.replace(/:.*/, '');
         // var url = environment.production
         //   ? "wss://dungeongram-gameserver.herokuapp.com"

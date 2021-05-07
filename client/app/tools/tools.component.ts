@@ -320,26 +320,26 @@ export class ToolsComponent implements OnInit {
   }
 
   initHotkeys() {
-    // this.orderedTools.forEach(tool => {
-    //   if (this.tools.users.options.hotkeysActions[tool.name]) this.gameScene.actionManager.unregisterAction(this.tools.users.options.hotkeysActions[tool.name]);
-    //   if (tool.hotkey) {
-    //     this.tools.users.options.hotkeysActions[tool.name] = this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
-    //       {
-    //         trigger: BABYLON.ActionManager.OnKeyUpTrigger,
-    //         parameter: tool.hotkey
-    //       },
-    //       () => { this.callTool(tool.name); }
-    //     ));
-    //   }
-    // });
+    this.orderedTools.forEach(tool => {
+      if (this.tools.users.options.hotkeysActions[tool.name]) this.gameScene.actionManager.unregisterAction(this.tools.users.options.hotkeysActions[tool.name]);
+      if (tool.hotkey) {
+        this.tools.users.options.hotkeysActions[tool.name] = this.gameScene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+          {
+            trigger: BABYLON.ActionManager.OnKeyUpTrigger,
+            parameter: tool.hotkey
+          },
+          () => { this.callTool(tool.name); }
+        ));
+      }
+    });
 
-    // document.addEventListener("keyup", event => {
-    //   // console.log(event.key);
-    //   this.orderedTools.forEach(tool => {
-    //     // console.log(event.key, tool.hotkey, event.key == tool.hotkey)
-    //     if (event.key == tool.hotkey) this.callTool(tool.name, event);
-    //   });
-    // });
+    document.addEventListener("keyup", event => {
+      // console.log(event.key);
+      this.orderedTools.forEach(tool => {
+        // console.log(event.key, tool.hotkey, event.key == tool.hotkey)
+        if (event.key == tool.hotkey) this.callTool(tool.name, event);
+      });
+    });
   }
 
   //for characters

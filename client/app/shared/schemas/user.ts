@@ -19,6 +19,7 @@ export class User extends Schema {
   avatar?: string;
   username?: string;
   email?: string;
+  latency?: number;
   //global actions registered
   actions: any = {};
 
@@ -85,6 +86,9 @@ export class User extends Schema {
             break;
           case 'isPlayer':
             if (this.id == this.parameters.token) this.parameters.controller.updateSetting('isPlayer', this.isPlayer);
+            break;
+          case 'latency':
+            if (this.id == this.parameters.token) this.parameters.controller.updateSetting('latency', this.latency);
             break;
           case 'selectedCharacter':
             this.parameters.world.updateCharactersVisibility();

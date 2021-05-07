@@ -33,6 +33,8 @@ export class User extends Schema {
   email: string;
   @type("string")
   avatar: string;
+  @type("number")
+  latency: number;
 
   db: any;
 

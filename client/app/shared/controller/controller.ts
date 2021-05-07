@@ -3,6 +3,16 @@ export class Controller {
   activeTool: any = null;
   activeAction: any = null;
   userSettings: any = {};
+  pingInterval: number = 5000;
+
+  constructor(options?) {
+    if (options?.ping?.rooms) {
+      if (options.ping.interval) this.pingInterval = options.ping.interval;
+      options.ping.rooms.forEach((room) => {
+        this.ping(room);
+      });
+    }
+  }
 
   toggleTool(tool, toggle) {
     this.activeTool = toggle ? tool : null;
@@ -33,5 +43,11 @@ export class Controller {
     if (!this.userSettings[setting])
       this.userSettings[setting] = { value: value, update: onUpdate };
     return this.userSettings[setting];
+  }
+
+  ping(room) {
+    setInterval(() => {
+      this.rooms[room].send('user', { action: 'ping', time: Date.now() });
+    }, this.pingInterval);
   }
 }

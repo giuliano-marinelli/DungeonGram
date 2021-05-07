@@ -94,7 +94,7 @@
       <input class="form-control" maxlength="{{messageSize}}" style="padding-right: 52px;" type="text" id="input"
         value="" [(ngModel)]="message" autofocus autocomplete="off" (keydown.enter)='sendMessage()'
         placeholder="Enter text or /roll command" />
-      <button type="button" class="btn bg-transparent" style="width: 52px; margin-left: -52px; z-index: 100;" disabled>
+      <button type="button" class="btn bg-transparent" style="width: 52px; margin-left: -52px; z-index: 100; opacity: 0.2;" disabled>
         {{message ? (messageSize - message.length >= 0 ? messageSize - message.length : 0) : messageSize}}
       </button>
       <div class="input-group-append">
