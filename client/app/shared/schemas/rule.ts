@@ -172,6 +172,7 @@ export class Rule extends Schema {
     this.reset();
     this.sum = 0;
 
+    if (!this.meshPoints?.length) this.init();
     if (this.points.length) {
       var points3D = [];
       var colors = [];

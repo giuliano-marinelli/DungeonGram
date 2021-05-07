@@ -13,7 +13,7 @@ class Storage {
     const s3 = getS3();
 
     //set storage method based on envinroment variable
-    if (process.env.NODE_ENV.trim() == "test") {
+    if (process.env.NODE_ENV?.trim() == "test") {
       this.storage = multer.diskStorage({
         destination: (req, file, cb) => {
           cb(null, 'uploads/');

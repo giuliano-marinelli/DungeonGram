@@ -122,89 +122,6 @@ export class Wall extends Schema {
     mesh.rotation.y = Vectors.angle(this.from, this.to);
   }
 
-  initActions() {
-    //set action on mouse in/out/click
-    this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
-    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
-      // this.mesh.material.emissiveColor = BABYLON.Color3.Black();
-      if (this.type == 'door') this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
-      else this.parameters.assets.wallHighlight.setEnabled(false);
-    }));
-    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
-      if (this.parameters.controller.activeTool?.name == 'walls') {
-        // this.mesh.material.emissiveColor = BABYLON.Color3.White();
-        if (this.type == 'door') {
-          this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
-        } else {
-          //add highlight mesh over the wall mesh
-          this.parameters.assets.wallHighlight.setEnabled(true);
-          this.adjustWallSize(this.parameters.assets.wallHighlight); //set wall highlight with the size of the actual wall
-          this.parameters.world.lights.highlightCharacter.addMesh(this.parameters.assets.wallHighlight, BABYLON.Color3.Black(), true);
-        }
-      }
-    }));
-    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
-      if (this.parameters.controller.activeTool?.name == 'walls' &&
-        e.sourceEvent.ctrlKey && this.parameters.controller.activeTool?.options?.remove) {
-        this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
-      }
-      this.parameters.assets.wallHighlight.setEnabled(false);
-    }));
-    if (this.type == 'door') {
-      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-        if (((!this.blocked && !this.hidden) || this.parameters.world.users[this.parameters.token].isDM) &&
-          !this.parameters.controller.activeTool && !this.parameters.controller.activeAction && e.sourceEvent.button == 0) {
-          var pickDoor = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isDoor });
-          var pickGround = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-          if (pickDoor?.pickedPoint && pickGround?.pickedPoint) {
-            console.log(this);
-            this.parameters.controller.toggleAction('dragDoor', true);
-            var difference = {
-              x: pickDoor.pickedPoint.x - pickGround.pickedPoint.x,
-              z: pickDoor.pickedPoint.z - pickGround.pickedPoint.z,
-            }
-            this.actions.drag = (e) => {
-              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
-              if (pick?.pickedPoint) {
-                this.parameters.controller.send('game', 'wall', {
-                  id: this.id,
-                  target: { x: pick.pickedPoint.x + difference.x / 2, y: pick.pickedPoint.z + difference.z / 2 },
-                  action: 'rotate'
-                });
-              }
-            }
-            this.actions.drop = (e) => {
-              this.parameters.canvas.removeEventListener("pointerup", this.actions.drop, false);
-              this.parameters.canvas.removeEventListener("pointermove", this.actions.drag, false);
-              setTimeout(() => {
-                this.parameters.controller.toggleAction('dragDoor', false);
-                this.parameters.controller.send('game', 'wall', { id: this.id, action: 'endRotate' });
-              }, 10);
-            };
-            this.parameters.canvas.addEventListener("pointermove", this.actions.drag, false);
-            this.parameters.canvas.addEventListener("pointerup", this.actions.drop, false);
-          }
-        }
-      }));
-      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
-        if (!this.parameters.controller.activeTool) {
-          if (e.sourceEvent.shiftKey) {
-            this.parameters.controller.send('game', 'wall', { id: this.id, block: !this.blocked, action: 'block' });
-          } else if (e.sourceEvent.altKey) {
-            this.parameters.controller.send('game', 'wall', { id: this.id, hide: !this.hidden, action: 'hide' });
-          }
-        }
-      }));
-      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, (e) => {
-        console.log("doble click door")
-        if (e.sourceEvent.button == 0 && !this.parameters.controller.activeTool) {
-          console.log("send close door")
-          this.parameters.controller.send('game', 'wall', { id: this.id, action: 'close' });
-        }
-      }));
-    }
-  }
-
   doMesh() {
     this.height = 2.55;
     if (this.size == 'medium') this.height = this.height / 2;
@@ -322,6 +239,89 @@ export class Wall extends Schema {
           this.tilesPhysicsColliders[this.tilesPhysicsColliders.length - 1].position.y = 0.05;
         });
       }, 1000);
+    }
+  }
+
+  initActions() {
+    //set action on mouse in/out/click
+    this.mesh.actionManager = new BABYLON.ActionManager(this.parameters.scene);
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+      // this.mesh.material.emissiveColor = BABYLON.Color3.Black();
+      if (this.type == 'door') this.parameters.world.lights.highlightCharacter.removeMesh(this.mesh);
+      else this.parameters.assets.wallHighlight.setEnabled(false);
+    }));
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+      if (this.parameters.controller.activeTool?.name == 'walls') {
+        // this.mesh.material.emissiveColor = BABYLON.Color3.White();
+        if (this.type == 'door') {
+          this.parameters.world.lights.highlightCharacter.addMesh(this.mesh, BABYLON.Color3.Black(), true);
+        } else {
+          //add highlight mesh over the wall mesh
+          this.parameters.assets.wallHighlight.setEnabled(true);
+          this.adjustWallSize(this.parameters.assets.wallHighlight); //set wall highlight with the size of the actual wall
+          this.parameters.world.lights.highlightCharacter.addMesh(this.parameters.assets.wallHighlight, BABYLON.Color3.Black(), true);
+        }
+      }
+    }));
+    this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
+      if (this.parameters.controller.activeTool?.name == 'walls' &&
+        e.sourceEvent.ctrlKey && this.parameters.controller.activeTool?.options?.remove) {
+        this.parameters.controller.send('game', 'wall', { id: this.id, action: 'remove' });
+      }
+      this.parameters.assets.wallHighlight.setEnabled(false);
+    }));
+    if (this.type == 'door') {
+      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
+        if (((!this.blocked && !this.hidden) || this.parameters.world.users[this.parameters.token].isDM) &&
+          !this.parameters.controller.activeTool && !this.parameters.controller.activeAction && e.sourceEvent.button == 0) {
+          var pickDoor = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isDoor });
+          var pickGround = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+          if (pickDoor?.pickedPoint && pickGround?.pickedPoint) {
+            console.log(this);
+            this.parameters.controller.toggleAction('dragDoor', true);
+            var difference = {
+              x: pickDoor.pickedPoint.x - pickGround.pickedPoint.x,
+              z: pickDoor.pickedPoint.z - pickGround.pickedPoint.z,
+            }
+            this.actions.drag = (e) => {
+              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+              if (pick?.pickedPoint) {
+                this.parameters.controller.send('game', 'wall', {
+                  id: this.id,
+                  target: { x: pick.pickedPoint.x + difference.x / 2, y: pick.pickedPoint.z + difference.z / 2 },
+                  action: 'rotate'
+                });
+              }
+            }
+            this.actions.drop = (e) => {
+              this.parameters.canvas.removeEventListener("pointerup", this.actions.drop, false);
+              this.parameters.canvas.removeEventListener("pointermove", this.actions.drag, false);
+              setTimeout(() => {
+                this.parameters.controller.toggleAction('dragDoor', false);
+                this.parameters.controller.send('game', 'wall', { id: this.id, action: 'endRotate' });
+              }, 10);
+            };
+            this.parameters.canvas.addEventListener("pointermove", this.actions.drag, false);
+            this.parameters.canvas.addEventListener("pointerup", this.actions.drop, false);
+          }
+        }
+      }));
+      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, (e) => {
+        if (!this.parameters.controller.activeTool) {
+          if (e.sourceEvent.shiftKey) {
+            this.parameters.controller.send('game', 'wall', { id: this.id, block: !this.blocked, action: 'block' });
+          } else if (e.sourceEvent.altKey) {
+            this.parameters.controller.send('game', 'wall', { id: this.id, hide: !this.hidden, action: 'hide' });
+          }
+        }
+      }));
+      this.mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, (e) => {
+        console.log("doble click door")
+        if (e.sourceEvent.button == 0 && !this.parameters.controller.activeTool) {
+          console.log("send close door")
+          this.parameters.controller.send('game', 'wall', { id: this.id, action: 'close' });
+        }
+      }));
     }
   }
 }

@@ -94,7 +94,7 @@ userSchema.statics.deleteFiles = async function (avatar) {
         const fs = require('fs');
 
         try {
-          if (process.env.NODE_ENV.trim() == "test") fs.unlinkSync(avatar);
+          if (process.env.NODE_ENV?.trim() == "test") fs.unlinkSync(avatar);
           else await s3.deleteObject({ Bucket: "dungeongram", Key: avatar.split('/').pop() }).promise();
         } catch (err) {
           console.log("Not found file " + avatar + " to delete");

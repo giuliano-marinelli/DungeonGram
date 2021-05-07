@@ -111,7 +111,7 @@ mapSchema.statics.deleteFiles = async function (terrain) {
         const fs = require('fs');
 
         try {
-          if (process.env.NODE_ENV.trim() == "test") fs.unlinkSync(terrain);
+          if (process.env.NODE_ENV?.trim() == "test") fs.unlinkSync(terrain);
           else await s3.deleteObject({ Bucket: "dungeongram", Key: terrain.split('/').pop() }).promise();
         } catch (err) {
           console.log("Not found file " + terrain + " to delete");
