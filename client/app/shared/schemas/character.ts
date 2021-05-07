@@ -515,7 +515,7 @@ export class Character extends Schema {
           console.log('Character', this.id, ': (', this.x, ',', this.y, ')', this);
           if (e.sourceEvent.ctrlKey) {
             this.parameters.controller.send('game', 'character', { id: this.id, action: 'select' });
-          } else if (e.sourceEvent.altKey) {
+          } else if (e.sourceEvent.altKey && this.parameters.controller.activeAction != "dragCharacter") {
             this.parameters.controller.send('game', 'character', { id: this.id, hide: !this.hidden, action: 'hide' });
           }
         }
