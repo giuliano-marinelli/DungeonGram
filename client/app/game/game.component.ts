@@ -121,6 +121,22 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       // this.scene.useMaterialMeshMap = true;
       // this.scene.useClonedMeshMap  = true;
 
+      //set stencil
+      // this.scene.setRenderingAutoClearDepthStencil(1, false);
+      // this.engine.setStencilBuffer(true);
+      // this.scene.onBeforeRenderingGroupObservable.add((groupInfo) => {
+      //   switch (groupInfo.renderingGroupId) {
+      //     case 1:
+      //       this.engine.setDepthFunction(BABYLON.Engine.ALWAYS);
+      //       this.engine.setStencilFunction(BABYLON.Engine.EQUAL);
+      //       break;
+      //     case 0:
+      //       this.engine.setDepthFunction(BABYLON.Engine.LESS);
+      //       this.engine.setStencilFunction(BABYLON.Engine.ALWAYS);
+      //       break;
+      //   }
+      // });
+
       this.scene.actionManager = new BABYLON.ActionManager(this.scene);
       this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
@@ -136,6 +152,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             this.ngZone.runOutsideAngular(() => {
               //create the root schema object
               this.world = new World(this.gameRoom.state.world, {
+                engine: this.engine,
                 scene: this.scene,
                 room: this.gameRoom,
                 canvas: this.canvas,

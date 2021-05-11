@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
 import * as BABYLON from '@babylonjs/core/Legacy/legacy';
 import { ShadowOnlyMaterial, SkyMaterial } from '@babylonjs/materials';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
@@ -12,10 +12,10 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { GlobalComponent } from '../../shared/global/global.component';
 import { Vectors } from '../../shared/utils/vectors';
 import Compressor from 'compressorjs';
+import { CircleComponent } from 'ngx-color/circle';
 
 declare var $;
 declare var iziToast;
-declare var ng;
 
 @Component({
   selector: 'app-character',
@@ -28,6 +28,7 @@ export class CharacterComponent implements OnInit, OnDestroy {
   @Output("getCharacters") getCharacters: EventEmitter<any> = new EventEmitter();
   @ViewChild("front_image_img") frontImageElem: ElementRef;
   @ViewChild("back_image_img") backImageElem: ElementRef;
+  colorPickers: any = {};
 
   //babylon
   @ViewChild('renderCanvasCharacter') canvasRef: ElementRef;
@@ -100,6 +101,12 @@ export class CharacterComponent implements OnInit, OnDestroy {
       backImage: this.backImage,
       backImageFile: this.backImageFile
     });
+
+    for (var idWearCategory in this.wearsAvailable) {
+      for (var idWearSubcategory in this.wearsAvailable[idWearCategory]) {
+        this.colorPickers[idWearSubcategory] = idWearSubcategory == 'color' ? '#dc9b78' : '#f44336';
+      }
+    }
 
     this.initEditor();
   }
@@ -283,16 +290,6 @@ export class CharacterComponent implements OnInit, OnDestroy {
   }
 
   /*AUXILIAR*/
-
-  setColorPicker(id, color) {
-    var colorPicker = ng.getComponent($("#" + id)[0]);
-    if (colorPicker.color != color.hex) {
-      colorPicker.color = color.hex;
-      colorPicker.currentColor = color.hex;
-      colorPicker.ngOnChanges();
-      colorPicker.handleChange(colorPicker);
-    }
-  }
 
   setValid(control): object {
     return {
@@ -538,7 +535,7 @@ export class Scenario {
 
   wearColorChange(category, subcategory, color) {
     //change wear color menu selection
-    this.parameters.component.setColorPicker('ce-' + subcategory + '-color', { hex: color });
+    this.parameters.component.colorPickers[subcategory] = color;
 
     //get actual equiped wear from character form
     var actualWear = this.parameters.character?.controls?.wears?.value?.findIndex(wear => {

@@ -8,13 +8,17 @@ export class Path extends Schema {
   to: Point;
   @type([Point])
   points = new ArraySchema<Point>();
+  @type('boolean')
+  temporal: boolean = false;
 
   //for destroy the object
   @type('boolean')
   destroy: boolean = false;
 
-  constructor() {
+  constructor(options?) {
     super();
+
+    if (options?.temporal) this.temporal = options?.temporal;
   }
 
   set(options) {

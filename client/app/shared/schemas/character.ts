@@ -7,6 +7,7 @@ import { Animator } from '../utils/animator';
 import { Vectors } from '../utils/vectors';
 import "@babylonjs/loaders/glTF/2.0/glTFLoader";
 import { Image, Rectangle, TextBlock, TextWrapping } from '@babylonjs/gui';
+import { Cooldown } from '../utils/cooldown';
 
 export class Character extends Schema {
   //schema
@@ -21,6 +22,7 @@ export class Character extends Schema {
   stealth?: boolean;
   hidden?: boolean;
   movementPath?: Path;
+  temporalMovementPath?: Path;
   movementCooldown?: number;
   beignDragged?: boolean;
   visionRange?: number;
@@ -69,6 +71,19 @@ export class Character extends Schema {
       {
         direction: { type: Point, datatype: Object },
         movementPath: {
+          type: Path, datatype: Object, parameters: () => {
+            return {
+              world: parameters.world,
+              scene: parameters.scene,
+              room: parameters.room,
+              token: parameters.token,
+              assets: parameters.assets,
+              character: this,
+              characterId: this.id
+            }
+          }
+        },
+        temporalMovementPath: {
           type: Path, datatype: Object, parameters: () => {
             return {
               world: parameters.world,
@@ -215,6 +230,7 @@ export class Character extends Schema {
     this.backMaterial = null;
 
     this.movementPath.reset();
+    this.temporalMovementPath.reset();
   }
 
   removeSigns() {
@@ -299,8 +315,8 @@ export class Character extends Schema {
 
         //set collider phyics mesh (if testing)
         if (this.parameters.world.test) {
-          this.colliderPhysics = this.parameters.assets.characterColliderPhysics.createInstance();
-          this.colliderPhysics.material = this.parameters.assets.characterColliderPhysicsMaterial.createInstance();
+          this.colliderPhysics = this.parameters.assets.characterColliderPhysics.clone();
+          this.colliderPhysics.material = this.parameters.assets.characterColliderPhysicsMaterial.clone();
           this.colliderPhysics.setEnabled(true);
           this.colliderPhysics.position.y = 0.95;
           this.colliderPhysics.position.x = this.xPhysics;
@@ -483,27 +499,50 @@ export class Character extends Schema {
     this.collider.actionManager = new BABYLON.ActionManager(this.parameters.scene);
     //add the actions when is not an adding mode character
     if (!this.addingMode) {
-      //for drag, drop and lookAt (with shift + hold(click) on character) actions
+      //for drag, drop, lookAt (with shift + hold(click) on character) and moveTo (with ctrl + hold(click) on character) actions
       this.collider.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (e) => {
-        if (e.sourceEvent.button == 0 && !e.sourceEvent.ctrlKey && !e.sourceEvent.altKey && !this.parameters.controller.activeTool) {
+        if (e.sourceEvent.button == 0 && !e.sourceEvent.altKey && !this.parameters.controller.activeTool) {
+          var firstPick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+
           var isShift = e.sourceEvent.shiftKey;
+          var isCtrl = e.sourceEvent.ctrlKey;
+
           this.parameters.controller.toggleAction('dragCharacter', true);
-          if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
+          if (!isShift && !isCtrl) this.parameters.controller.send('game', 'character', { id: this.id, action: 'drag' });
           this.actions.drag = () => {
             var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
             if (pick?.pickedPoint) {
-              if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
-              else if (this.parameters.world.users[this.parameters.token].isDM)
+              if (!isShift && !isCtrl) this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'drag' });
+              else if (isShift && this.parameters.world.users[this.parameters.token].isDM)
                 this.parameters.controller.send('game', 'character', { id: this.id, x: pick.pickedPoint.x, y: pick.pickedPoint.z, action: 'lookAt' });
+              else if (isCtrl) {
+                var xToMove = Math.round(pick.pickedPoint.x);
+                var zToMove = Math.round(pick.pickedPoint.z);
+                if (Cooldown.set('temporalMove', 50)) {
+                  this.parameters.controller.send('game', 'character', { id: this.id, x: xToMove, y: zToMove, action: 'temporalMove' });
+                }
+              }
             }
           }
           this.actions.drop = (e) => {
-            if (!isShift) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
+            if (!isShift && !isCtrl) this.parameters.controller.send('game', 'character', { id: this.id, snapToGrid: !e.altKey, action: 'drop' });
+            if (isCtrl) {
+              var pick = this.parameters.scene.pick(this.parameters.scene.pointerX, this.parameters.scene.pointerY, (mesh) => { return mesh.isGround });
+              if (pick?.pickedPoint && BABYLON.Vector3.Distance(firstPick.pickedPoint, pick.pickedPoint) > 0.5) {
+                var xToMove = pick.pickedPoint.x;
+                var zToMove = pick.pickedPoint.z;
+                if (!e.altKey) {
+                  xToMove = Math.round(pick.pickedPoint.x);
+                  zToMove = Math.round(pick.pickedPoint.z);
+                }
+                this.parameters.controller.send('game', 'character', { id: this.id, x: xToMove, y: zToMove, action: 'move' });
+              }
+            }
             this.parameters.canvas.removeEventListener("pointerup", this.actions.drop, false);
             this.parameters.canvas.removeEventListener("pointermove", this.actions.drag, false);
             setTimeout(() => {
               this.parameters.controller.toggleAction('dragCharacter', false);
-            }, 10);
+            }, 100);
           };
           this.parameters.canvas.addEventListener("pointermove", this.actions.drag, false);
           this.parameters.canvas.addEventListener("pointerup", this.actions.drop, false);

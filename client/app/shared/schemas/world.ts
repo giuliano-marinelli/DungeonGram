@@ -9,6 +9,8 @@ import {
 import { Vectors } from '../utils/vectors';
 import { AdvancedDynamicTexture } from '@babylonjs/gui';
 import { Camera } from '../utils/camera';
+import { Color3, Vector3 } from '@babylonjs/core/Legacy/legacy';
+import earcut from "earcut";
 
 export class World extends Schema {
   //schema
@@ -23,6 +25,7 @@ export class World extends Schema {
   camera?: any;
   lights?: any = {};
   ui?: any;
+  fieldOfView?: any;
   //test (activate physics colliders and other testing elements)
   test?: boolean = false;
 
@@ -306,6 +309,8 @@ export class World extends Schema {
           // this.characters[selectedCharacter]?.visibleCharacters?.forEach(characterMesh => {
           //   if (characterMesh) characterMesh.animator.show();
           // });
+
+          // this.getFieldOfView(32);
         }
       }, this.characters[selectedCharacter].movementCooldown);
     } else {
@@ -425,6 +430,62 @@ export class World extends Schema {
 
       //for testing
       if (this.test) this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene, BABYLON.Color3.Green()));
+    }
+  }
+
+  getFieldOfView(precision?) {
+    var selectedCharacter = this.users[this.parameters.token]?.selectedCharacter;
+    if (selectedCharacter && this.characters[selectedCharacter]?.mesh && this.characters[selectedCharacter]?.collider) {
+      precision = precision ? precision : 20;
+      var points = [];
+      var points2 = [];
+      var triangles = [];
+      var origin = new BABYLON.Vector3(this.characters[selectedCharacter].mesh.position.x, this.characters[selectedCharacter].height * 2 - 0.1, this.characters[selectedCharacter].mesh.position.z);
+      for (var i = 0; i < precision; i++) {
+        //create ray in one direction per precision
+        var ray = new BABYLON.Ray(origin,
+          Vectors.angleToDirection(((Math.PI * 2) / precision) * i),
+          this.adjustVisionRange(this.characters[selectedCharacter].visionRange) - 1
+        );
+
+        //get picking info
+        var pickingInfo = this.parameters.scene.pickWithRay(ray, (mesh) => {
+          return mesh.isCollible && mesh.isWall && !mesh.isTranspasable
+        });
+
+        //add point
+        // var newPoint = pickingInfo.pickedPoint
+        //   ? pickingInfo.pickedPoint.subtract(origin)
+        //   : new BABYLON.Vector3(ray.direction.x * ray.length, ray.direction.y * ray.length, ray.direction.z * ray.length);
+        var newPoint = pickingInfo.pickedPoint
+          ? new BABYLON.Vector2(pickingInfo.pickedPoint.subtract(origin).x, pickingInfo.pickedPoint.subtract(origin).z)
+          : new BABYLON.Vector2(ray.direction.x * ray.length, ray.direction.z * ray.length)
+        points.push(newPoint);
+        // if (i < precision / 2) points.push(newPoint);
+        // else points2.unshift(newPoint);
+
+        // if (i > 0) {
+        //   triangles.push()
+        // }
+
+        //for testing
+        if (this.test) {
+          if (pickingInfo.pickedPoint) ray.length = Vector3.Distance(origin, pickingInfo.pickedPoint);
+          this.characters[selectedCharacter].visionRays.push(BABYLON.RayHelper.CreateAndShow(ray, this.parameters.scene,
+            i >= 2 ? BABYLON.Color3.Blue() : (i == 0 ? BABYLON.Color3.Red() : BABYLON.Color3.Purple())
+          ));
+        }
+      }
+      // points.push(points[0].clone());
+
+      var polygonBuilder = new BABYLON.PolygonMeshBuilder("fieldOfView", points, this.parameters.scene, earcut)
+      if (this.fieldOfView) this.fieldOfView.dispose();
+      this.fieldOfView = polygonBuilder.build();
+      this.fieldOfView.isPickable = false;
+      this.fieldOfView.position = origin;
+      this.fieldOfView.position.y = 0.2;
+      this.fieldOfView.material = new BABYLON.StandardMaterial("fieldOfViewMaterial", this.parameters.scene);
+      this.fieldOfView.material.wireframe = true;
     }
   }
 }

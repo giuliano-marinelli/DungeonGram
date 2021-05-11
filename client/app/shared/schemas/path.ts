@@ -7,6 +7,7 @@ export class Path extends Schema {
   from?: Point;
   to?: Point;
   points?: Point[];
+  temporal?: boolean;
   //game objects
   meshTo?: any;
   line?: any;
@@ -29,7 +30,7 @@ export class Path extends Schema {
     changes?.forEach((change) => {
       switch (change.field) {
         case 'to':
-          if (!this.parameters.character.animation || this.parameters.character.animation == 'None') this.parameters.character.animator?.playIdle();
+          if (!this.temporal && (!this.parameters.character.animation || this.parameters.character.animation == 'None')) this.parameters.character.animator?.playIdle();
           break;
       }
     });
@@ -67,23 +68,27 @@ export class Path extends Schema {
   doMeshTo() {
     this.reset();
 
-    if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
+    if ((this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter
+      || (this.temporal && this.parameters.world.users[this.parameters.token].isDM)) &&
       this.to) {
       //show mesh to
-      this.meshTo.visibility = 1;
+      this.meshTo.visibility = this.temporal ? 0.5 : 1;
 
       //positioning mesh to
       this.meshTo.position = new BABYLON.Vector3(this.to.x, 0.1, this.to.y);
     }
 
-    if (this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter &&
+    if ((this.parameters.characterId == this.parameters.world.users[this.parameters.token].selectedCharacter
+      || (this.temporal && this.parameters.world.users[this.parameters.token].isDM)) &&
       this.points.length) {
       var points3D = [];
+      var colors = []
       for (let i = 0; i < this.points.length; i++) {
         points3D.push(new BABYLON.Vector3(this.points[i].x, 0.1, this.points[i].y));
+        colors.push(new BABYLON.Color4(1, 1, 1, this.temporal ? 0.5 : 1));
       }
       //create line based on the points
-      this.line = BABYLON.MeshBuilder.CreateLines("lines", { points: points3D }, this.parameters.scene);
+      this.line = BABYLON.MeshBuilder.CreateLines("lines", { points: points3D, colors: colors }, this.parameters.scene);
     }
   }
 }

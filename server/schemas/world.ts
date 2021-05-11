@@ -28,6 +28,10 @@ export class World extends Schema {
   maxVisionCharacters: number;
   @type("string")
   publicSelectedCharacter: string;
+
+  //for manage cooldows of commands
+  cooldowns: any = {};
+
   //physics
   worldPhysics: WorldPhysics;
 
@@ -68,22 +72,25 @@ export class World extends Schema {
       }
     },
     character: {
-      _options: {
-        addingModeTimer: 0
-      },
       move: {
         do: (client: string, data: any) => {
-          if (this.map != null && this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map) {
+          if (this.map != null &&
+            (this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map ||
+              this.map.mapId == this.characters[data.id]?.map)) {
             if (!this.users[client].addingModeCharacter &&
               !this.users[client].beignDragged &&
-              this.users[client].selectedCharacter &&
               data.x >= 0 && data.y >= 0 &&
-              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height)
-              this.characters[this.users[client].selectedCharacter].move({ x: data.x, y: data.y });
+              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height) {
+              if (data.id && this.users[client].isDM)
+                this.characters[data.id].move({ x: data.x, y: data.y });
+              else
+                this.characters[this.users[client].selectedCharacter].move({ x: data.x, y: data.y });
+            }
           }
         },
         validate: (client: string, data: any) => {
-          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" && this.users[client].isPlayer
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" &&
+            (data.id == null || typeof data.id === "string") && this.users[client].isPlayer
         }
       },
       drag: {
@@ -122,46 +129,44 @@ export class World extends Schema {
         }
       },
       addingModeOn: {
-        do: async (client: string, data: any) => {
-          if (this.command.character._options.addingModeTimer == 0) {
-            if (!this.users[client].addingModeCharacter) {
-              this.command.character._options.addingModeTimer = 1500;
+        do: async (client: string, data: any, cooldown: any) => {
+          if (!this.users[client].addingModeCharacter) {
+            cooldown();
 
-              //add adding mode character
-              var id = await this.addCharacter({ model: data.model, map: this.map?.mapId })
-              this.characters[id].addingMode = true;
+            //add adding mode character
+            var id = await this.addCharacter({ model: data.model, map: this.map?.mapId })
+            this.characters[id].addingMode = true;
 
-              //activate adding mode on user with the created characeter
-              this.users[client].addingModeCharacter = id;
-              this.users[client].addingModeModel = data.model;
+            //activate adding mode on user with the created characeter
+            this.users[client].addingModeCharacter = id;
+            this.users[client].addingModeModel = data.model;
 
-              //drag adding mode character to the point sended
-              var point = data.x || data.y ? { x: data.x, y: data.y } : null;
-              this.characters[id].drag(point);
-            } else {
-              var lastAddingModeModel = this.users[client].addingModeModel;
-              this.execCommand(client, 'character', { action: 'addingModeOff' });
-              if (lastAddingModeModel != data.model)
-                this.execCommand(client, 'character', data);
-            }
+            //drag adding mode character to the point sended
+            var point = data.x || data.y ? { x: data.x, y: data.y } : null;
+            this.characters[id].drag(point);
+          } else {
+            var lastAddingModeModel = this.users[client].addingModeModel;
+            this.execCommand(client, 'character', { action: 'addingModeOff' });
+            if (lastAddingModeModel != data.model)
+              this.execCommand(client, 'character', data);
           }
         },
         validate: (client: string, data: any) => {
           return this.map != null && data.model != null && typeof data.model === "string" && this.users[client].isDM
-        }
+        },
+        cooldown: { time: 1500, id: 'user-addingMode' }
       },
       addingModeOff: {
         do: (client: string, data: any) => {
-          if (this.command.character._options.addingModeTimer == 0) {
-            //remove adding mode character
-            delete this.characters[this.users[client].addingModeCharacter]
+          //remove adding mode character
+          delete this.characters[this.users[client].addingModeCharacter]
 
-            //deactivate adding mode on user
-            this.users[client].addingModeCharacter = null;
-            this.users[client].addingModeModel = null;
-          }
+          //deactivate adding mode on user
+          this.users[client].addingModeCharacter = null;
+          this.users[client].addingModeModel = null;
         },
-        validate: (client: string, data: any) => { return this.users[client].isDM }
+        validate: (client: string, data: any) => { return this.users[client].isDM },
+        cooldown: { id: 'user-addingMode' }
       },
       add: {
         do: async (client: string, data: any) => {
@@ -255,7 +260,7 @@ export class World extends Schema {
             if (!this.users[client].addingModeCharacter &&
               data.x >= 0 && data.y >= 0 &&
               data.x < this.map.tilemap.width && data.y < this.map.tilemap.height) {
-              if (data.id)
+              if (data.id && this.users[client].isDM)
                 this.characters[data.id].lookAt({ x: data.x, y: data.y });
               else if (this.users[client].selectedCharacter)
                 this.characters[this.users[client].selectedCharacter].lookAt({ x: data.x, y: data.y });
@@ -306,6 +311,26 @@ export class World extends Schema {
             typeof data.id === "string" && typeof data.hide === "boolean" && this.users[client].isDM
         }
       },
+      temporalMove: {
+        do: (client: string, data: any, cooldown: any) => {
+          if (this.map != null &&
+            (this.map.mapId == this.characters[this.users[client].selectedCharacter]?.map ||
+              this.map.mapId == this.characters[data.id]?.map)) {
+            if (!this.users[client].addingModeCharacter &&
+              !this.users[client].beignDragged &&
+              data.x >= 0 && data.y >= 0 &&
+              data.x < this.map.tilemap.width && data.y < this.map.tilemap.height) {
+              cooldown();
+              this.characters[data.id].temporalMove({ x: data.x, y: data.y });
+            }
+          }
+        },
+        validate: (client: string, data: any) => {
+          return data.x != null && data.y != null && typeof data.x === "number" && typeof data.y === "number" &&
+            data.id != null && typeof data.id === "string" && this.users[client].isDM
+        },
+        cooldown: { time: 50 }
+      }
     },
     wall: {
       state: { wallFirstPoint: null },
@@ -595,11 +620,8 @@ export class World extends Schema {
       }
     },
     map: {
-      _options: {
-        loadTimer: 0
-      },
       open: {
-        do: async (client: string, data: any) => {
+        do: async (client: string, data: any, cooldown: any, ready: any) => {
           var previousMap = this.map?.mapId;
           if (this.map) {
             this.map.persist();
@@ -607,8 +629,8 @@ export class World extends Schema {
             this.map = null;
             await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: null } });
           }
-          if (previousMap != data.map && this.command.map._options.loadTimer == 0) {
-            this.command.map._options.loadTimer = 1500;
+          if (previousMap != data.map && ready()) {
+            cooldown();
             await CampaignDB.update({ _id: this.campaignId }, { $set: { openedMap: data.map } });
             setTimeout(() => {
               this.worldPhysics = new WorldPhysics();
@@ -622,7 +644,8 @@ export class World extends Schema {
         },
         validate: (client: string, data: any) => {
           return data.map != null && typeof data.map === "string" && this.users[client].isDM
-        }
+        },
+        cooldown: { time: 1500, manual: true }
       },
       close: {
         do: async (client: string, data: any) => {
@@ -710,25 +733,33 @@ export class World extends Schema {
     // this.map.worldPhysics.setGrid({ width: 20, height: 20 });
   }
 
-  execCommand(client?: string, type?: string | number, data?: any) {
+  execCommand(client?: string, type?: string | number, data?: any, bypass?: boolean) {
     try {
-      if (client && type
-        && data?.action
-        && data?.action != '_options'
-        && this.command[type]
-        && this.command[type][data?.action]
-        && this.command[type][data?.action].do) {
-        if (this.command[type][data?.action].validate) {
-          if (this.command[type][data?.action].validate(client, data))
-            this.command[type][data?.action].do(client, data);
-          else
-            throw new Error('invalid action params for command "' + type + '"');
-        } else {
-          this.command[type][data?.action].do(client, data);
-        }
-      } else {
+      //check if the command have type, action, client and "do" function
+      if (!client || !type || !data?.action || data?.action == '_options'
+        || !this.command[type] || !this.command[type][data?.action] || !this.command[type][data?.action].do)
         throw new Error('inexistent action "' + data?.action + '" for command "' + type + '"');
-      }
+
+      //validates the command if it has "validate" function
+      if (!bypass && this.command[type][data?.action].validate && !this.command[type][data?.action].validate(client, data))
+        throw new Error('invalid action params for command "' + type + '"');
+
+      //this id allow multiple actions use the same cooldown counter
+      var id = this.command[type][data?.action].cooldown?.id ? this.command[type][data?.action].cooldown?.id : type + '-' + data?.action
+
+      //check if the command is not on cooldown for the client
+      if (this.cooldowns[client + '-' + id] && this.cooldowns[client + '-' + id] > 0 && !this.command[type][data?.action].cooldown?.manual)
+        throw new Error('command "' + type + '" is still on cooldown for client ' + client + '. Remaining: ' + this.cooldowns[client + '-' + id]);
+
+      //execute command
+      this.command[type][data?.action].do(client, data,
+        () => {
+          this.cooldowns[client + '-' + id] = this.command[type][data?.action].cooldown?.time;
+        },
+        () => {
+          return !this.cooldowns[client + '-' + id] || this.cooldowns[client + '-' + id] <= 0;
+        }
+      );
     } catch (err) {
       delete data.roomRef;
       console.warn('GameRoom: client', client, 'send action that produce an error:', err.message, '... data:', data);
@@ -736,8 +767,10 @@ export class World extends Schema {
   }
 
   update(deltaTime: number) {
-    this.command.map._options.loadTimer = this.command.map._options.loadTimer - deltaTime >= 0 ? this.command.map._options.loadTimer - deltaTime : 0;
-    this.command.character._options.addingModeTimer = this.command.character._options.addingModeTimer - deltaTime >= 0 ? this.command.character._options.addingModeTimer - deltaTime : 0;
+    //update cooldowns setted
+    for (var id in this.cooldowns) {
+      this.cooldowns[id] = this.cooldowns[id] - deltaTime >= 0 ? this.cooldowns[id] - deltaTime : 0;
+    }
 
     //udpate physics world
     this.map?.worldPhysics?.update(deltaTime);
@@ -775,7 +808,7 @@ export class World extends Schema {
     });
 
     if (campaign.openedMap)
-      this.command.map.open.do(null, { map: campaign.openedMap });
+      this.execCommand('system', 'map', { action: 'open', map: campaign.openedMap }, true);
 
     this.fogOfWarVisibilityPlayers = campaign.settings?.fogOfWarVisibilityPlayers != null
       ? campaign.settings?.fogOfWarVisibilityPlayers : 0;

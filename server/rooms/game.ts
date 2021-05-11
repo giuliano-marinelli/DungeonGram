@@ -49,7 +49,7 @@ export class GameRoom extends Room<State> {
     this.state.world.load(this.campaignId);
 
     this.onMessage('*', (client, type, data) => {
-      if (!['drag'].includes(data?.action)) //this actions are not displayed
+      if (!['drag','ping','lookAt'].includes(data?.action)) //this actions are not displayed
         console.log('GameRoom-', this.roomId, '-: user', this.clientUserObj[client.sessionId].username, 'send command "' + type + '" =>', data);
       data.roomRef = this;
       this.state.world?.execCommand(this.clientUser[client.sessionId], type, data);

@@ -37,6 +37,10 @@ export class Vectors {
     return angle;
   }
 
+  static angleToDirection(angle) {
+    return new BABYLON.Vector3(Math.sin(angle), 0, Math.cos(angle));
+  }
+
   static ratationDiff(pointA, pointB) {
 
   }

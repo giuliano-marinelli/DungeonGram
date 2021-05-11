@@ -27,6 +27,8 @@ export class Character extends Schema {
   hidden = false;
   @type(Path)
   movementPath: Path = new Path();
+  @type(Path)
+  temporalMovementPath: Path = new Path({ temporal: true });
   @type("number")
   movementCooldown = 200;
   @type("boolean")
@@ -183,6 +185,7 @@ export class Character extends Schema {
       // this.movementAcum = 100;
       var path = this.characterPhysics.getPath({ x: movement.x, y: movement.y });
       if (path.length) {
+        this.temporalMovementPath.unset();
         this.movementPath.set({
           from: new Point(this.x, this.y),
           to: new Point(path[path.length - 1].x, path[path.length - 1].y),//new Point(movement.x, movement.y),
@@ -195,6 +198,23 @@ export class Character extends Schema {
     // this.movementPath.points.forEach((point) => {
     //   console.log(JSON.stringify(point));
     // });
+  }
+
+  temporalMove(movement: any) {
+    if (movement.x != this.x || movement.y != this.y) {
+      if (movement.x != this.temporalMovementPath.to?.x || movement.y != this.temporalMovementPath.to?.y) {
+        var path = this.characterPhysics.getPath({ x: movement.x, y: movement.y });
+        if (path.length) {
+          this.temporalMovementPath.set({
+            from: new Point(this.x, this.y),
+            to: new Point(path[path.length - 1].x, path[path.length - 1].y),//new Point(movement.x, movement.y),
+            path: path
+          });
+        } else {
+          this.temporalMovementPath.unset();
+        }
+      }
+    }
   }
 
   lookAt(place: any) {
