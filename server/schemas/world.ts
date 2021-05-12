@@ -693,6 +693,7 @@ export class World extends Schema {
           if (mapModel) {
             mapModel.copyOf = mapModel._id;
             delete mapModel._id;
+            mapModel.owner = mongoose.Types.ObjectId(client);
 
             //add a copy of the model but with copyOf
             const map = await new MapDB(mapModel).save();
