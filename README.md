@@ -1,18 +1,9 @@
 # DungeonGram
 
-This project uses the [MEAN stack](https://en.wikipedia.org/wiki/MEAN_(software_bundle)):
-* [**M**ongoose.js](http://www.mongoosejs.com) ([MongoDB](https://www.mongodb.com)): database
-* [**E**xpress.js](http://expressjs.com): backend framework
-* [**A**ngular 2+](https://angular.io): frontend framework
-* [**N**ode.js](https://nodejs.org): runtime environment
+It's an Agnostic Rol 3D Tabletop on Web. You can create and manage campaigns, characters and maps. Play with your friends in an online environment were the DM leads the history and the players can interact with their characters on map.
 
-Other tools and technologies used:
-* [Angular CLI](https://cli.angular.io): frontend scaffolding
-* [Bootstrap](http://www.getbootstrap.com): layout and styles
-* [Font Awesome](http://fontawesome.com): icons
-* [JSON Web Token](https://jwt.io): user authentication
-* [Angular 2 JWT](https://github.com/auth0/angular2-jwt): JWT helper for Angular 2+
-* [Bcrypt.js](https://github.com/dcodeIO/bcrypt.js): password encryption
+![image](https://user-images.githubusercontent.com/5109640/124859549-87176080-df86-11eb-9083-e5cf713ae52f.png)
+
 
 ## Prerequisites
 1. Install [Node.js](https://nodejs.org) and [MongoDB](https://www.mongodb.com)
@@ -23,30 +14,7 @@ Other tools and technologies used:
 ### Development mode
 `npm run dev`: [concurrently](https://github.com/kimmobrunfeldt/concurrently) execute MongoDB, Angular build, TypeScript compiler and Express server.
 
-A window will automatically open at [localhost:4200](http://localhost:4200). Angular and Express files are being watched. Any change automatically creates a new bundle, restart Express server and reload your browser.
+A window will automatically open at [localhost:4200](http://localhost:3000). Angular and Express files are being watched. Any change automatically creates a new bundle, restart Express server and reload your browser.
 
 ### Production mode
 `npm run prod`: run the project with a production bundle and AOT compilation listening at [localhost:3000](http://localhost:3000) 
-
-### Docker
-1. `docker-compose up`
-2. Go to [localhost:3000](http://localhost:3000)
-
-## Running tests
-Run `ng test` to execute the frontend unit tests via [Karma](https://karma-runner.github.io).
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-Run `mongod` to run an instance of MongoDB then run `npm run testbe` to execute the backend tests via [Mocha](https://mochajs.org/).
-
-## Running linters
-Run `ng lint` to execute the frontend TS linting via [TSLint](https://github.com/palantir/tslint).
-
-Run `npm run lintbe` to execute the backend TS linting via [TSLint](https://github.com/palantir/tslint).
-
-Run `npm run linthtml` to execute the frontend HTML linting via [HTMLHint](https://github.com/htmlhint/HTMLHint).
-
-Run `npm run lintscss` to execute the frontend SCSS linting via [SASS-Lint](https://github.com/sasstools/sass-lint).
-
-## Further help
-To get more help on the `angular-cli` use `ng --help` or go check out the [Angular-CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
